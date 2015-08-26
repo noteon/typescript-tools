@@ -228,6 +228,9 @@ class TSS {
     // internally builds programs from root files,
     // chases dependencies (references and imports), ...
     // (NOTE: files are processed on demand, loaded via lsHost, cached in fileCache)
+    
+        
+        
     this.lsHost = {
         getCompilationSettings : ()=>this.compilerOptions,
         getScriptFileNames : ()=>this.fileCache.getFileNames(),
@@ -241,6 +244,7 @@ class TSS {
         trace : (message)=>undefined, // ??
         error : (message)=>console.error(message) // ??
     };
+    
     this.ls = ts.createLanguageService(this.lsHost,ts.createDocumentRegistry());
     this.fileCache.ls = this.ls;
   }

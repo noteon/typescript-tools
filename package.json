@@ -1,24 +1,24 @@
 {
   "name": "typescript-tools",
   "version": "v0.4.7",
-  "description": "TypeScript Services commandline server",
+  "description": "TypeScript Services for ace",
   "bin": {
     "tss": "bin/tss"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/clausreinke/typescript-tools.git"
+    "url": "git://github.com/noteon/typescript-tools.git"
   },
   "bugs": {
-    "url": "https://github.com/clausreinke/typescript-tools/issues"
+    "url": "https://github.com/noteon/typescript-tools/issues"
   },
   "keywords": [
     "TypeScript"
   ],
   "preferGlobal": true,
-  "author": "Claus Reinke",
+  "author": "Claus Reinke, qinghai",
   "license": "Apache License, Version 2.0",
   "dependencies": {
-    "typescript": "1.5.0-beta"
+    "typescript": "^1.5.3"
   }
 }

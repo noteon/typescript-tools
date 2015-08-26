@@ -1,0 +1,66 @@
+707c707
+< "updated lines 2-2 in PREFIX/empty.ts, (0/0) errors"
+---
+> "updated lines 2-2 in PREFIX/empty.ts, (0/1) errors"
+711c711
+< "ho";
+---
+> "ho";r
+713c713
+< "updated lines 4-4 in PREFIX/empty.ts, (0/0) errors"
+---
+> "updated lines 4-4 in PREFIX/empty.ts, (0/1) errors"
+717c717
+< "ho";
+---
+> "ho";r
+719c719
+< "updated lines 3-3 in PREFIX/empty.ts, (0/1) errors"
+---
+> "updated lines 3-3 in PREFIX/empty.ts, (0/2) errors"
+723c723
+< bozo;
+---
+> bozo;r
+732a733,741
+>   ,"category":"Error"}
+>   ,{"file":"PREFIX/empty.ts"
+>   ,"start":{"line":3
+>   ,"character":6}
+>   ,"end":{"line":3
+>   ,"character":7}
+>   ,"text":"Cannot find name 'r'."
+>   ,"code":2304
+>   ,"phase":"Semantics"
+734c743
+< "updated lines 5-5 in PREFIX/empty.ts, (0/1) errors"
+---
+> "updated lines 5-5 in PREFIX/empty.ts, (0/2) errors"
+738c747
+< bozo;
+---
+> bozo;r
+741c750
+< "updated lines 0-0 in PREFIX/empty.ts, (0/1) errors"
+---
+> "updated lines 0-0 in PREFIX/empty.ts, (0/2) errors"
+746c755
+< bozo;
+---
+> bozo;r
+828c837
+<   ,"textSpan":{"start":353
+---
+>   ,"textSpan":{"start":331
+835c844
+<   ,"textSpan":{"start":377
+---
+>   ,"textSpan":{"start":354
+892c901
+< ["c:/javascript/typescript/github/typescript-tools/node_modules/typescript/bin/lib.d.ts"
+---
+> ["/Users/qinghai/MyWorkspace/mongobooster-tools/typescript-tools/node_modules/typescript/bin/lib.d.ts"
+935c944
+<   ,"c:/javascript/typescript/github/typescript-tools/node_modules/typescript/bin/lib.d.ts"
+---
+>   ,"/Users/qinghai/MyWorkspace/mongobooster-tools/typescript-tools/node_modules/typescript/bin/lib.d.ts"

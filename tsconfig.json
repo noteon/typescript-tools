@@ -8,6 +8,7 @@
 		"tss.ts",
 		"harness.ts",
 		"fileCache.ts",
-		"typescriptService.ts"
+		"typescriptService.ts",
+		"tssCmdListener.ts"
 	]
 }

@@ -4,7 +4,7 @@
 ///<reference path='typings/node/node.d.ts'/>
 ///<reference path='node_modules/typescript/bin/typescript.d.ts'/>
 var ts = require("typescript");
-var TypescriptService = require("./typescriptService");
+var TSSCmdListener = require("./tssCmdListener");
 var path = require("path");
 function extend(o1, o2) {
     var o = {};
@@ -59,7 +59,7 @@ if (!fileNames) {
     console.error("  or --project directory (containing a tsconfig.json)");
     process.exit(1);
 }
-var tss = new TypescriptService();
+var tss = new TSSCmdListener();
 try {
     tss.setup(fileNames, options);
     tss.listen();

@@ -1,6 +1,6 @@
 {
   "name": "typescript-tools",
-  "version": "v0.4.7",
+  "version": "",
   "description": "TypeScript Services for ace",
   "bin": {
     "tss": "bin/tss"

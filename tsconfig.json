@@ -6,6 +6,8 @@
 	},
 	"files": [
 		"tss.ts",
-		"harness.ts"
+		"harness.ts",
+		"fileCache.ts",
+		"typescriptService.ts"
 	]
 }

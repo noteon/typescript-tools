@@ -38,7 +38,7 @@ var EOL = require("os").EOL;
 /** TypeScript Services Server,
     an interactive commandline tool
     for getting info on .ts projects */
-class TSS {
+class TypescriptService {
   public compilerOptions: ts.CompilerOptions;
   public compilerHost: ts.CompilerHost;
   public lsHost : ts.LanguageServiceHost;
@@ -51,7 +51,7 @@ class TSS {
   private fileCache: FileCache;
 
   /** collect syntactic and semantic diagnostics for all project files */
-  public getErrors(): ts.Diagnostic[] {
+  private getErrors(): ts.Diagnostic[] {
 
       var addPhase = phase => d => {d.phase = phase; return d};
       var errors = [];
@@ -160,7 +160,201 @@ class TSS {
            , childItems: item.childItems.map(item=>this.handleNavBarItem(file,item))
            };
   }
+  
+  public getSignatureInfo(file,line,col){
+        var pos    = this.fileCache.lineColToPosition(file,line,col);
 
+         var info:any   = this.ls.getSignatureHelpItems(file,pos);
+
+            var param = p=>({name:p.name
+                            ,isOptional:p.isOptional
+                            ,type:ts.displayPartsToString(p.displayParts)||""
+                            ,docComment:ts.displayPartsToString(p.documentation)||""
+                            });
+
+            info && (info.items = info.items
+                                      .map(item=>({prefix: ts.displayPartsToString(item.prefixDisplayParts)||""
+                                                  ,separator: ts.displayPartsToString(item.separatorDisplayParts)||""
+                                                  ,suffix: ts.displayPartsToString(item.suffixDisplayParts)||""
+                                                  ,parameters: item.parameters.map(param)
+                                                  ,docComment: ts.displayPartsToString(item.documentation)||""
+                                                  }))
+            );
+            
+            return info;
+
+  }
+  
+  public getQuickInfo(file, line, col) {
+    var pos = this.fileCache.lineColToPosition(file, line, col);
+
+    var info: any = (this.ls.getQuickInfoAtPosition(file, pos) || {});
+    info.type = ((info && ts.displayPartsToString(info.displayParts)) || "");
+    info.docComment = ((info && ts.displayPartsToString(info.documentation)) || "");
+
+    return info;
+  }
+  
+  public getDefinitionInfo(file, line, col) {
+    var pos = this.fileCache.lineColToPosition(file, line, col);
+    var locs = this.ls.getDefinitionAtPosition(file, pos); // NOTE: multiple definitions
+
+    var info: any = locs && locs.map(def => ({
+      def: def,
+      file: def && def.fileName,
+      min: def && this.fileCache.positionToLineCol(def.fileName, def.textSpan.start),
+      lim: def && this.fileCache.positionToLineCol(def.fileName, ts.textSpanEnd(def.textSpan))
+    }));
+
+    // TODO: what about multiple definitions?
+    return ((locs && info[0]) || null);
+  }
+  
+  //occurences:false, to getReferences  
+  public getReferencesOrOccurrencesInfo(occurences:boolean, file,line,col){
+           var   pos  = this.fileCache.lineColToPosition(file,line,col);
+           
+           var refs= occurences?this.ls.getOccurrencesAtPosition(file, pos):this.ls.getReferencesAtPosition(file, pos);
+           
+           var info = (refs || []).map( ref => {
+            var start, end, fileName, lineText;
+            if (ref) {
+              start    = this.fileCache.positionToLineCol(ref.fileName,ref.textSpan.start);
+              end      = this.fileCache.positionToLineCol(ref.fileName,ts.textSpanEnd(ref.textSpan));
+              fileName = resolvePath(ref.fileName);
+              lineText = this.fileCache.getLineText(fileName,start.line);
+            }
+            return {
+              ref      : ref,
+              file     : ref && ref.fileName,
+              lineText : lineText,
+              min      : start,
+              lim      : end
+            }} );
+
+          return info;
+
+  }
+  
+  public getNavigationBarItemsInfo(file){
+       return this.ls.getNavigationBarItems(file)
+                          .map(item=>this.handleNavBarItem(file,item));
+  }
+
+  public getCompletionsInfo(brief:boolean, file, line,col){
+         var     pos    = this.fileCache.lineColToPosition(file,line,col);
+
+         var info:any = this.ls.getCompletionsAtPosition(file, pos) || null;
+
+          if (info) {
+            // fill in completion entry details, unless briefness requested
+            !brief && (info.entries = info.entries.map( e =>{
+                        var d = this.ls.getCompletionEntryDetails(file,pos,e.name);
+                        if (d) {
+                          d["type"]      =ts.displayPartsToString(d.displayParts);
+                          d["docComment"]=ts.displayPartsToString(d.documentation);
+                          return d;
+                        } else {
+                          return e;
+                        }} ));
+                        // NOTE: details null for primitive type symbols, see TS #1592
+
+            (()=>{ // filter entries by prefix, determined by pos
+              var languageVersion = this.compilerOptions.target;
+              var source   = this.fileCache.getScriptInfo(file).content;
+              var startPos = pos;
+              var idPart   = p => /[0-9a-zA-Z_$]/.test(source[p])
+                               || ts.isIdentifierPart(source.charCodeAt(p),languageVersion);
+              var idStart  = p => /[a-zA-Z_$]/.test(source[p])
+                               || ts.isIdentifierStart(source.charCodeAt(p),languageVersion);
+              while ((--startPos>=0) && idPart(startPos) );
+              if ((++startPos < pos) && idStart(startPos)) {
+                var prefix = source.slice(startPos,pos);
+                info["prefix"] = prefix;
+                var len    = prefix.length;
+                info.entries = info.entries.filter( e => e.name.substr(0,len)===prefix );
+              }
+            })();
+          }
+       return info;
+  }
+  
+  public getNavigateToItemsInfo(pattern){
+        return this.ls.getNavigateToItems(pattern)
+                   .map(item=>{
+                      item['min'] = this.fileCache.positionToLineCol(item.fileName
+                                                                    ,item.textSpan.start);
+                      item['lim'] = this.fileCache.positionToLineCol(item.fileName
+                                                                    ,item.textSpan.start
+                                                                    +item.textSpan.length);
+                      return item;
+                    });
+
+  }
+  
+  public updateScript(file, lines:string[]){
+    this.fileCache.updateScript(file,lines.join(EOL));
+  }
+  
+  public editScript(file, startLine, endLine, lines:string[]){
+    var script = this.fileCache.getScriptInfo(file);
+    var maxLines = this.ls.getSourceFile(file).getLineStarts().length;
+    var startPos = startLine <= maxLines
+      ? (startLine < 1 ? 0 : this.fileCache.lineColToPosition(file, startLine, 1))
+      : script.content.length;
+    var endPos = endLine < maxLines
+      ? (endLine < 1 ? 0 : this.fileCache.lineColToPosition(file, endLine + 1, 0) - 1) //??CHECK
+      : script.content.length;
+
+    this.fileCache.editScript(file, startPos, endPos, lines.join(EOL));
+  }
+  
+  public getErrorsInfo(){
+    return this.ls.getProgram().getGlobalDiagnostics()
+      .concat(this.getErrors())
+      .map(d => {
+        if (d.file) {
+
+          var file = resolvePath(d.file.fileName);
+          var lc = this.fileCache.positionToLineCol(file, d.start);
+          var len = this.fileCache.getScriptInfo(file).content.length;
+          var end = Math.min(len, d.start + d.length);
+          // NOTE: clamped to end of file (#11)
+          var lc2 = this.fileCache.positionToLineCol(file, end);
+          return {
+            file: file,
+            start: { line: lc.line, character: lc.character },
+            end: { line: lc2.line, character: lc2.character },
+            text: this.messageChain(d.messageText).join(EOL),
+            code: d.code,
+            phase: d["phase"],
+            category: ts.DiagnosticCategory[d.category]
+          };
+
+        } else { // global diagnostics have no file
+
+          return {
+            text: this.messageChain(d.messageText).join(EOL),
+            code: d.code,
+            phase: d["phase"],
+            category: ts.DiagnosticCategory[d.category]
+          };
+
+        }
+      }
+        );
+    
+  }
+  
+  public getScriptFileNames(){
+    return this.lsHost.getScriptFileNames(); // TODO: files are pre-resolved
+  }
+  
+  public reload(){
+    // TODO: keep updated (in-memory-only) files?
+      return this.setup(this.rootFiles,this.compilerOptions);
+  }
+  
   /** commandline server main routine: commands in, JSON info out */
   public listen() {
     var line: number;
@@ -202,26 +396,8 @@ class TSS {
             col    = parseInt(m[2]);
             file   = resolvePath(m[3]);
 
-            pos    = this.fileCache.lineColToPosition(file,line,col);
-
-            info   = this.ls.getSignatureHelpItems(file,pos);
-
-            var param = p=>({name:p.name
-                            ,isOptional:p.isOptional
-                            ,type:ts.displayPartsToString(p.displayParts)||""
-                            ,docComment:ts.displayPartsToString(p.documentation)||""
-                            });
-
-            info && (info.items = info.items
-                                      .map(item=>({prefix: ts.displayPartsToString(item.prefixDisplayParts)||""
-                                                  ,separator: ts.displayPartsToString(item.separatorDisplayParts)||""
-                                                  ,suffix: ts.displayPartsToString(item.suffixDisplayParts)||""
-                                                  ,parameters: item.parameters.map(param)
-                                                  ,docComment: ts.displayPartsToString(item.documentation)||""
-                                                  }))
-            );
-
-            this.output(info);
+              
+            this.output(this.getSignatureInfo(file,line,col));
           })();
 
         } else if (m = match(cmd,/^(type|quickInfo) (\d+) (\d+) (.*)$/)) { // "type" deprecated
@@ -230,13 +406,7 @@ class TSS {
           col    = parseInt(m[3]);
           file   = resolvePath(m[4]);
 
-          pos    = this.fileCache.lineColToPosition(file,line,col);
-
-          info            = (this.ls.getQuickInfoAtPosition(file, pos)||{});
-          info.type       = ((info&&ts.displayPartsToString(info.displayParts))||"");
-          info.docComment = ((info&&ts.displayPartsToString(info.documentation))||"");
-
-          this.output(info);
+          this.output(this.getQuickInfo(file,line,col));
 
         } else if (m = match(cmd,/^definition (\d+) (\d+) (.*)$/)) {
 
@@ -244,18 +414,8 @@ class TSS {
           col  = parseInt(m[2]);
           file = resolvePath(m[3]);
 
-          pos  = this.fileCache.lineColToPosition(file,line,col);
-          locs = this.ls.getDefinitionAtPosition(file, pos); // NOTE: multiple definitions
-
-          info = locs && locs.map( def => ({
-            def  : def,
-            file : def && def.fileName,
-            min  : def && this.fileCache.positionToLineCol(def.fileName,def.textSpan.start),
-            lim  : def && this.fileCache.positionToLineCol(def.fileName,ts.textSpanEnd(def.textSpan))
-          }));
-
           // TODO: what about multiple definitions?
-          this.output((locs && info[0])||null);
+          this.output(this.getDefinitionInfo(file,line,col));
 
         } else if (m = match(cmd,/^(references|occurrences) (\d+) (\d+) (.*)$/)) {
 
@@ -264,58 +424,32 @@ class TSS {
           file = resolvePath(m[4]);
 
           pos  = this.fileCache.lineColToPosition(file,line,col);
+          
+          var isOccurences;
           switch (m[1]) {
             case "references":
-              refs = this.ls.getReferencesAtPosition(file, pos);
+              isOccurences=false;
               break;
             case "occurrences":
-              refs = this.ls.getOccurrencesAtPosition(file, pos);
+              isOccurences=true;
               break;
             default:
               throw "cannot happen";
           }
 
-          info = (refs || []).map( ref => {
-            var start, end, fileName, lineText;
-            if (ref) {
-              start    = this.fileCache.positionToLineCol(ref.fileName,ref.textSpan.start);
-              end      = this.fileCache.positionToLineCol(ref.fileName,ts.textSpanEnd(ref.textSpan));
-              fileName = resolvePath(ref.fileName);
-              lineText = this.fileCache.getLineText(fileName,start.line);
-            }
-            return {
-              ref      : ref,
-              file     : ref && ref.fileName,
-              lineText : lineText,
-              min      : start,
-              lim      : end
-            }} );
-
-          this.output(info);
+          this.output(this.getReferencesOrOccurrencesInfo(isOccurences,file,line,col));
 
         } else if (m = match(cmd,/^navigationBarItems (.*)$/)) {
 
           file = resolvePath(m[1]);
 
-          this.output(this.ls.getNavigationBarItems(file)
-                          .map(item=>this.handleNavBarItem(file,item)));
+          this.output(this.getNavigationBarItemsInfo(file));
 
         } else if (m = match(cmd,/^navigateToItems (.*)$/)) {
 
           pattern = m[1];
-
-          info = this.ls.getNavigateToItems(pattern)
-                   .map(item=>{
-                      item['min'] = this.fileCache.positionToLineCol(item.fileName
-                                                                    ,item.textSpan.start);
-                      item['lim'] = this.fileCache.positionToLineCol(item.fileName
-                                                                    ,item.textSpan.start
-                                                                    +item.textSpan.length);
-                      return item;
-                    });
-
-          this.output(info);
-
+          return this.getNavigateToItemsInfo(pattern);
+          
         } else if (m = match(cmd,/^completions(-brief)?( true| false)? (\d+) (\d+) (.*)$/)) {
 
           brief  = m[1];
@@ -323,49 +457,13 @@ class TSS {
           col    = parseInt(m[4]);
           file   = resolvePath(m[5]);
 
-          pos    = this.fileCache.lineColToPosition(file,line,col);
-
-          info = this.ls.getCompletionsAtPosition(file, pos) || null;
-
-          if (info) {
-            // fill in completion entry details, unless briefness requested
-            !brief && (info.entries = info.entries.map( e =>{
-                        var d = this.ls.getCompletionEntryDetails(file,pos,e.name);
-                        if (d) {
-                          d["type"]      =ts.displayPartsToString(d.displayParts);
-                          d["docComment"]=ts.displayPartsToString(d.documentation);
-                          return d;
-                        } else {
-                          return e;
-                        }} ));
-                        // NOTE: details null for primitive type symbols, see TS #1592
-
-            (()=>{ // filter entries by prefix, determined by pos
-              var languageVersion = this.compilerOptions.target;
-              var source   = this.fileCache.getScriptInfo(file).content;
-              var startPos = pos;
-              var idPart   = p => /[0-9a-zA-Z_$]/.test(source[p])
-                               || ts.isIdentifierPart(source.charCodeAt(p),languageVersion);
-              var idStart  = p => /[a-zA-Z_$]/.test(source[p])
-                               || ts.isIdentifierStart(source.charCodeAt(p),languageVersion);
-              while ((--startPos>=0) && idPart(startPos) );
-              if ((++startPos < pos) && idStart(startPos)) {
-                var prefix = source.slice(startPos,pos);
-                info["prefix"] = prefix;
-                var len    = prefix.length;
-                info.entries = info.entries.filter( e => e.name.substr(0,len)===prefix );
-              }
-            })();
-          }
-
-          this.output(info,["displayParts","documentation","sortText"]);
+          this.output(this.getCompletionsInfo(brief,file,line,col),["displayParts","documentation","sortText"]);
 
         } else if (m = match(cmd,/^update( nocheck)? (\d+)( (\d+)-(\d+))? (.*)$/)) { // send non-saved source
 
           file       = resolvePath(m[6]);
-          source     = this.ls.getSourceFile(file);
-          script     = this.fileCache.getScriptInfo(file);
-          added      = !script;
+          
+          added      = !this.fileCache.getScriptInfo(file);
           range      = !!m[3]
           check      = !m[1]
 
@@ -374,19 +472,12 @@ class TSS {
             on_collected_callback = () => {
 
               if (!range) {
-                this.fileCache.updateScript(file,lines.join(EOL));
+                this.updateScript(file,lines)
               } else {
                 var startLine = parseInt(m[4]);
                 var endLine   = parseInt(m[5]);
-                var maxLines  = source.getLineStarts().length;
-                var startPos  = startLine<=maxLines
-                              ? (startLine<1 ? 0 : this.fileCache.lineColToPosition(file,startLine,1))
-                              : script.content.length;
-                var endPos    = endLine<maxLines
-                              ? (endLine<1 ? 0 : this.fileCache.lineColToPosition(file,endLine+1,0)-1) //??CHECK
-                              : script.content.length;
-
-                this.fileCache.editScript(file, startPos, endPos, lines.join(EOL));
+                
+                this.editScript(file,startLine,endLine,lines);
               }
               var syn:number,sem:number;
               if (check) {
@@ -405,48 +496,11 @@ class TSS {
           }
 
         } else if (m = match(cmd,/^showErrors$/)) { // get processing errors
-
-          info = this.ls.getProgram().getGlobalDiagnostics()
-                     .concat(this.getErrors())
-                     .map( d => {
-                           if (d.file) {
-
-                             var file = resolvePath(d.file.fileName);
-                             var lc   = this.fileCache.positionToLineCol(file,d.start);
-                             var len  = this.fileCache.getScriptInfo(file).content.length;
-                             var end  = Math.min(len,d.start+d.length);
-                                        // NOTE: clamped to end of file (#11)
-                             var lc2  = this.fileCache.positionToLineCol(file,end);
-                             return {
-                              file: file,
-                              start: {line: lc.line, character: lc.character},
-                              end: {line: lc2.line, character: lc2.character},
-                              text: this.messageChain(d.messageText).join(EOL),
-                              code: d.code,
-                              phase: d["phase"],
-                              category: ts.DiagnosticCategory[d.category]
-                             };
-
-                           } else { // global diagnostics have no file
-
-                             return {
-                              text: this.messageChain(d.messageText).join(EOL),
-                              code: d.code,
-                              phase: d["phase"],
-                              category: ts.DiagnosticCategory[d.category]
-                             };
-
-                           }
-                         }
-                       );
-
-          this.output(info);
+          this.output(this.getErrorsInfo());
 
         } else if (m = match(cmd,/^files$/)) { // list files in project
 
-          info = this.lsHost.getScriptFileNames(); // TODO: files are pre-resolved
-
-          this.output(info);
+          this.output(this.getScriptFileNames());
 
         } else if (m = match(cmd,/^lastError(Dump)?$/)) { // debugging only
 
@@ -525,4 +579,4 @@ class TSS {
   }
 }
 
-export = TSS;
+export = TypescriptService;

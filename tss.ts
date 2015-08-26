@@ -6,7 +6,7 @@
 ///<reference path='node_modules/typescript/bin/typescript.d.ts'/>
 
 import ts = require("typescript");
-import TSS=require("./typescriptService");
+import TypescriptService=require("./typescriptService");
 import path=require("path")
 
 function extend(o1,o2) {
@@ -77,10 +77,12 @@ if (!fileNames) {
   process.exit(1);
 }
 
-var tss = new TSS();
+var tss = new TypescriptService();
 try {
   tss.setup(fileNames,options);
+  
   tss.listen();
+  
 } catch (e) {
   console.error(e.toString());
   process.exit(1);

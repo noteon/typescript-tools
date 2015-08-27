@@ -9,6 +9,7 @@
 		"harness.ts",
 		"fileCache.ts",
 		"typescriptService.ts",
-		"tssCmdListener.ts"
+		"tssCmdListener.ts",
+		"testAce.ts"
 	]
 }

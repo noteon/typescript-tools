@@ -20,5 +20,8 @@
   "license": "Apache License, Version 2.0",
   "dependencies": {
     "typescript": "^1.5.3"
+  },
+  "scripts": {
+    "start": "electron ./bin/main.js"
   }
 }

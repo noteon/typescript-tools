@@ -79,7 +79,7 @@ if (!fileNames) {
 
 var tss = new TSSCmdListener();
 try {
-  tss.setup(fileNames,options);
+  tss.setup(fileNames.map((it)=>{return {name:it}}),options);
   
   tss.listen();
   

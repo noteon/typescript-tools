@@ -17,6 +17,7 @@ var FileCache = (function () {
      * @param fileName resolved name of possibly cached file
      */
     FileCache.prototype.getScriptInfo = function (fileName) {
+        console.log("getScriptInfo", fileName);
         if (!this.fileNameToScript[fileName]) {
             throw new Error("Not Found ScriptInfo");
         }
@@ -46,6 +47,7 @@ var FileCache = (function () {
             this.fileNames.unshift(fileName);
         }
         this.fileNameToScript[fileName] = new harness.ScriptInfo(fileName, text);
+        console.log("addFile", fileName);
         this.snapshots[fileName] = new harness.ScriptSnapshot(this.getScriptInfo(fileName));
     };
     /**

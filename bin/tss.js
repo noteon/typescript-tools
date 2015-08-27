@@ -61,7 +61,7 @@ if (!fileNames) {
 }
 var tss = new TSSCmdListener();
 try {
-    tss.setup(fileNames, options);
+    tss.setup(fileNames.map(function (it) { return { name: it }; }), options);
     tss.listen();
 }
 catch (e) {

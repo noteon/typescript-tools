@@ -77,17 +77,18 @@ class TypescriptService {
     var seenNoDefaultLib = options.noLib;
     
     files.forEach(file=>{
+      var fullFileName=resolvePath(file.name);
       if (!file.content){
-        var source = this.compilerHost.getSourceFile(resolvePath(file.name),options.target);
+        var source = this.compilerHost.getSourceFile(fullFileName,options.target);
         if (source) {
           seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
-          this.fileCache.addFile(file.name,source.text);
+          this.fileCache.addFile(fullFileName,source.text);
         } else {
           throw ("tss cannot find file: "+file);
        }        
       }else{
         seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
-        this.fileCache.addFile(file.name,file.content);
+        this.fileCache.addFile(fullFileName,file.content);
       }
     });
     

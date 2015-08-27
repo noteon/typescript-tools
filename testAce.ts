@@ -21,41 +21,50 @@ export function setupAceEditor(){
             console.log("Enter Typescript Completer getCompletions");
             let text=session.getValue();
             
+            var startAt=Date.now();
             tsServ.updateScript(FILE_NAME,text);
             
-            let completionsInfo=tsServ.getCompletionsInfoByPos(false,FILE_NAME,pos);
+            console.log('updateScript elapsed', Date.now()-startAt);
+            
+            startAt=Date.now();
+            
+            let completionsInfo=tsServ.getCompletionsInfoByPos(true,FILE_NAME,pos);
             let completions=completionsInfo.entries.map((it)=>{
               return {
                   name:it.name,
                   value:it.name,
                   meta:it.kind,
-                  toolTip:it.type,
+                  //toolTip:it.type,
+                  pos:pos,
                   score:100
               }   
             });
             
-            
+            console.log('getCompletionsInfoByPos elapsed', Date.now()-startAt);
             
             
 //             kind: "method"
 // kindModifiers: ""
 // name: "greet"
 // type: "(method) Greeter.greet(): string"
-            console.log("completions",completions);
-            console.log("prefix",prefix);
+            //console.log("completions",completions);
+            //console.log("prefix",prefix);
             
 			//console.log(session.getValue());
           
             //if (prefix.length === 0) { callback(null, []); return }
                       
-            
+            startAt=Date.now();
             callback(null, completions)
+             console.log('completions callback elapsed', Date.now()-startAt);
             
         },
 		
         getDocTooltip: function(item) {
             //console.log('tooltip fired',item);
-            item.docHTML = "<b>"+item.toolTip+"</b>"
+            var detailInfo:any=tsServ.getCompletionEntryDetailsInfo(FILE_NAME,item.pos,item.name) || {type:"Not Found"};
+            
+            item.docHTML = "<b>"+detailInfo.type+"</b>"
         }
     }
     

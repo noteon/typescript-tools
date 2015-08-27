@@ -219,16 +219,24 @@ class TypescriptService {
                           .map(item=>this.handleNavBarItem(file,item));
   }
 
+  public getCompletionEntryDetailsInfo(file,pos,name){
+    var d = this.ls.getCompletionEntryDetails(file, pos, name);
+    if (d) {
+      d["type"] = ts.displayPartsToString(d.displayParts);
+      d["docComment"] = ts.displayPartsToString(d.documentation);
+      return d;
+    } 
+  }
+  
   public getCompletionsInfoByPos(brief:boolean, file, pos){
+         var startTime=Date.now();
          var info:any = this.ls.getCompletionsAtPosition(file, pos) || null;
-
+         
           if (info) {
             // fill in completion entry details, unless briefness requested
             !brief && (info.entries = info.entries.map( e =>{
-                        var d = this.ls.getCompletionEntryDetails(file,pos,e.name);
+                        var d = this.getCompletionEntryDetailsInfo(file,pos, e.name)
                         if (d) {
-                          d["type"]      =ts.displayPartsToString(d.displayParts);
-                          d["docComment"]=ts.displayPartsToString(d.documentation);
                           return d;
                         } else {
                           return e;

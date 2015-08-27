@@ -17,7 +17,7 @@ var FileCache = (function () {
      * @param fileName resolved name of possibly cached file
      */
     FileCache.prototype.getScriptInfo = function (fileName) {
-        console.log("getScriptInfo", fileName);
+        //console.log("getScriptInfo",fileName);
         if (!this.fileNameToScript[fileName]) {
             throw new Error("Not Found ScriptInfo");
         }

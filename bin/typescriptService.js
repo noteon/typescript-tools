@@ -173,16 +173,23 @@ var TypescriptService = (function () {
         return this.ls.getNavigationBarItems(file)
             .map(function (item) { return _this.handleNavBarItem(file, item); });
     };
+    TypescriptService.prototype.getCompletionEntryDetailsInfo = function (file, pos, name) {
+        var d = this.ls.getCompletionEntryDetails(file, pos, name);
+        if (d) {
+            d["type"] = ts.displayPartsToString(d.displayParts);
+            d["docComment"] = ts.displayPartsToString(d.documentation);
+            return d;
+        }
+    };
     TypescriptService.prototype.getCompletionsInfoByPos = function (brief, file, pos) {
         var _this = this;
+        var startTime = Date.now();
         var info = this.ls.getCompletionsAtPosition(file, pos) || null;
         if (info) {
             // fill in completion entry details, unless briefness requested
             !brief && (info.entries = info.entries.map(function (e) {
-                var d = _this.ls.getCompletionEntryDetails(file, pos, e.name);
+                var d = _this.getCompletionEntryDetailsInfo(file, pos, e.name);
                 if (d) {
-                    d["type"] = ts.displayPartsToString(d.displayParts);
-                    d["docComment"] = ts.displayPartsToString(d.documentation);
                     return d;
                 }
                 else {

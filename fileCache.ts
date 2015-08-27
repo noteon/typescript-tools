@@ -21,7 +21,7 @@ class FileCache {
    * @param fileName resolved name of possibly cached file
    */
   public getScriptInfo(fileName) {
-    console.log("getScriptInfo",fileName);
+    //console.log("getScriptInfo",fileName);
     if (!this.fileNameToScript[fileName]) {
       throw new Error("Not Found ScriptInfo");
     }

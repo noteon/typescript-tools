@@ -66,7 +66,7 @@ var TypescriptService = (function () {
                 }
             }
             else {
-                seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
+                //seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
                 _this.fileCache.addFile(fullFileName, file.content);
             }
         });
@@ -173,9 +173,8 @@ var TypescriptService = (function () {
         return this.ls.getNavigationBarItems(file)
             .map(function (item) { return _this.handleNavBarItem(file, item); });
     };
-    TypescriptService.prototype.getCompletionsInfo = function (brief, file, line, col) {
+    TypescriptService.prototype.getCompletionsInfoByPos = function (brief, file, pos) {
         var _this = this;
-        var pos = this.fileCache.lineColToPosition(file, line, col);
         var info = this.ls.getCompletionsAtPosition(file, pos) || null;
         if (info) {
             // fill in completion entry details, unless briefness requested
@@ -211,6 +210,10 @@ var TypescriptService = (function () {
         }
         return info;
     };
+    TypescriptService.prototype.getCompletionsInfo = function (brief, file, line, col) {
+        var pos = this.fileCache.lineColToPosition(file, line, col);
+        return this.getCompletionsInfoByPos(brief, file, pos);
+    };
     TypescriptService.prototype.getNavigateToItemsInfo = function (pattern) {
         var _this = this;
         return this.ls.getNavigateToItems(pattern)
@@ -221,8 +224,8 @@ var TypescriptService = (function () {
             return item;
         });
     };
-    TypescriptService.prototype.updateScript = function (file, lines) {
-        this.fileCache.updateScript(file, lines.join(EOL));
+    TypescriptService.prototype.updateScript = function (file, content) {
+        this.fileCache.updateScript(file, content);
     };
     TypescriptService.prototype.editScript = function (file, startLine, endLine, lines) {
         var script = this.fileCache.getScriptInfo(file);

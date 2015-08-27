@@ -1,41 +1,48 @@
 /// <reference path="./typings/tsd.d.ts" />
+var TypescriptService = require('./typescriptService');
+var tsServ = new TypescriptService();
+var FILE_NAME = "/tmp/inplaceText.ts";
+tsServ.setup([{ name: FILE_NAME, content: "//////" }], { module: "amd" });
 function setupAceEditor() {
     var langTools = ace.require("ace/ext/language_tools");
     var editor = ace.edit("editor");
+    editor.setOptions({ enableBasicAutocompletion: false });
     editor.setTheme("ace/theme/twilight");
     editor.getSession().setMode("ace/mode/typescript");
-    editor.setOptions({ enableBasicAutocompletion: true });
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
+            console.log("Enter Typescript Completer getCompletions");
             var text = session.getValue();
-            //console.log(session.getValue());
-            if (prefix.length === 0) {
-                callback(null, []);
-                return;
-            }
-            callback(null, [
-                // {
-                //     caption:"caption",
-                //     snippet: "snippet",
-                //     meta: "snippet",
-                //     type: "snippet"
-                // },
-                {
-                    caption: "name",
-                    value: "value",
-                    meta: "test",
+            tsServ.updateScript(FILE_NAME, text);
+            var completionsInfo = tsServ.getCompletionsInfoByPos(false, FILE_NAME, pos);
+            var completions = completionsInfo.entries.map(function (it) {
+                return {
+                    name: it.name,
+                    value: it.name,
+                    meta: it.kind,
+                    toolTip: it.type,
                     score: 100
-                }
-            ]);
-            //                    callback(null, wordList.map(function(ea) {
-            //return {caption:ea.word, name: ea.word, snippet: value, value: ea.word, score: ea.score, meta: "rhyme"}
-            //}));
+                };
+            });
+            //             kind: "method"
+            // kindModifiers: ""
+            // name: "greet"
+            // type: "(method) Greeter.greet(): string"
+            console.log("completions", completions);
+            console.log("prefix", prefix);
+            //console.log(session.getValue());
+            //if (prefix.length === 0) { callback(null, []); return }
+            callback(null, completions);
         },
         getDocTooltip: function (item) {
-            item.docHTML = "<b>" + item.caption + "</b>";
+            //console.log('tooltip fired',item);
+            item.docHTML = "<b>" + item.toolTip + "</b>";
         }
     };
-    langTools.addCompleter(typescriptCompleter);
+    //langTools.snippetCompleter
+    //langTools.setCompleters([]);
+    langTools.setCompleters([typescriptCompleter]);
+    editor.setOptions({ enableBasicAutocompletion: true });
 }
 exports.setupAceEditor = setupAceEditor;

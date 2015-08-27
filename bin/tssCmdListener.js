@@ -140,7 +140,7 @@ var TSSCmdListener = (function (_super) {
                         collecting = parseInt(m[2]);
                         on_collected_callback = function () {
                             if (!range) {
-                                _this.updateScript(file, lines);
+                                _this.updateScript(file, lines.join(EOL));
                             }
                             else {
                                 var startLine = parseInt(m[4]);

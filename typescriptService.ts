@@ -87,7 +87,7 @@ class TypescriptService {
           throw ("tss cannot find file: "+file);
        }        
       }else{
-        seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
+        //seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
         this.fileCache.addFile(fullFileName,file.content);
       }
     });
@@ -219,9 +219,7 @@ class TypescriptService {
                           .map(item=>this.handleNavBarItem(file,item));
   }
 
-  public getCompletionsInfo(brief:boolean, file, line,col){
-         var     pos    = this.fileCache.lineColToPosition(file,line,col);
-
+  public getCompletionsInfoByPos(brief:boolean, file, pos){
          var info:any = this.ls.getCompletionsAtPosition(file, pos) || null;
 
           if (info) {
@@ -256,6 +254,13 @@ class TypescriptService {
           }
        return info;
   }
+
+
+  public getCompletionsInfo(brief:boolean, file, line,col){
+         var     pos    = this.fileCache.lineColToPosition(file,line,col);
+
+         return this.getCompletionsInfoByPos(brief, file, pos)
+  }
   
   public getNavigateToItemsInfo(pattern){
         return this.ls.getNavigateToItems(pattern)
@@ -270,8 +275,8 @@ class TypescriptService {
 
   }
   
-  public updateScript(file, lines:string[]){
-    this.fileCache.updateScript(file,lines.join(EOL));
+  public updateScript(file, content){
+    this.fileCache.updateScript(file,content);
   }
   
   public editScript(file, startLine, endLine, lines:string[]){

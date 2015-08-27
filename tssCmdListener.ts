@@ -184,7 +184,7 @@ class TSSCmdListener extends TypescriptService {
             on_collected_callback = () => {
 
               if (!range) {
-                this.updateScript(file,lines)
+                this.updateScript(file,lines.join(EOL))
               } else {
                 var startLine = parseInt(m[4]);
                 var endLine   = parseInt(m[5]);

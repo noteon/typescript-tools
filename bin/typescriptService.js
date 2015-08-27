@@ -47,20 +47,26 @@ var TypescriptService = (function () {
     TypescriptService.prototype.setup = function (files, options) {
         var _this = this;
         this.fileCache = new FileCache();
-        this.rootFiles = files.map(function (file) { return resolvePath(file); });
+        this.rootFiles = files.map(function (file) { return resolvePath(file.name); });
         this.compilerOptions = options;
         this.compilerHost = ts.createCompilerHost(options);
         //TODO: diagnostics
         // prime fileCache with root files and defaultLib
         var seenNoDefaultLib = options.noLib;
-        this.rootFiles.forEach(function (file) {
-            var source = _this.compilerHost.getSourceFile(file, options.target);
-            if (source) {
-                seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
-                _this.fileCache.addFile(file, source.text);
+        files.forEach(function (file) {
+            if (!file.content) {
+                var source = _this.compilerHost.getSourceFile(resolvePath(file.name), options.target);
+                if (source) {
+                    seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
+                    _this.fileCache.addFile(file.name, source.text);
+                }
+                else {
+                    throw ("tss cannot find file: " + file);
+                }
             }
             else {
-                throw ("tss cannot find file: " + file);
+                seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
+                _this.fileCache.addFile(file.name, file.content);
             }
         });
         if (!seenNoDefaultLib) {
@@ -265,7 +271,8 @@ var TypescriptService = (function () {
     };
     TypescriptService.prototype.reload = function () {
         // TODO: keep updated (in-memory-only) files?
-        return this.setup(this.rootFiles, this.compilerOptions);
+        var files = this.rootFiles.map(function (it) { return { name: it }; });
+        return this.setup(files, this.compilerOptions);
     };
     return TypescriptService;
 })();

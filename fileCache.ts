@@ -22,7 +22,7 @@ class FileCache {
    */
   public getScriptInfo(fileName) {
     if (!this.fileNameToScript[fileName]) {
-      this.fetchFile(fileName);
+      throw new Error("Not Found ScriptInfo");
     }
     return this.fileNameToScript[fileName];
   }
@@ -33,7 +33,7 @@ class FileCache {
   public getScriptSnapshot(fileName) {
     // console.log("getScriptSnapshot",fileName);
     if (!this.snapshots[fileName]) {
-      this.fetchFile(fileName);
+      throw new Error("Not Found ScriptSnapshot "+fileName);
     }
     return this.snapshots[fileName];
   }
@@ -56,7 +56,7 @@ class FileCache {
   /**
    * @param fileName resolved file name
    */
-  public fetchFile(fileName) {
+  private fetchFile(fileName) {
     // console.log("fetchFile:",fileName);
     if (ts.sys.fileExists(fileName)) {
       this.addFile(fileName,ts.sys.readFile(fileName));

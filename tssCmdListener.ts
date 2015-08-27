@@ -244,7 +244,7 @@ class TSSCmdListener extends TypescriptService {
         } else if (m = match(cmd,/^reload$/)) { // reload current project
 
           // TODO: keep updated (in-memory-only) files?
-          this.setup(this.rootFiles,this.compilerOptions);
+          this.reload();
           this.outputJSON(this.listeningMessage('reloaded'));
 
         } else if (m = match(cmd,/^quit$/)) {

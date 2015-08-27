@@ -51,6 +51,7 @@ class TypescriptService {
       return errors;
 
   }
+  
 
   /** flatten messageChain into string|string[] */
   private messageChain(message:string|ts.DiagnosticMessageChain) {
@@ -62,10 +63,10 @@ class TypescriptService {
   }
 
   /** load file and dependencies, prepare language service for queries */
-  public setup(files,options) {
+  public setup(files:{name:string, content?:string}[],options) {
     this.fileCache = new FileCache();
 
-    this.rootFiles = files.map(file=>resolvePath(file));
+    this.rootFiles = files.map(file=>resolvePath(file.name));
 
     this.compilerOptions = options;
     this.compilerHost    = ts.createCompilerHost(options);
@@ -74,15 +75,22 @@ class TypescriptService {
 
     // prime fileCache with root files and defaultLib
     var seenNoDefaultLib = options.noLib;
-    this.rootFiles.forEach(file=>{
-      var source = this.compilerHost.getSourceFile(file,options.target);
-      if (source) {
+    
+    files.forEach(file=>{
+      if (!file.content){
+        var source = this.compilerHost.getSourceFile(resolvePath(file.name),options.target);
+        if (source) {
+          seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
+          this.fileCache.addFile(file.name,source.text);
+        } else {
+          throw ("tss cannot find file: "+file);
+       }        
+      }else{
         seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
-        this.fileCache.addFile(file,source.text);
-      } else {
-        throw ("tss cannot find file: "+file);
+        this.fileCache.addFile(file.name,file.content);
       }
     });
+    
     if (!seenNoDefaultLib) {
       var defaultLibFileName = this.compilerHost.getDefaultLibFileName(options);
       var source = this.compilerHost.getSourceFile(defaultLibFileName,options.target);
@@ -321,7 +329,10 @@ class TypescriptService {
   
   public reload(){
     // TODO: keep updated (in-memory-only) files?
-      return this.setup(this.rootFiles,this.compilerOptions);
+      var files=this.rootFiles.map((it)=>{return {name:it}});
+    
+    
+      return this.setup(files,this.compilerOptions);
   }
   
 

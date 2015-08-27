@@ -18,7 +18,7 @@ var FileCache = (function () {
      */
     FileCache.prototype.getScriptInfo = function (fileName) {
         if (!this.fileNameToScript[fileName]) {
-            this.fetchFile(fileName);
+            throw new Error("Not Found ScriptInfo");
         }
         return this.fileNameToScript[fileName];
     };
@@ -28,7 +28,7 @@ var FileCache = (function () {
     FileCache.prototype.getScriptSnapshot = function (fileName) {
         // console.log("getScriptSnapshot",fileName);
         if (!this.snapshots[fileName]) {
-            this.fetchFile(fileName);
+            throw new Error("Not Found ScriptSnapshot " + fileName);
         }
         return this.snapshots[fileName];
     };

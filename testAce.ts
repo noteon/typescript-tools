@@ -1,5 +1,9 @@
 /// <reference path="./typings/tsd.d.ts" />
 
+import tsServ=require('./typescriptService');
+
+
+
 export function setupAceEditor(){
 	
 	var langTools = ace.require("ace/ext/language_tools");
@@ -14,7 +18,9 @@ export function setupAceEditor(){
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
         getCompletions: function(editor, session, pos, prefix, callback) {
-			console.log(session.getValue());
+            let text=session.getValue();
+            
+			//console.log(session.getValue());
           
             if (prefix.length === 0) { callback(null, []); return }
             

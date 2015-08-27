@@ -195,7 +195,7 @@ var TSSCmdListener = (function (_super) {
                 }
                 else if (m = match(cmd, /^reload$/)) {
                     // TODO: keep updated (in-memory-only) files?
-                    _this.setup(_this.rootFiles, _this.compilerOptions);
+                    _this.reload();
                     _this.outputJSON(_this.listeningMessage('reloaded'));
                 }
                 else if (m = match(cmd, /^quit$/)) {

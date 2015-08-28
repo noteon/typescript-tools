@@ -49,6 +49,7 @@ function setupAceEditor() {
         errorMarkers.forEach(function (id) {
             session.removeMarker(id);
         });
+        var annotations = [];
         errors.forEach(function (error) {
             //var getpos = aceEditorPosition.getAcePositionFromChars;
             var doc = editor.getSession().getDocument();
@@ -56,8 +57,20 @@ function setupAceEditor() {
             var end = aceUtils.getPosition(doc, error.start + error.length);
             var range = new AceRange(start.row, start.column, end.row, end.column);
             console.log("session push marker", range);
-            errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, true));
+            errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
+            //errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, false));
+            annotations.push({
+                row: start.row,
+                column: start.column,
+                text: error.messageText,
+                type: "error"
+            });
         });
+        session.setAnnotations(annotations);
+        //          row: number;
+        //  column: number;
+        //  text: string;
+        //  type: string;
         console.log('error', errors);
     }
     function onChangeDocument(e) {

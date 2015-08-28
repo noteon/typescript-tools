@@ -35,7 +35,8 @@ declare module AceAjax {
 
         addCommand(command:EditorCommand);
 
-        exec(name: string, editor: Editor, args: any);
+        exec(name: string, editor?: Editor, args?: any);
+        on:any;
     }
 
     export interface Annotation {

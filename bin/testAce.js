@@ -12,7 +12,7 @@ function setupAceEditor() {
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            console.log("Enter Typescript Completer getCompletions");
+            //console.log("Enter Typescript Completer getCompletions");
             var text = session.getValue();
             var startAt = Date.now();
             tsServ.updateScript(FILE_NAME, text);
@@ -51,6 +51,24 @@ function setupAceEditor() {
     //langTools.snippetCompleter
     //langTools.setCompleters([]);
     langTools.setCompleters([typescriptCompleter]);
-    editor.setOptions({ enableBasicAutocompletion: true });
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true
+    });
+    editor.commands.on("afterExec", function (e) {
+        if (e.command.name == "insertstring" && /^[\w.]$/.test(e.args)) {
+            editor.execCommand("startAutocomplete");
+        }
+    });
+    // override editor onTextInput
+    // var originalTextInput = editor.onTextInput;
+    // editor.onTextInput = function (text){
+    //     originalTextInput.call(editor, text);
+    //     console.log('editor onTextInput', text);
+    //     if(text == "."){
+    //         editor.execCommand("startAutoComplete");
+    //     }
+    // };   
+    var str = 'test2';
 }
 exports.setupAceEditor = setupAceEditor;

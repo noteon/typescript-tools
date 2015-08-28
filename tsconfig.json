@@ -10,6 +10,7 @@
 		"fileCache.ts",
 		"typescriptService.ts",
 		"tssCmdListener.ts",
+		"aceUtils.ts",
 		"testAce.ts"
 	]
 }

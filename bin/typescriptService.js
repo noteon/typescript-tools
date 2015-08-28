@@ -245,6 +245,9 @@ var TypescriptService = (function () {
             : script.content.length;
         this.fileCache.editScript(file, startPos, endPos, lines.join(EOL));
     };
+    TypescriptService.prototype.editScriptByPos = function (file, startPos, endPos, newLines) {
+        this.fileCache.editScript(file, startPos, endPos, newLines.join(EOL));
+    };
     TypescriptService.prototype.getErrorsInfo = function () {
         var _this = this;
         return this.ls.getProgram().getGlobalDiagnostics()

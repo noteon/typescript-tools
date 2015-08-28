@@ -300,6 +300,10 @@ class TypescriptService {
     this.fileCache.editScript(file, startPos, endPos, lines.join(EOL));
   }
   
+  public editScriptByPos(file,startPos,endPos, newLines:string[]){
+    this.fileCache.editScript(file, startPos, endPos, newLines.join(EOL));
+  }
+  
   public getErrorsInfo(){
     return this.ls.getProgram().getGlobalDiagnostics()
       .concat(this.getErrors())

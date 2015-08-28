@@ -6,6 +6,7 @@ var FILE_NAME = "/tmp/inplaceText.ts";
 tsServ.setup([{ name: FILE_NAME, content: "//////" }], { module: "amd" });
 function setupAceEditor() {
     var langTools = ace.require("ace/ext/language_tools");
+    var AceRange = ace.require('ace/range').Range;
     var editor = ace.edit("editor");
     editor.setOptions({ enableBasicAutocompletion: false });
     editor.setTheme("ace/theme/twilight");
@@ -37,12 +38,35 @@ function setupAceEditor() {
     }
     ;
     reloadDocument();
+    var errorMarkers = [];
+    function updateMarker(e) {
+        var addPhase = function (phase) { return function (d) { d.phase = phase; return d; }; };
+        var syntactic = tsServ.ls.getSyntacticDiagnostics(FILE_NAME);
+        var semantic = tsServ.ls.getSemanticDiagnostics(FILE_NAME);
+        // this.ls.languageService.getEmitOutput(file).diagnostics;
+        var errors = [].concat(syntactic.map(addPhase("Syntax")), semantic.map(addPhase("Semantics")));
+        var session = editor.getSession();
+        errorMarkers.forEach(function (id) {
+            session.removeMarker(id);
+        });
+        errors.forEach(function (error) {
+            //var getpos = aceEditorPosition.getAcePositionFromChars;
+            var doc = editor.getSession().getDocument();
+            var start = aceUtils.getPosition(doc, error.start);
+            var end = aceUtils.getPosition(doc, error.start + error.length);
+            var range = new AceRange(start.row, start.column, end.row, end.column);
+            console.log("session push marker", range);
+            errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, true));
+        });
+        console.log('error', errors);
+    }
     function onChangeDocument(e) {
         //reloadDocument();
-        // console.log("onChangeDoc",e);
+        console.log("onChangeDoc", e);
         if (!syncStop) {
             try {
                 syncTypeScriptServiceContent(FILE_NAME, e);
+                updateMarker(e);
             }
             catch (ex) {
             }

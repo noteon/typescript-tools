@@ -305,6 +305,8 @@ class TypescriptService {
   }
   
   public getErrorsInfo(){
+   
+    
     return this.ls.getProgram().getGlobalDiagnostics()
       .concat(this.getErrors())
       .map(d => {

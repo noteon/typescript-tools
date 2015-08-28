@@ -86,7 +86,7 @@ export function setupAceEditor() {
     var typescriptCompleter = {
         getCompletions: function(editor, session, pos, prefix, callback) {
             //console.log("Enter Typescript Completer getCompletions");
-            let text = session.getValue();
+            //let text = session.getValue();
 
             var startAt = Date.now();
             //tsServ.updateScript(FILE_NAME,text);
@@ -96,8 +96,19 @@ export function setupAceEditor() {
             startAt = Date.now();
 
             let completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, pos);
-            if (!completionsInfo)
-               return callback(null,[])
+            if (!completionsInfo){
+                //try to refresh
+                
+               console.log("try refresh tsServ",prefix); 
+               
+               //有时候Script Snapshot会混乱掉，需要有个机制重新刷新 script
+               var startAt = Date.now();
+               tsServ.updateScript(FILE_NAME, session.getValue());  
+               console.log('updateScript elapsed', Date.now()-startAt);
+                
+               return callback(null,[]) 
+            }
+               
                
 
             //console.log(completionsInfo.entries);
@@ -144,7 +155,7 @@ export function setupAceEditor() {
     langTools.setCompleters([typescriptCompleter]);
     editor.setOptions({
         enableBasicAutocompletion: true,
-        enableLiveAutocompletion: true
+        //enableLiveAutocompletion: true
     });
 
 

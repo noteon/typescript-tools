@@ -111,17 +111,40 @@ export function setupAceEditor() {
                
                
 
-            //console.log(completionsInfo.entries);
+            //console.log("completionsInfo",completionsInfo.entries);
             let completions = completionsInfo.entries.map((it) => {
                 return {
                     name: it.name,
                     value: it.name,
                     meta: it.kind,
                     //toolTip:it.type,
-                    pos: pos
+                    pos: pos,
+                    srcProps:it,
                 }
             });
 
+
+            var matchFunc = function(elm) {
+                return elm.name.indexOf(prefix) == 0 ? 1 : 0;
+            };
+
+            var matchCompare = function(a, b){
+                return matchFunc(b) - matchFunc(a);
+            };
+
+            var textCompare = function(a, b){
+                 if (a.name == b.name){
+                    return 0;
+                 }else{
+                     return (a.name > b.name) ? 1 : -1;
+                 }
+            };
+            var compare = function(a, b){
+                var ret = matchCompare(a, b);
+                return (ret != 0) ? ret : textCompare(a, b);
+            };
+
+            completions = completions.sort(compare);
             //console.log('getCompletionsInfoByPos elapsed', Date.now() - startAt);
             
             
@@ -143,7 +166,7 @@ export function setupAceEditor() {
         },
 
         getDocTooltip: function(item) {
-            //console.log('tooltip fired',item);
+            console.log('tooltip fired',item.srcProps);
             var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "Not Found" };
 
             item.docHTML = "<b>" + detailInfo.type + "</b>"

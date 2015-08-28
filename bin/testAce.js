@@ -83,16 +83,36 @@ function setupAceEditor() {
                 console.log('updateScript elapsed', Date.now() - startAt);
                 return callback(null, []);
             }
-            //console.log(completionsInfo.entries);
+            //console.log("completionsInfo",completionsInfo.entries);
             var completions = completionsInfo.entries.map(function (it) {
                 return {
                     name: it.name,
                     value: it.name,
                     meta: it.kind,
                     //toolTip:it.type,
-                    pos: pos
+                    pos: pos,
+                    srcProps: it,
                 };
             });
+            var matchFunc = function (elm) {
+                return elm.name.indexOf(prefix) == 0 ? 1 : 0;
+            };
+            var matchCompare = function (a, b) {
+                return matchFunc(b) - matchFunc(a);
+            };
+            var textCompare = function (a, b) {
+                if (a.name == b.name) {
+                    return 0;
+                }
+                else {
+                    return (a.name > b.name) ? 1 : -1;
+                }
+            };
+            var compare = function (a, b) {
+                var ret = matchCompare(a, b);
+                return (ret != 0) ? ret : textCompare(a, b);
+            };
+            completions = completions.sort(compare);
             //console.log('getCompletionsInfoByPos elapsed', Date.now() - startAt);
             //             kind: "method"
             // kindModifiers: ""
@@ -107,7 +127,7 @@ function setupAceEditor() {
             //console.log('completions callback elapsed', Date.now() - startAt);
         },
         getDocTooltip: function (item) {
-            //console.log('tooltip fired',item);
+            console.log('tooltip fired', item.srcProps);
             var detailInfo = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "Not Found" };
             item.docHTML = "<b>" + detailInfo.type + "</b>";
         }

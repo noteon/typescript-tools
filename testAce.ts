@@ -50,7 +50,6 @@ export function setupAceEditor() {
     
     reloadDocument();
     
-    
     var errorMarkers=[];
     function updateMarker(e: AceAjax.EditorChangeEvent){
         var addPhase = phase => d => {d.phase = phase; return d};
@@ -63,6 +62,8 @@ export function setupAceEditor() {
                               
                               
         var session = editor.getSession();
+        
+        
         errorMarkers.forEach((id)=>{
             session.removeMarker(id);
         });
@@ -83,11 +84,13 @@ export function setupAceEditor() {
             
             //errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, false));
             
+            console.log("add annotation", start.row, start.column, error.messageText);
             annotations.push({
-                row:start.row,
+                row: start.row,
                 column: start.column,
                 text:error.messageText,
-                type: "error"                
+                type: "error",
+                raw:"test"                
             });
         });
         
@@ -107,11 +110,19 @@ export function setupAceEditor() {
 
     function onChangeDocument(e: AceAjax.EditorChangeEvent) {
         //reloadDocument();
-        console.log("onChangeDoc",e);
+        //console.log("onChangeDoc",e);
         if (!syncStop) {
             try {
                 syncTypeScriptServiceContent(FILE_NAME, e);
+                
+                var startAt=Date.now();
+                
+                var docChanged=true; 
+                
                 updateMarker(e);
+                
+                console.log("update Error Markers", Date.now()-startAt);                    
+                
             } catch (ex) {
 
             }

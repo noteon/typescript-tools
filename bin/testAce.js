@@ -59,11 +59,13 @@ function setupAceEditor() {
             console.log("session push marker", range);
             errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
             //errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, false));
+            console.log("add annotation", start.row, start.column, error.messageText);
             annotations.push({
                 row: start.row,
                 column: start.column,
                 text: error.messageText,
-                type: "error"
+                type: "error",
+                raw: "test"
             });
         });
         session.setAnnotations(annotations);
@@ -75,11 +77,14 @@ function setupAceEditor() {
     }
     function onChangeDocument(e) {
         //reloadDocument();
-        console.log("onChangeDoc", e);
+        //console.log("onChangeDoc",e);
         if (!syncStop) {
             try {
                 syncTypeScriptServiceContent(FILE_NAME, e);
+                var startAt = Date.now();
+                var docChanged = true;
                 updateMarker(e);
+                console.log("update Error Markers", Date.now() - startAt);
             }
             catch (ex) {
             }

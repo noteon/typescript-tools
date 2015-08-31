@@ -110,21 +110,31 @@ function setupAceEditor() {
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            var doc = editor.getSession().getDocument();
-            var prevChar;
-            if (pos.column > 0) {
-                prevChar = session.getValue().charAt(aceUtils.getChars(doc, { row: pos.row, column: pos.column - 1 }));
-            }
+            // let doc = editor.getSession().getDocument()
+            // let prevChar;
+            // if (pos.column>0){
+            //     prevChar = session.getValue().charAt(aceUtils.getChars(doc,{row:pos.row, column:pos.column-1}));
+            // }
+            var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
             //console.log("Enter Typescript Completer getCompletions",{pos, prefix, prevChar});
-            if (prevChar && prevChar === '(') {
-                //tsServ.getSignatureInfo
-                var helpItems = tsServ.getSignatureInfo(FILE_NAME, pos.row, pos.column);
-                console.log('helpItems', pos, helpItems);
-                var quickInfo = tsServ.getQuickInfo(FILE_NAME, pos.row, pos.column);
-                console.log('QuickInfo', quickInfo);
-                var definitionInfo = tsServ.getDefinitionInfo(FILE_NAME, pos.row, pos.column);
-                console.log('definition', definitionInfo);
-                return callback(null, [{ name: quickInfo.type, value: quickInfo.type, meta: "" }]);
+            var startAt = Date.now();
+            var helpItems = tsServ.getSignatureInfoByPos(FILE_NAME, posChar);
+            console.log('getSignatureInfoByPos elapsed', Date.now() - startAt);
+            if (helpItems) {
+                var completionsItems = helpItems.items.map(function (it, idx) {
+                    var value = it.prefix + (it.parameters.map(function (param) { return param.type; }).join(it.separator)) + it.suffix;
+                    return {
+                        name: value,
+                        value: value,
+                        meta: "",
+                        score: (idx === helpItems.selectedItemIndex) ? 1 : 0
+                    };
+                });
+                // var quickInfo=tsServ.getQuickInfoByPos(FILE_NAME, posChar);
+                // console.log('QuickInfo',quickInfo);
+                // var definitionInfo=tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
+                // console.log('definition', definitionInfo);
+                return callback(null, completionsItems);
             }
             var startAt = Date.now();
             //tsServ.updateScript(FILE_NAME,text);

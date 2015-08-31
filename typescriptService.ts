@@ -10,6 +10,28 @@ import harness = require("./harness");
 import FileCache=require("./fileCache");
 import path = require("path");
 
+interface SignatureParam{
+  name:string;
+  isOptional:boolean;
+  type:string;
+  docComment:string;
+}
+
+interface SignatureHelpItemInfo {
+  prefix:string;
+  separator:string;
+  suffix:string;
+  parameters:SignatureParam[],
+  docComment:string;
+}
+
+interface SignatureHelpItems {
+    items: SignatureHelpItemInfo[];
+    selectedItemIndex: number;
+    argumentIndex: number;
+    argumentCount: number;
+}
+
 function resolvePath(rpath) {
   return switchToForwardSlashes(path.resolve(rpath));
 }
@@ -163,7 +185,7 @@ class TypescriptService {
                                                   }))
             );
             
-            return info;
+            return <SignatureHelpItems>info;
 
   }
 

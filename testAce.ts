@@ -95,7 +95,7 @@ export function setupAceEditor() {
                 column: start.column,
                 text:error.messageText,
                 type: "error",
-                raw:"test"                
+                //raw:"test"                
             });
         });
         
@@ -110,7 +110,7 @@ export function setupAceEditor() {
         //  type: string;
                   
 
-        console.log('error',errors);
+        //console.log('error',errors);
     }
 
     function onChangeDocument(e: AceAjax.EditorChangeEvent) {
@@ -149,17 +149,41 @@ export function setupAceEditor() {
             
             tsServ.editScriptByPos(script, start, end, [""]);
         }
-        console.log('syncTypeScriptServiceContent', start,end,e.lines);
+        //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     };
     
     
-
+   
     
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
-        getCompletions: function(editor, session, pos, prefix, callback) {
-            //console.log("Enter Typescript Completer getCompletions");
-            //let text = session.getValue();
+        getCompletions: function(editor, session, pos:{row:number, column:number}, prefix, callback) {
+            let doc = editor.getSession().getDocument()
+
+            let prevChar;
+            if (pos.column>0){
+                prevChar = session.getValue().charAt(aceUtils.getChars(doc,{row:pos.row, column:pos.column-1}));
+            }
+            
+            //console.log("Enter Typescript Completer getCompletions",{pos, prefix, prevChar});
+            
+            
+            if (prevChar && prevChar==='('){ //parameter hint
+                //tsServ.getSignatureInfo
+                
+                var helpItems=tsServ.getSignatureInfo(FILE_NAME,pos.row,pos.column);
+                console.log('helpItems',pos, helpItems);
+                
+                var quickInfo=tsServ.getQuickInfo(FILE_NAME,pos.row, pos.column);
+                console.log('QuickInfo',quickInfo);
+                
+                var definitionInfo=tsServ.getDefinitionInfo(FILE_NAME, pos.row,pos.column);
+                console.log('definition', definitionInfo);
+                
+                 return callback(null,[{name:quickInfo.type, value:quickInfo.type, meta:""}]) 
+            }
+            
+            
 
             var startAt = Date.now();
             //tsServ.updateScript(FILE_NAME,text);
@@ -167,7 +191,11 @@ export function setupAceEditor() {
             // console.log('updateScript elapsed', Date.now()-startAt);
             
             startAt = Date.now();
+            
+            
 
+
+            //? why pos, not pos.row, pos.column
             let completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, pos);
             if (!completionsInfo){
                 //try to refresh
@@ -232,17 +260,20 @@ export function setupAceEditor() {
           
             //if (prefix.length === 0) { callback(null, []); return }
                       
-            startAt = Date.now();
+            startAt = Date.now(); 
             callback(null, completions)
             //console.log('completions callback elapsed', Date.now() - startAt);
 
         },
 
         getDocTooltip: function(item) {
-            console.log('tooltip fired',item.srcProps);
-            var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "Not Found" };
+           // console.log('tooltip fired',item.srcProps);
+            var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
+            if (detailInfo.type){
+               item.docHTML = "<b>" + detailInfo.type + "</b>"    
+            }
 
-            item.docHTML = "<b>" + detailInfo.type + "</b>"
+            
         }
     }
     
@@ -251,12 +282,12 @@ export function setupAceEditor() {
     langTools.setCompleters([typescriptCompleter]);
     editor.setOptions({
         enableBasicAutocompletion: true,
-        //enableLiveAutocompletion: true
+        enableLiveAutocompletion: true
     });
 
 
     editor.commands.on("afterExec", function(e) {
-        if (e.command.name == "insertstring" && /^[\w.]$/.test(e.args)) {
+        if (e.command.name == "insertstring" && /^[\w.\(\,]$/.test(e.args)) {
             editor.execCommand("startAutocomplete")
         }
     })     

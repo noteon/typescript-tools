@@ -61,7 +61,7 @@ var ScriptInfo = (function () {
         var prefix = this.content.substring(0, minChar);
         var middle = newText;
         var suffix = this.content.substring(limChar);
-        console.log('editContent', { prefix: prefix, middle: middle, suffix: suffix, content: this.content, newContent: prefix + middle + suffix });
+        //console.log('editContent', {prefix, middle, suffix, content:this.content, newContent: prefix + middle + suffix}); 
         this.setContent(prefix + middle + suffix);
         // Store edit range + new length of script
         this.editRanges.push({

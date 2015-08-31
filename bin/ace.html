@@ -25,9 +25,19 @@
 
     .typescript-error{
       position: absolute;
-      border-bottom: 1px solid red;
     }
-
+    .typescript-error:before {
+      content: "~~~~~~~~~~~~";
+      font-size: 1em;
+      font-weight: 700;
+      font-family: Times New Roman, Serif;
+      color: red;
+      width: 100%;
+      position: absolute;
+      top: 8px;
+      left: -1px;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
@@ -53,7 +63,7 @@ button.onclick = function() {
 
 document.body.appendChild(button)
 
-greeter.
+alert()
 </pre>
 
 

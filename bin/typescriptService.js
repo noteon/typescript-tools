@@ -110,6 +110,9 @@ var TypescriptService = (function () {
     };
     TypescriptService.prototype.getSignatureInfo = function (file, line, col) {
         var pos = this.fileCache.lineColToPosition(file, line, col);
+        return this.getSignatureInfoByPos(file, pos);
+    };
+    TypescriptService.prototype.getSignatureInfoByPos = function (file, pos) {
         var info = this.ls.getSignatureHelpItems(file, pos);
         var param = function (p) { return ({ name: p.name,
             isOptional: p.isOptional,
@@ -127,14 +130,21 @@ var TypescriptService = (function () {
     };
     TypescriptService.prototype.getQuickInfo = function (file, line, col) {
         var pos = this.fileCache.lineColToPosition(file, line, col);
+        return this.getQuickInfoByPos(file, pos);
+    };
+    TypescriptService.prototype.getQuickInfoByPos = function (file, pos) {
+        //console.log('getQuickInfo',pos,this.ls.getQuickInfoAtPosition(file, pos)); 
         var info = (this.ls.getQuickInfoAtPosition(file, pos) || {});
         info.type = ((info && ts.displayPartsToString(info.displayParts)) || "");
         info.docComment = ((info && ts.displayPartsToString(info.documentation)) || "");
         return info;
     };
     TypescriptService.prototype.getDefinitionInfo = function (file, line, col) {
-        var _this = this;
         var pos = this.fileCache.lineColToPosition(file, line, col);
+        return this.getDefinitionInfoByPos(file, pos);
+    };
+    TypescriptService.prototype.getDefinitionInfoByPos = function (file, pos) {
+        var _this = this;
         var locs = this.ls.getDefinitionAtPosition(file, pos); // NOTE: multiple definitions
         var info = locs && locs.map(function (def) { return ({
             def: def,
@@ -184,6 +194,7 @@ var TypescriptService = (function () {
     TypescriptService.prototype.getCompletionsInfoByPos = function (brief, file, pos) {
         var _this = this;
         var startTime = Date.now();
+        //console.log("getCompletionsInfoByPos", pos);
         var info = this.ls.getCompletionsAtPosition(file, pos) || null;
         if (info) {
             // fill in completion entry details, unless briefness requested

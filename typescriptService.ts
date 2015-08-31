@@ -142,6 +142,10 @@ class TypescriptService {
   public getSignatureInfo(file,line,col){
         var pos    = this.fileCache.lineColToPosition(file,line,col);
 
+        return this.getSignatureInfoByPos(file,pos)
+  }
+
+  public getSignatureInfoByPos(file,pos){
          var info:any   = this.ls.getSignatureHelpItems(file,pos);
 
             var param = p=>({name:p.name
@@ -162,10 +166,16 @@ class TypescriptService {
             return info;
 
   }
+
   
   public getQuickInfo(file, line, col) {
     var pos = this.fileCache.lineColToPosition(file, line, col);
 
+    return this.getQuickInfoByPos(file,pos);
+  }
+  
+  public getQuickInfoByPos(file, pos) {
+    //console.log('getQuickInfo',pos,this.ls.getQuickInfoAtPosition(file, pos)); 
     var info: any = (this.ls.getQuickInfoAtPosition(file, pos) || {});
     info.type = ((info && ts.displayPartsToString(info.displayParts)) || "");
     info.docComment = ((info && ts.displayPartsToString(info.documentation)) || "");
@@ -175,6 +185,10 @@ class TypescriptService {
   
   public getDefinitionInfo(file, line, col) {
     var pos = this.fileCache.lineColToPosition(file, line, col);
+    return this.getDefinitionInfoByPos(file,pos);
+  }
+  
+    public getDefinitionInfoByPos(file, pos) {
     var locs = this.ls.getDefinitionAtPosition(file, pos); // NOTE: multiple definitions
 
     var info: any = locs && locs.map(def => ({
@@ -187,6 +201,7 @@ class TypescriptService {
     // TODO: what about multiple definitions?
     return ((locs && info[0]) || null);
   }
+
   
   //occurences:false, to getReferences  
   public getReferencesOrOccurrencesInfo(occurences:boolean, file,line,col){
@@ -230,6 +245,7 @@ class TypescriptService {
   
   public getCompletionsInfoByPos(brief:boolean, file, pos){
          var startTime=Date.now();
+         //console.log("getCompletionsInfoByPos", pos);
          var info:any = this.ls.getCompletionsAtPosition(file, pos) || null;
          
           if (info) {

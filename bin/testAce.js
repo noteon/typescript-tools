@@ -68,7 +68,6 @@ function setupAceEditor() {
                 column: start.column,
                 text: error.messageText,
                 type: "error",
-                raw: "test"
             });
         });
         session.setAnnotations(annotations);
@@ -76,7 +75,7 @@ function setupAceEditor() {
         //  column: number;
         //  text: string;
         //  type: string;
-        console.log('error', errors);
+        //console.log('error',errors);
     }
     function onChangeDocument(e) {
         //reloadDocument();
@@ -105,18 +104,33 @@ function setupAceEditor() {
             var end = start + (e.lines.join(aceUtils.EOL).length);
             tsServ.editScriptByPos(script, start, end, [""]);
         }
-        console.log('syncTypeScriptServiceContent', start, end, e.lines);
+        //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     }
     ;
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            //console.log("Enter Typescript Completer getCompletions");
-            //let text = session.getValue();
+            var doc = editor.getSession().getDocument();
+            var prevChar;
+            if (pos.column > 0) {
+                prevChar = session.getValue().charAt(aceUtils.getChars(doc, { row: pos.row, column: pos.column - 1 }));
+            }
+            //console.log("Enter Typescript Completer getCompletions",{pos, prefix, prevChar});
+            if (prevChar && prevChar === '(') {
+                //tsServ.getSignatureInfo
+                var helpItems = tsServ.getSignatureInfo(FILE_NAME, pos.row, pos.column);
+                console.log('helpItems', pos, helpItems);
+                var quickInfo = tsServ.getQuickInfo(FILE_NAME, pos.row, pos.column);
+                console.log('QuickInfo', quickInfo);
+                var definitionInfo = tsServ.getDefinitionInfo(FILE_NAME, pos.row, pos.column);
+                console.log('definition', definitionInfo);
+                return callback(null, [{ name: quickInfo.type, value: quickInfo.type, meta: "" }]);
+            }
             var startAt = Date.now();
             //tsServ.updateScript(FILE_NAME,text);
             // console.log('updateScript elapsed', Date.now()-startAt);
             startAt = Date.now();
+            //? why pos, not pos.row, pos.column
             var completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, pos);
             if (!completionsInfo) {
                 //try to refresh
@@ -171,9 +185,11 @@ function setupAceEditor() {
             //console.log('completions callback elapsed', Date.now() - startAt);
         },
         getDocTooltip: function (item) {
-            console.log('tooltip fired', item.srcProps);
-            var detailInfo = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "Not Found" };
-            item.docHTML = "<b>" + detailInfo.type + "</b>";
+            // console.log('tooltip fired',item.srcProps);
+            var detailInfo = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
+            if (detailInfo.type) {
+                item.docHTML = "<b>" + detailInfo.type + "</b>";
+            }
         }
     };
     //langTools.snippetCompleter
@@ -181,9 +197,10 @@ function setupAceEditor() {
     langTools.setCompleters([typescriptCompleter]);
     editor.setOptions({
         enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true
     });
     editor.commands.on("afterExec", function (e) {
-        if (e.command.name == "insertstring" && /^[\w.]$/.test(e.args)) {
+        if (e.command.name == "insertstring" && /^[\w.\(\,]$/.test(e.args)) {
             editor.execCommand("startAutocomplete");
         }
     });

@@ -45,7 +45,7 @@ export class ScriptInfo {
     }
 
     private setContent(content: string): void {
-        this.content = content;
+        this.content = content;        
     }
 
     public updateContent(content: string): void {
@@ -65,6 +65,8 @@ export class ScriptInfo {
         var prefix = this.content.substring(0, minChar);
         var middle = newText;
         var suffix = this.content.substring(limChar);
+        console.log('editContent', {prefix, middle, suffix, content:this.content, newContent: prefix + middle + suffix}); 
+        
         this.setContent(prefix + middle + suffix);
 
         // Store edit range + new length of script

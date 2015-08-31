@@ -24,9 +24,9 @@ export function setupAceEditor() {
     var syncStop = false;
 
     function reloadDocument() {
-        syncStop = true;
+        //syncStop = true;
         tsServ.updateScript(FILE_NAME, editor.getSession().getValue());
-        syncStop = false;
+        //syncStop = false;
         // var errors = this.serviceShim.languageService.getScriptErrors("temp.ts", 100);
         // var annotations = [];
         // var self = this;
@@ -47,6 +47,11 @@ export function setupAceEditor() {
 
         // this.sender.emit("compileErrors", annotations);
     };
+    
+    setInterval(()=>{
+       // tsServ.updateScript(FILE_NAME, editor.getSession().getValue());
+    },2000)
+    
     
     reloadDocument();
     
@@ -78,13 +83,13 @@ export function setupAceEditor() {
             var end = aceUtils.getPosition(doc, error.start+error.length);
             var range = new AceRange(start.row, start.column, end.row, end.column);
             
-            console.log("session push marker",range);
+            //console.log("session push marker",start.row,start.column);
             errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
             
             
             //errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, false));
             
-            console.log("add annotation", start.row, start.column, error.messageText);
+            //console.log("add annotation", start.row, start.column, error.messageText);
             annotations.push({
                 row: start.row,
                 column: start.column,
@@ -117,11 +122,9 @@ export function setupAceEditor() {
                 
                 var startAt=Date.now();
                 
-                var docChanged=true; 
+                updateMarker(e)
                 
-                updateMarker(e);
-                
-                console.log("update Error Markers", Date.now()-startAt);                    
+                //console.log("update Error Markers", Date.now()-startAt);                    
                 
             } catch (ex) {
 
@@ -131,7 +134,6 @@ export function setupAceEditor() {
     
     //sync LanguageService content and ace editor content
     function syncTypeScriptServiceContent(script, e: AceAjax.EditorChangeEvent) {
-        //console.log('syncTypeScriptServiceContent', e);
         var doc = editor.getSession().getDocument()
 
         var action = e.action;
@@ -139,12 +141,15 @@ export function setupAceEditor() {
 
         if (action == "insert") {
             var end=  aceUtils.getChars(doc, e.end);
+            end=end-(e.lines.join(aceUtils.EOL).length);
+                
             tsServ.editScriptByPos(script, start, end, e.lines);
         }else if (action == "remove") {
             var end=start+ (e.lines.join(aceUtils.EOL).length)
             
             tsServ.editScriptByPos(script, start, end, [""]);
         }
+        console.log('syncTypeScriptServiceContent', start,end,e.lines);
     };
     
     
@@ -167,12 +172,12 @@ export function setupAceEditor() {
             if (!completionsInfo){
                 //try to refresh
                 
-               console.log("try refresh tsServ",prefix); 
+               //console.log("try refresh tsServ",prefix); 
                
                //有时候Script Snapshot会混乱掉，需要有个机制重新刷新 script
                var startAt = Date.now();
-               tsServ.updateScript(FILE_NAME, session.getValue());  
-               console.log('updateScript elapsed', Date.now()-startAt);
+               //tsServ.updateScript(FILE_NAME, session.getValue());  
+               //console.log('updateScript elapsed', Date.now()-startAt);
                 
                return callback(null,[]) 
             }

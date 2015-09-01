@@ -7,6 +7,9 @@
   "installed": {
     "ace/ace.d.ts": {
       "commit": "e5de5c4daf8cdc33ed60704cd6e8021c99a89f92"
+    },
+    "lodash/lodash.d.ts": {
+      "commit": "a278148f0ec80f2aa9a2ec22f5089308f74dda47"
     }
   }
 }

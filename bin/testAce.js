@@ -1,6 +1,8 @@
 /// <reference path="./typings/tsd.d.ts" />
+/// <reference path="./typings/lodash/lodash.d.ts" />
 var TypescriptService = require('./typescriptService');
 var aceUtils = require('./aceUtils');
+_ = require('lodash');
 var tsServ = new TypescriptService();
 var FILE_NAME = "/tmp/inplaceText.ts";
 tsServ.setup([{ name: FILE_NAME, content: "//////" }], { module: "amd" });
@@ -37,9 +39,6 @@ function setupAceEditor() {
         // this.sender.emit("compileErrors", annotations);
     }
     ;
-    setInterval(function () {
-        // tsServ.updateScript(FILE_NAME, editor.getSession().getValue());
-    }, 2000);
     reloadDocument();
     var errorMarkers = [];
     function updateMarker(e) {
@@ -63,11 +62,18 @@ function setupAceEditor() {
             errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
             //errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, false));
             //console.log("add annotation", start.row, start.column, error.messageText);
+            var getMessageType = function (error) {
+                if (error.category === 0)
+                    return 'warning';
+                if (error.category === 1)
+                    return 'error';
+                return 'info';
+            };
             annotations.push({
                 row: start.row,
                 column: start.column,
                 text: error.messageText,
-                type: "error",
+                type: getMessageType(error),
             });
         });
         session.setAnnotations(annotations);
@@ -77,6 +83,7 @@ function setupAceEditor() {
         //  type: string;
         //console.log('error',errors);
     }
+    var throttledUpdateMarker = _.throttle(updateMarker, 2000);
     function onChangeDocument(e) {
         //reloadDocument();
         //console.log("onChangeDoc",e);
@@ -84,7 +91,7 @@ function setupAceEditor() {
             try {
                 syncTypeScriptServiceContent(FILE_NAME, e);
                 var startAt = Date.now();
-                updateMarker(e);
+                throttledUpdateMarker(e);
             }
             catch (ex) {
             }

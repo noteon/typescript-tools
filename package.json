@@ -19,6 +19,7 @@
   "author": "Claus Reinke, qinghai",
   "license": "Apache License, Version 2.0",
   "dependencies": {
+    "keymaster": "^1.6.2",
     "typescript": "^1.5.3"
   },
   "scripts": {

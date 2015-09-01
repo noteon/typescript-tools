@@ -210,15 +210,22 @@ class TypescriptService {
     return this.getDefinitionInfoByPos(file,pos);
   }
   
-    public getDefinitionInfoByPos(file, pos) {
+    public getDefinitionInfoByPos(file, pos):{def:ts.DefinitionInfo, file:string,min:any, lim:any, content:string} {
     var locs = this.ls.getDefinitionAtPosition(file, pos); // NOTE: multiple definitions
+    
+    
 
-    var info: any = locs && locs.map(def => ({
-      def: def,
-      file: def && def.fileName,
-      min: def && this.fileCache.positionToLineCol(def.fileName, def.textSpan.start),
-      lim: def && this.fileCache.positionToLineCol(def.fileName, ts.textSpanEnd(def.textSpan))
-    }));
+    var info: any = locs && locs.map(def => {
+      var snapshot=def && this.fileCache.getScriptSnapshot(def.fileName);
+      
+      return  {
+        def: def,
+        file: def && def.fileName,
+        min: def && this.fileCache.positionToLineCol(def.fileName, def.textSpan.start),
+        lim: def && this.fileCache.positionToLineCol(def.fileName, ts.textSpanEnd(def.textSpan)),
+        content: snapshot && snapshot.getText(def.textSpan.start,def.textSpan.length+def.textSpan.start)
+      }
+    });
 
     // TODO: what about multiple definitions?
     return ((locs && info[0]) || null);

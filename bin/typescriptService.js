@@ -146,12 +146,16 @@ var TypescriptService = (function () {
     TypescriptService.prototype.getDefinitionInfoByPos = function (file, pos) {
         var _this = this;
         var locs = this.ls.getDefinitionAtPosition(file, pos); // NOTE: multiple definitions
-        var info = locs && locs.map(function (def) { return ({
-            def: def,
-            file: def && def.fileName,
-            min: def && _this.fileCache.positionToLineCol(def.fileName, def.textSpan.start),
-            lim: def && _this.fileCache.positionToLineCol(def.fileName, ts.textSpanEnd(def.textSpan))
-        }); });
+        var info = locs && locs.map(function (def) {
+            var snapshot = def && _this.fileCache.getScriptSnapshot(def.fileName);
+            return {
+                def: def,
+                file: def && def.fileName,
+                min: def && _this.fileCache.positionToLineCol(def.fileName, def.textSpan.start),
+                lim: def && _this.fileCache.positionToLineCol(def.fileName, ts.textSpanEnd(def.textSpan)),
+                content: snapshot && snapshot.getText(def.textSpan.start, def.textSpan.length + def.textSpan.start)
+            };
+        });
         // TODO: what about multiple definitions?
         return ((locs && info[0]) || null);
     };

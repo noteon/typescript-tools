@@ -19,7 +19,7 @@ export function setupAceEditor() {
     editor.getSession().setMode("ace/mode/typescript");
 
     editor.addEventListener("change", onChangeDocument);
-//    editor.addEventListener("update", onUpdateDocument);
+    //    editor.addEventListener("update", onUpdateDocument);
 
     var syncStop = false;
 
@@ -47,40 +47,40 @@ export function setupAceEditor() {
 
         // this.sender.emit("compileErrors", annotations);
     };
-    
-    setInterval(()=>{
-       // tsServ.updateScript(FILE_NAME, editor.getSession().getValue());
-    },2000)
-    
-    
+
+    setInterval(() => {
+        // tsServ.updateScript(FILE_NAME, editor.getSession().getValue());
+    }, 2000)
+
+
     reloadDocument();
-    
-    var errorMarkers=[];
-    function updateMarker(e: AceAjax.EditorChangeEvent){
-        var addPhase = phase => d => {d.phase = phase; return d};
-        
+
+    var errorMarkers = [];
+    function updateMarker(e: AceAjax.EditorChangeEvent) {
+        var addPhase = phase => d => { d.phase = phase; return d };
+
         var syntactic = tsServ.ls.getSyntacticDiagnostics(FILE_NAME);
         var semantic = tsServ.ls.getSemanticDiagnostics(FILE_NAME);
         // this.ls.languageService.getEmitOutput(file).diagnostics;
         var errors = [].concat(syntactic.map(addPhase("Syntax"))
-                              ,semantic.map(addPhase("Semantics")));
-                              
-                              
+            , semantic.map(addPhase("Semantics")));
+
+
         var session = editor.getSession();
-        
-        
-        errorMarkers.forEach((id)=>{
+
+
+        errorMarkers.forEach((id) => {
             session.removeMarker(id);
         });
-        
-        var annotations:AceAjax.Annotation[]=[];
-        
-        errors.forEach((error)=>{
+
+        var annotations: AceAjax.Annotation[] = [];
+
+        errors.forEach((error) => {
             //var getpos = aceEditorPosition.getAcePositionFromChars;
             var doc = editor.getSession().getDocument()
-            
-            var start = aceUtils.getPosition(doc,error.start);
-            var end = aceUtils.getPosition(doc, error.start+error.length);
+
+            var start = aceUtils.getPosition(doc, error.start);
+            var end = aceUtils.getPosition(doc, error.start + error.length);
             var range = new AceRange(start.row, start.column, end.row, end.column);
             
             //console.log("session push marker",start.row,start.column);
@@ -93,12 +93,12 @@ export function setupAceEditor() {
             annotations.push({
                 row: start.row,
                 column: start.column,
-                text:error.messageText,
+                text: error.messageText,
                 type: "error",
                 //raw:"test"                
             });
         });
-        
+
         session.setAnnotations(annotations);
             
         //          row: number;
@@ -119,9 +119,9 @@ export function setupAceEditor() {
         if (!syncStop) {
             try {
                 syncTypeScriptServiceContent(FILE_NAME, e);
-                
-                var startAt=Date.now();
-                
+
+                var startAt = Date.now();
+
                 updateMarker(e)
                 
                 //console.log("update Error Markers", Date.now()-startAt);                    
@@ -140,13 +140,13 @@ export function setupAceEditor() {
         var start = aceUtils.getChars(doc, e.start);
 
         if (action == "insert") {
-            var end=  aceUtils.getChars(doc, e.end);
-            end=end-(e.lines.join(aceUtils.EOL).length);
-                
+            var end = aceUtils.getChars(doc, e.end);
+            end = end - (e.lines.join(aceUtils.EOL).length);
+
             tsServ.editScriptByPos(script, start, end, e.lines);
-        }else if (action == "remove") {
-            var end=start+ (e.lines.join(aceUtils.EOL).length)
-            
+        } else if (action == "remove") {
+            var end = start + (e.lines.join(aceUtils.EOL).length)
+
             tsServ.editScriptByPos(script, start, end, [""]);
         }
         //console.log('syncTypeScriptServiceContent', start,end,e.lines);
@@ -157,7 +157,7 @@ export function setupAceEditor() {
     
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
-        getCompletions: function(editor, session, pos:{row:number, column:number}, prefix, callback) {
+        getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
             // let doc = editor.getSession().getDocument()
 
             // let prevChar;
@@ -165,32 +165,31 @@ export function setupAceEditor() {
             //     prevChar = session.getValue().charAt(aceUtils.getChars(doc,{row:pos.row, column:pos.column-1}));
             // }
             
-            var posChar=tsServ.fileCache.lineColToPosition(FILE_NAME,pos.row+1, pos.column+1);
+            var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
             
             
             //console.log("Enter Typescript Completer getCompletions",{pos, prefix, prevChar});
-            var helpItems=tsServ.getSignatureInfoByPos(FILE_NAME,posChar);
-            
-            if (helpItems){ //parameter hint
-                var filterText="";
-                var completionsItems=helpItems.items.map((it,idx)=>{
-                    var paramsText=(it.parameters.map((param, paramIdx)=>
-                            {
-                                if (idx===helpItems.selectedItemIndex && paramIdx===helpItems.argumentIndex){
-                                    filterText=param.type;
-                                  return param.type  
-                                }
-                                else 
-                                  return param.type;
-                            }
+            var helpItems = tsServ.getSignatureInfoByPos(FILE_NAME, posChar);
+
+            if (helpItems) { //parameter hint
+                var filterText = "";
+                var completionsItems = helpItems.items.map((it, idx) => {
+                    var paramsText = (it.parameters.map((param, paramIdx) => {
+                        if (idx === helpItems.selectedItemIndex && paramIdx === helpItems.argumentIndex) {
+                            filterText = param.type;
+                            return param.type
+                        }
+                        else
+                            return param.type;
+                    }
                         ).join(it.separator));
-                    
-                    var value=it.prefix+paramsText+it.suffix;
+
+                    var value = it.prefix + paramsText + it.suffix;
                     return {
-                      name:value,
-                      value:value,
-                      meta:"",
-                      score:(idx===helpItems.selectedItemIndex)?1:0                           
+                        name: value,
+                        value: value,
+                        meta: "",
+                        score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                     }
                 });
                 
@@ -198,24 +197,24 @@ export function setupAceEditor() {
                 
                 // var quickInfo=tsServ.getQuickInfoByPos(FILE_NAME, posChar);
                 // console.log('QuickInfo',quickInfo);
-                window['langTools']=langTools;
-                window['aceEditor']=editor;
+                window['langTools'] = langTools;
+                window['aceEditor'] = editor;
                 // var definitionInfo=tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
                 // console.log('definition', definitionInfo);
                               
                 
-                setTimeout(()=>{ 
-                    if (editor.completer && editor.completer.completions){
+                setTimeout(() => {
+                    if (editor.completer && editor.completer.completions) {
                         //console.log("setFilterText",filterText);
                         editor.completer.completions.setFilter(filterText)
-                        editor.completer.openPopup(editor, filterText,true);
-                    }                    
-                },0)
-                    
-                 return callback(null, completionsItems) 
+                        editor.completer.openPopup(editor, filterText, true);
+                    }
+                }, 0)
+
+                return callback(null, completionsItems)
             }
-            
-            
+
+
 
             var startAt = Date.now();
             //tsServ.updateScript(FILE_NAME,text);
@@ -229,17 +228,17 @@ export function setupAceEditor() {
 
             //? why pos, not pos.row, pos.column
             let completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, pos);
-            if (!completionsInfo){
+            if (!completionsInfo) {
                 //try to refresh
                 
-               //console.log("try refresh tsServ",prefix); 
+                //console.log("try refresh tsServ",prefix); 
                
-               //有时候Script Snapshot会混乱掉，需要有个机制重新刷新 script
-               var startAt = Date.now();
-               //tsServ.updateScript(FILE_NAME, session.getValue());  
-               //console.log('updateScript elapsed', Date.now()-startAt);
+                //有时候Script Snapshot会混乱掉，需要有个机制重新刷新 script
+                var startAt = Date.now();
+                //tsServ.updateScript(FILE_NAME, session.getValue());  
+                //console.log('updateScript elapsed', Date.now()-startAt);
                 
-               return callback(null,[]) 
+                return callback(null, [])
             }
                
                
@@ -252,7 +251,7 @@ export function setupAceEditor() {
                     meta: it.kind,
                     //toolTip:it.type,
                     pos: pos,
-                    srcProps:it,
+                    srcProps: it,
                 }
             });
 
@@ -261,18 +260,18 @@ export function setupAceEditor() {
                 return elm.name.indexOf(prefix) == 0 ? 1 : 0;
             };
 
-            var matchCompare = function(a, b){
+            var matchCompare = function(a, b) {
                 return matchFunc(b) - matchFunc(a);
             };
 
-            var textCompare = function(a, b){
-                 if (a.name == b.name){
+            var textCompare = function(a, b) {
+                if (a.name == b.name) {
                     return 0;
-                 }else{
-                     return (a.name > b.name) ? 1 : -1;
-                 }
+                } else {
+                    return (a.name > b.name) ? 1 : -1;
+                }
             };
-            var compare = function(a, b){
+            var compare = function(a, b) {
                 var ret = matchCompare(a, b);
                 return (ret != 0) ? ret : textCompare(a, b);
             };
@@ -292,20 +291,20 @@ export function setupAceEditor() {
           
             //if (prefix.length === 0) { callback(null, []); return }
                       
-            startAt = Date.now(); 
+            startAt = Date.now();
             callback(null, completions)
             //console.log('completions callback elapsed', Date.now() - startAt);
 
         },
 
         getDocTooltip: function(item) {
-           // console.log('tooltip fired',item.srcProps);
+            // console.log('tooltip fired',item.srcProps);
             var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
-            if (detailInfo.type){
-               item.docHTML = "<b>" + detailInfo.type + "</b>"    
+            if (detailInfo.type) {
+                item.docHTML = "<b>" + detailInfo.type + "</b>"
             }
 
-            
+
         }
     }
     
@@ -322,17 +321,34 @@ export function setupAceEditor() {
         if (e.command.name == "insertstring" && /^[\w.\(\,]$/.test(e.args)) {
             editor.execCommand("startAutocomplete")
         }
-    })     
-    
-     var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
-     editor["tokenTooltip"] = new TokenTooltip(editor, (editor,token,pos)=>{
-            //console.log('show token tooltip',token,pos);
-            var posChar=tsServ.fileCache.lineColToPosition(FILE_NAME,pos.row+1, pos.column+1);
-            
-            var quickInfo=tsServ.getQuickInfoByPos(FILE_NAME, posChar);
-            if (quickInfo && quickInfo.type)
-               return '<b><span style="color:navy">'+quickInfo.type+'</span></b>';
+    })
+
+    var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
+    editor["tokenTooltip"] = new TokenTooltip(editor, (editor, token, pos) => {
+        var isModKeyPressed = () => {
+            const commandKey = 91;
+            const ctrlKey = 17;
+            var os = require('os');
+            var modKey = (os.platform() === 'darwin') ? commandKey : ctrlKey;
+            var keymaster = require('keymaster');
+            return keymaster.isPressed(modKey);
+        }
          
-     });    
+        //console.log('show token tooltip',token,pos);
+        var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
+
+        if (!isModKeyPressed()) {
+            var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
+            if (quickInfo && quickInfo.type)
+                return '<b><span style="color:navy">' + quickInfo.type + '</span></b>';
+        }else{
+            var definitionInfo = tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
+            //console.log('definitionInfo',definitionInfo);
+            
+            if (definitionInfo && definitionInfo.content)
+                return '<b><span style="color:navy">' + definitionInfo.content + '</span></b>';
+            
+        }
+    });
 }	
 	

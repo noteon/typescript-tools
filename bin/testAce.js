@@ -233,11 +233,27 @@ function setupAceEditor() {
     });
     var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
     editor["tokenTooltip"] = new TokenTooltip(editor, function (editor, token, pos) {
+        var isModKeyPressed = function () {
+            var commandKey = 91;
+            var ctrlKey = 17;
+            var os = require('os');
+            var modKey = (os.platform() === 'darwin') ? commandKey : ctrlKey;
+            var keymaster = require('keymaster');
+            return keymaster.isPressed(modKey);
+        };
         //console.log('show token tooltip',token,pos);
         var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
-        var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
-        if (quickInfo && quickInfo.type)
-            return '<b><span style="color:navy">' + quickInfo.type + '</span></b>';
+        if (!isModKeyPressed()) {
+            var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
+            if (quickInfo && quickInfo.type)
+                return '<b><span style="color:navy">' + quickInfo.type + '</span></b>';
+        }
+        else {
+            var definitionInfo = tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
+            //console.log('definitionInfo',definitionInfo);
+            if (definitionInfo && definitionInfo.content)
+                return '<b><span style="color:navy">' + definitionInfo.content + '</span></b>';
+        }
     });
 }
 exports.setupAceEditor = setupAceEditor;

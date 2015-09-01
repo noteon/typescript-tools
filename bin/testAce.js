@@ -121,9 +121,10 @@ function setupAceEditor() {
             if (helpItems) {
                 var filterText = "";
                 var completionsItems = helpItems.items.map(function (it, idx) {
+                    var currentParam = undefined;
                     var paramsText = (it.parameters.map(function (param, paramIdx) {
-                        if (idx === helpItems.selectedItemIndex && paramIdx === helpItems.argumentIndex) {
-                            filterText = param.type;
+                        if (paramIdx === helpItems.argumentIndex) {
+                            currentParam = param;
                             return param.type;
                         }
                         else
@@ -131,9 +132,11 @@ function setupAceEditor() {
                     }).join(it.separator));
                     var value = it.prefix + paramsText + it.suffix;
                     return {
-                        name: value,
+                        caption: value,
+                        exactMatch: true,
                         value: value,
                         meta: "",
+                        toolTip: currentParam && highlightTypeAndComment(currentParam),
                         score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                     };
                 });
@@ -144,13 +147,13 @@ function setupAceEditor() {
                 window['aceEditor'] = editor;
                 // var definitionInfo=tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
                 // console.log('definition', definitionInfo);
-                setTimeout(function () {
-                    if (editor.completer && editor.completer.completions) {
-                        //console.log("setFilterText",filterText);
-                        editor.completer.completions.setFilter(filterText);
-                        editor.completer.openPopup(editor, filterText, true);
-                    }
-                }, 0);
+                // setTimeout(() => {
+                //     if (editor.completer && editor.completer.completions) {
+                //         console.log("setFilterText",filterText);
+                //         editor.completer.completions.setFilter(filterText)
+                //         editor.completer.openPopup(editor, filterText, true);
+                //     }
+                // }, 0)
                 return callback(null, completionsItems);
             }
             //? why pos, not pos.row, pos.column
@@ -208,11 +211,16 @@ function setupAceEditor() {
             //console.log('completions callback elapsed', Date.now() - startAt);
         },
         getDocTooltip: function (item) {
-            // console.log('tooltip fired',item.srcProps);
-            var detailInfo = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
-            if (detailInfo.type) {
-                item.docHTML = highlightTypeAndComment(detailInfo);
+            if (item.toolTip) {
+                item.docHTML = item.toolTip;
             }
+            else {
+                var detailInfo = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
+                if (detailInfo.type) {
+                    item.docHTML = highlightTypeAndComment(detailInfo);
+                }
+            }
+            // console.log('tooltip fired',item.srcProps);
         }
     };
     //langTools.snippetCompleter

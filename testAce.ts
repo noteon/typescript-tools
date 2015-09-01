@@ -175,9 +175,10 @@ export function setupAceEditor() {
             if (helpItems) { //parameter hint
                 var filterText = "";
                 var completionsItems = helpItems.items.map((it, idx) => {
+                    var currentParam=undefined;
                     var paramsText = (it.parameters.map((param, paramIdx) => {
-                        if (idx === helpItems.selectedItemIndex && paramIdx === helpItems.argumentIndex) {
-                            filterText = param.type;
+                        if (paramIdx === helpItems.argumentIndex) {
+                            currentParam=param;
                             return param.type
                         }
                         else
@@ -187,9 +188,11 @@ export function setupAceEditor() {
 
                     var value = it.prefix + paramsText + it.suffix;
                     return {
-                        name: value,
+                        caption: value,
+                        exactMatch:true,
                         value: value,
                         meta: "",
+                        toolTip:currentParam && highlightTypeAndComment(currentParam),
                         score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                     }
                 });
@@ -204,13 +207,13 @@ export function setupAceEditor() {
                 // console.log('definition', definitionInfo);
                               
                 
-                setTimeout(() => {
-                    if (editor.completer && editor.completer.completions) {
-                        //console.log("setFilterText",filterText);
-                        editor.completer.completions.setFilter(filterText)
-                        editor.completer.openPopup(editor, filterText, true);
-                    }
-                }, 0)
+                // setTimeout(() => {
+                //     if (editor.completer && editor.completer.completions) {
+                //         console.log("setFilterText",filterText);
+                //         editor.completer.completions.setFilter(filterText)
+                //         editor.completer.openPopup(editor, filterText, true);
+                //     }
+                // }, 0)
 
                 return callback(null, completionsItems)
             }
@@ -289,11 +292,15 @@ export function setupAceEditor() {
         },
 
         getDocTooltip: function(item) {
-            // console.log('tooltip fired',item.srcProps);
-            var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
-            if (detailInfo.type) {
-                item.docHTML = highlightTypeAndComment(detailInfo);
+            if (item.toolTip){
+                item.docHTML=item.toolTip;
+            }else{
+                var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
+                if (detailInfo.type) {
+                    item.docHTML = highlightTypeAndComment(detailInfo);
+                }
             }
+            // console.log('tooltip fired',item.srcProps);
 
 
         }

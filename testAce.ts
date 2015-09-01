@@ -1,4 +1,5 @@
 /// <reference path="./typings/tsd.d.ts" />
+declare var hljs:any;
 
 import TypescriptService = require('./typescriptService');
 import aceUtils = require('./aceUtils');
@@ -301,7 +302,7 @@ export function setupAceEditor() {
             // console.log('tooltip fired',item.srcProps);
             var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
             if (detailInfo.type) {
-                item.docHTML = "<b>" + detailInfo.type + "</b>"
+                item.docHTML = highlightTypeAndComment(detailInfo);
             }
 
 
@@ -323,6 +324,23 @@ export function setupAceEditor() {
         }
     })
 
+    var highLightCode=(code)=>{
+        if (hljs){
+            return hljs.highlight('typescript',code,true).value;
+        }else
+          return code;
+    }; 
+    
+    var highlightTypeAndComment=(info)=>{
+        var docComment="";
+        if (info.docComment){
+            docComment=`<p class='hljs-comment'>${info.docComment}</p>`
+        }
+                
+        return highLightCode(info.type)+docComment;
+    };
+
+
     var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
     editor["tokenTooltip"] = new TokenTooltip(editor, (editor, token, pos) => {
         var isModKeyPressed = () => {
@@ -339,15 +357,15 @@ export function setupAceEditor() {
 
         if (!isModKeyPressed()) {
             var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
-            if (quickInfo && quickInfo.type)
-                return '<b><span style="color:navy">' + quickInfo.type + '</span></b>';
+            if (quickInfo && quickInfo.type){                
+                return highlightTypeAndComment(quickInfo)
+            }
         }else{
             var definitionInfo = tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
             //console.log('definitionInfo',definitionInfo);
             
             if (definitionInfo && definitionInfo.content)
-                return '<b><span style="color:navy">' + definitionInfo.content + '</span></b>';
-            
+                return highLightCode(definitionInfo.content)
         }
     });
 }	

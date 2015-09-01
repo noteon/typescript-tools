@@ -121,8 +121,17 @@ function setupAceEditor() {
             var helpItems = tsServ.getSignatureInfoByPos(FILE_NAME, posChar);
             console.log('getSignatureInfoByPos elapsed', Date.now() - startAt);
             if (helpItems) {
+                var filterText = "";
                 var completionsItems = helpItems.items.map(function (it, idx) {
-                    var value = it.prefix + (it.parameters.map(function (param) { return param.type; }).join(it.separator)) + it.suffix;
+                    var paramsText = (it.parameters.map(function (param, paramIdx) {
+                        if (idx === helpItems.selectedItemIndex && paramIdx === helpItems.argumentIndex) {
+                            filterText = param.type;
+                            return param.type;
+                        }
+                        else
+                            return param.type;
+                    }).join(it.separator));
+                    var value = it.prefix + paramsText + it.suffix;
                     return {
                         name: value,
                         value: value,
@@ -130,10 +139,20 @@ function setupAceEditor() {
                         score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                     };
                 });
+                //console.log("filterText",filterText);
                 // var quickInfo=tsServ.getQuickInfoByPos(FILE_NAME, posChar);
                 // console.log('QuickInfo',quickInfo);
+                window['langTools'] = langTools;
+                window['aceEditor'] = editor;
                 // var definitionInfo=tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
                 // console.log('definition', definitionInfo);
+                setTimeout(function () {
+                    if (editor.completer && editor.completer.completions) {
+                        //console.log("setFilterText",filterText);
+                        editor.completer.completions.setFilter(filterText);
+                        editor.completer.openPopup(editor, filterText, true);
+                    }
+                }, 0);
                 return callback(null, completionsItems);
             }
             var startAt = Date.now();

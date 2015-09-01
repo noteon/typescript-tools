@@ -233,6 +233,8 @@ function setupAceEditor() {
             editor.execCommand("startAutocomplete");
         }
     });
+    var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
+    editor["tokenTooltip"] = new TokenTooltip(editor);
     // override editor onTextInput
     // var originalTextInput = editor.onTextInput;
     // editor.onTextInput = function (text){

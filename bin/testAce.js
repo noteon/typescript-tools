@@ -164,7 +164,7 @@ function setupAceEditor() {
                 //console.log('updateScript elapsed', Date.now()-startAt);
                 return callback(null, []);
             }
-            console.log("completionsInfo", completionsInfo.entries);
+            //console.log("completionsInfo",completionsInfo.entries);
             var completions = completionsInfo.entries.map(function (it) {
                 return {
                     name: it.name,
@@ -238,7 +238,18 @@ function setupAceEditor() {
         if (info.docComment) {
             docComment = "<p class='hljs-comment'>" + info.docComment + "</p>";
         }
-        return highLightCode(info.type) + docComment;
+        var type = "";
+        if (info.type) {
+            var matches = info.type.match(/^(\(method\)|\(property\)) ?(.*)$/);
+            var prefix = "";
+            var content = info.type;
+            if (matches && matches.length === 3) {
+                prefix = "<span class='hljs-name'>" + matches[1] + " </span>";
+                content = matches[2];
+            }
+            type = prefix + highLightCode(content);
+        }
+        return type + docComment;
     };
     var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
     editor["tokenTooltip"] = new TokenTooltip(editor, function (editor, token, pos) {

@@ -234,7 +234,7 @@ export function setupAceEditor() {
                
                
 
-            console.log("completionsInfo",completionsInfo.entries);
+            //console.log("completionsInfo",completionsInfo.entries);
             let completions = completionsInfo.entries.map((it) => {
                 return {
                     name: it.name,
@@ -326,8 +326,23 @@ export function setupAceEditor() {
         if (info.docComment){
             docComment=`<p class='hljs-comment'>${info.docComment}</p>`
         }
+        
+        var type="";
+        if (info.type){
+           var matches=info.type.match(/^(\(method\)|\(property\)) ?(.*)$/);
+           var prefix="";
+           var content=info.type;
+           if (matches && matches.length===3){
+               prefix=`<span class='hljs-name'>${matches[1]} </span>`;
+               content=matches[2];
+           }   
+           
+           type=prefix+ highLightCode(content);
+          // console.log('typeHtml',type);
+        }
+        
                 
-        return highLightCode(info.type)+docComment;
+        return type+docComment;
     };
 
 

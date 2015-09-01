@@ -117,9 +117,7 @@ function setupAceEditor() {
             // }
             var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
             //console.log("Enter Typescript Completer getCompletions",{pos, prefix, prevChar});
-            var startAt = Date.now();
             var helpItems = tsServ.getSignatureInfoByPos(FILE_NAME, posChar);
-            console.log('getSignatureInfoByPos elapsed', Date.now() - startAt);
             if (helpItems) {
                 var filterText = "";
                 var completionsItems = helpItems.items.map(function (it, idx) {
@@ -234,15 +232,12 @@ function setupAceEditor() {
         }
     });
     var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
-    editor["tokenTooltip"] = new TokenTooltip(editor);
-    // override editor onTextInput
-    // var originalTextInput = editor.onTextInput;
-    // editor.onTextInput = function (text){
-    //     originalTextInput.call(editor, text);
-    //     console.log('editor onTextInput', text);
-    //     if(text == "."){
-    //         editor.execCommand("startAutoComplete");
-    //     }
-    // };   
+    editor["tokenTooltip"] = new TokenTooltip(editor, function (editor, token, pos) {
+        //console.log('show token tooltip',token,pos);
+        var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
+        var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
+        if (quickInfo && quickInfo.type)
+            return '<b><span style="color:navy">' + quickInfo.type + '</span></b>';
+    });
 }
 exports.setupAceEditor = setupAceEditor;

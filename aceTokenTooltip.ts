@@ -6,7 +6,7 @@ var aceEvent = ace.require("ace/lib/event");
 var AceRange = ace.require("ace/range").Range;
 var Tooltip = ace.require("ace/tooltip").Tooltip;
 
-function TokenTooltip (editor) {
+function TokenTooltip (editor, getTokenHtml?:(editor,token, pos)=>string) {
     if (editor.tokenTooltip)
         return;
     Tooltip.call(this, editor.container);
@@ -16,6 +16,8 @@ function TokenTooltip (editor) {
     this.update = this.update.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseOut = this.onMouseOut.bind(this);
+    this.getTokenHtml=getTokenHtml;
+    
     aceEvent.addListener(editor.renderer.scroller, "mousemove", this.onMouseMove);
     aceEvent.addListener(editor.renderer.content, "mouseout", this.onMouseOut);
 }
@@ -45,8 +47,15 @@ oop.inherits(TokenTooltip, Tooltip);
         var screenPos = {row: row, column: col, side: offset - col > 0 ? 1 : -1};
         var session = this.editor.session;
         var docPos = session.screenToDocumentPosition(screenPos.row, screenPos.column);
+        
         var token = session.getTokenAt(docPos.row, docPos.column);
 
+        if (!token) {
+            session.removeMarker(this.marker);
+            this.hide();
+            return;
+        }
+        
         if (!token && !session.getLine(docPos.row)) {
             token = {
                 type: "",
@@ -54,32 +63,42 @@ oop.inherits(TokenTooltip, Tooltip);
                 state: session.bgTokenizer.getState(0)
             };
         }
-        if (!token) {
-            session.removeMarker(this.marker);
-            this.hide();
-            return;
+        
+        var tokenText;
+        
+        if (this.getTokenHtml){
+            tokenText=this.getTokenHtml(this.editor,token, docPos);
+            
+            if (!tokenText) {
+                session.removeMarker(this.marker);
+                this.hide();
+                return;
+            }            
+        }else{
+            tokenText = token.type;
+            if (token.state)
+                tokenText += "|" + token.state;
+            if (token.merge)
+                tokenText += "\n  merge";
+            if (token.stateTransitions)
+                tokenText += "\n  " + token.stateTransitions.join("\n  ");            
         }
 
-        var tokenText = token.type;
-        if (token.state)
-            tokenText += "|" + token.state;
-        if (token.merge)
-            tokenText += "\n  merge";
-        if (token.stateTransitions)
-            tokenText += "\n  " + token.stateTransitions.join("\n  ");
-
         if (this.tokenText != tokenText) {
-            this.setText(tokenText);
+            this.setHtml(tokenText);
             this.width = this.getWidth();
             this.height = this.getHeight();
             this.tokenText = tokenText;
         }
 
         this.show(null, this.x, this.y);
-
+        
         this.token = token;
+        
         session.removeMarker(this.marker);
+        
         this.range = new AceRange(docPos.row, token.start, docPos.row, token.start + token.value.length);
+        
         this.marker = session.addMarker(this.range, "ace_bracket", "text");
     };
     

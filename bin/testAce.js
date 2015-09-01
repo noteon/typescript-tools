@@ -91,7 +91,11 @@ function setupAceEditor() {
             try {
                 syncTypeScriptServiceContent(FILE_NAME, e);
                 var startAt = Date.now();
-                throttledUpdateMarker(e);
+                if (e.start.row === editor.getCursorPosition().row) {
+                    _.delay(function () { throttledUpdateMarker(e); }, 5000);
+                }
+                else
+                    throttledUpdateMarker(e);
             }
             catch (ex) {
             }

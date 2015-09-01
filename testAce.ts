@@ -136,8 +136,11 @@ export function setupAceEditor() {
                 syncTypeScriptServiceContent(FILE_NAME, e);
 
                 var startAt = Date.now();
-
-                throttledUpdateMarker(e)
+               
+                if (e.start.row===editor.getCursorPosition().row){
+                    _.delay(()=>{throttledUpdateMarker(e)},5000)
+                }else       
+                  throttledUpdateMarker(e)
                 
                 //console.log("update Error Markers", Date.now()-startAt);                    
                 

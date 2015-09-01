@@ -153,12 +153,8 @@ function setupAceEditor() {
                 }, 0);
                 return callback(null, completionsItems);
             }
-            var startAt = Date.now();
-            //tsServ.updateScript(FILE_NAME,text);
-            // console.log('updateScript elapsed', Date.now()-startAt);
-            startAt = Date.now();
             //? why pos, not pos.row, pos.column
-            var completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, pos);
+            var completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, posChar);
             if (!completionsInfo) {
                 //try to refresh
                 //console.log("try refresh tsServ",prefix); 
@@ -168,14 +164,14 @@ function setupAceEditor() {
                 //console.log('updateScript elapsed', Date.now()-startAt);
                 return callback(null, []);
             }
-            //console.log("completionsInfo",completionsInfo.entries);
+            console.log("completionsInfo", completionsInfo.entries);
             var completions = completionsInfo.entries.map(function (it) {
                 return {
                     name: it.name,
                     value: it.name,
                     meta: it.kind,
                     //toolTip:it.type,
-                    pos: pos,
+                    pos: posChar,
                     srcProps: it,
                 };
             });
@@ -224,7 +220,6 @@ function setupAceEditor() {
     langTools.setCompleters([typescriptCompleter]);
     editor.setOptions({
         enableBasicAutocompletion: true,
-        enableLiveAutocompletion: true
     });
     editor.commands.on("afterExec", function (e) {
         if (e.command.name == "insertstring" && /^[\w.\(\,]$/.test(e.args)) {

@@ -217,18 +217,8 @@ export function setupAceEditor() {
 
 
 
-            var startAt = Date.now();
-            //tsServ.updateScript(FILE_NAME,text);
-            
-            // console.log('updateScript elapsed', Date.now()-startAt);
-            
-            startAt = Date.now();
-            
-            
-
-
             //? why pos, not pos.row, pos.column
-            let completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, pos);
+            let completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, posChar);
             if (!completionsInfo) {
                 //try to refresh
                 
@@ -244,14 +234,14 @@ export function setupAceEditor() {
                
                
 
-            //console.log("completionsInfo",completionsInfo.entries);
+            console.log("completionsInfo",completionsInfo.entries);
             let completions = completionsInfo.entries.map((it) => {
                 return {
                     name: it.name,
                     value: it.name,
                     meta: it.kind,
                     //toolTip:it.type,
-                    pos: pos,
+                    pos: posChar,
                     srcProps: it,
                 }
             });
@@ -314,7 +304,7 @@ export function setupAceEditor() {
     langTools.setCompleters([typescriptCompleter]);
     editor.setOptions({
         enableBasicAutocompletion: true,
-        enableLiveAutocompletion: true
+        //enableLiveAutocompletion: true
     });
 
 

@@ -201,3 +201,25 @@ let aggregationPipelineOperators = [
 	['$addToSet', 'Returns an array of unique expression values for each group. Order of the array elements is undefined.']
 ]
 
+//Query Modifiers
+let queryModifierOperators = [
+	//Modifiers
+	//Many of these operators have corresponding methods in the shell. These methods provide a straightforward and user-friendly interface and are the preferred way to add these options.
+
+	['$comment', 'Adds a comment to the query to identify queries in the database profiler output.'],
+	['$explain', 'Forces MongoDB to report on query execution plans. '],
+	['$hint', 'Forces MongoDB to use a specific index. '],
+	['$maxScan', 'Limits the number of documents scanned.'],
+	['$maxTimeMS', 'Specifies a cumulative time limit in milliseconds for processing operations on a cursor. '],
+	['$max', 'Specifies an exclusive upper limit for the index to use in a query. '],
+	['$min', 'Specifies an inclusive lower limit for the index to use in a query. '],
+	['$orderby', 'Returns a cursor with documents sorted according to a sort specification. '],
+	['$returnKey', 'Forces the cursor to only return fields included in the index.'],
+	['$showDiskLoc', 'Modifies the documents returned to include references to the on-disk location of each document.'],
+	['$snapshot', 'Forces the query to use the index on the _id field. '],
+	['$query', 'Wraps a query document.'],
+
+	//Sort Order
+	['$natural', 'A special sort order that orders documents using the order of documents on disk.']
+
+]

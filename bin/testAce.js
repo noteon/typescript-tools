@@ -83,7 +83,8 @@ function setupAceEditor() {
         //  type: string;
         //console.log('error',errors);
     }
-    var throttledUpdateMarker = _.throttle(updateMarker, 2000);
+    var throttledUpdateMarker = _.throttle(updateMarker, 100);
+    var debounceUpdateMarker = _.debounce(throttledUpdateMarker, 500);
     function onChangeDocument(e) {
         //reloadDocument();
         //console.log("onChangeDoc",e);
@@ -91,8 +92,9 @@ function setupAceEditor() {
             try {
                 syncTypeScriptServiceContent(FILE_NAME, e);
                 var startAt = Date.now();
-                if (e.start.row === editor.getCursorPosition().row) {
-                    _.delay(function () { throttledUpdateMarker(e); }, 5000);
+                var cursorRow = editor.getCursorPosition().row;
+                if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
+                    debounceUpdateMarker(e);
                 }
                 else
                     throttledUpdateMarker(e);

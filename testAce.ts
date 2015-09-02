@@ -126,7 +126,8 @@ export function setupAceEditor() {
     }
     
     
-     var throttledUpdateMarker = _.throttle(updateMarker, 2000);
+    var throttledUpdateMarker = _.throttle(updateMarker, 100);
+    var debounceUpdateMarker= _.debounce(throttledUpdateMarker,500);
      
     function onChangeDocument(e: AceAjax.EditorChangeEvent) {
         //reloadDocument();
@@ -136,13 +137,15 @@ export function setupAceEditor() {
                 syncTypeScriptServiceContent(FILE_NAME, e);
 
                 var startAt = Date.now();
+                
+                var cursorRow=editor.getCursorPosition().row;
                
-                if (e.start.row===editor.getCursorPosition().row){
-                    _.delay(()=>{throttledUpdateMarker(e)},5000)
+                if (e.start.row===cursorRow && e.end.row===cursorRow && e.lines && e.lines.join(aceUtils.EOL).length===1){
+                    debounceUpdateMarker(e)
                 }else       
                   throttledUpdateMarker(e)
                 
-                //console.log("update Error Markers", Date.now()-startAt);                    
+                //console.log("update Error Markers", Date.now()-startAt);        
                 
             } catch (ex) {
 

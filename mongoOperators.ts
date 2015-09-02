@@ -2,11 +2,12 @@
 
 interface MongoOp{
 	caption:string;
-  category:string;
+ // category:string;
 	snippet:string;
 	comment:string;
 	example:string;
-  docUrl:string;	
+  docUrl:string;
+  meta:string;	
 }
 
 function getDocUrl(category,opName){
@@ -28,7 +29,6 @@ function addMongoOperators(category:string, operators:any[]) {
     
     let op:MongoOp={
       caption:it[0],
-      category:category,
       //value:`${opName}: ${snippetPart}`,
       snippet:`\\${opName}: ${snippetPart}`,
       comment:it[1],

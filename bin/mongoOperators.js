@@ -12,7 +12,6 @@ function addMongoOperators(category, operators) {
         var snippetPart = it[3] || "";
         var op = {
             caption: it[0],
-            category: category,
             //value:`${opName}: ${snippetPart}`,
             snippet: "\\" + opName + ": " + snippetPart,
             comment: it[1],

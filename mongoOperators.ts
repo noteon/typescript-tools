@@ -33,7 +33,8 @@ function addMongoOperators(category:string, operators:any[]) {
       snippet:`\\${opName}: ${snippetPart}`,
       comment:it[1],
       example:it[2],
-      docUrl:getDocUrl(category,opName)  
+      docUrl:getDocUrl(category,opName),
+      meta:category
     }
     
     //console.log('op',op);    
@@ -341,7 +342,7 @@ let updateOperators = [
    { $push: { scores: { $each: [ 90, 92, 85 ] } } }
 )`,'[$1]'],
 
-	['$slice(update)', '(New in version 2.4) Modifies the $push operator to limit the size of updated arrays.',
+	['$slice', '(New in version 2.4) Modifies the $push operator to limit the size of updated arrays.',
 `db.students.update(
    { _id: 1 },
    {
@@ -394,15 +395,15 @@ let updateOperators = [
 //Aggregation Pipeline Operators
 //Pipeline stages appear in an array. Documents pass through the stages in sequence.
 let aggregationOperators = [
-	['$project(aggregate)', 'Reshapes each document in the stream, such as by adding new fields or removing existing fields. For each input document, outputs one document.','db.books.aggregate( [ { $project : { _id: 0, title : 1 , author : 1 } } ] )','{$1}'],
+	['$project', 'Reshapes each document in the stream, such as by adding new fields or removing existing fields. For each input document, outputs one document.','db.books.aggregate( [ { $project : { _id: 0, title : 1 , author : 1 } } ] )','{$1}'],
 	
-	['$match(aggregate)', 'Filters the document stream to allow only matching documents to pass unmodified into the next pipeline stage. $match uses standard MongoDB queries. For each input document, outputs either one document (a match) or zero documents (no match).',
+	['$match', 'Filters the document stream to allow only matching documents to pass unmodified into the next pipeline stage. $match uses standard MongoDB queries. For each input document, outputs either one document (a match) or zero documents (no match).',
 `db.articles.aggregate( [
                         { $match : { score : { $gt : 70, $lte : 90 } } },
                         { $group: { _id: null, count: { $sum: 1 } } }
                        ] );`,'{$1}'],
 	
-	['$redact(aggregate)', '(New in version 2.6) Reshapes each document in the stream by restricting the content for each document based on information stored in the documents themselves. Incorporates the functionality of $project and $match. Can be used to implement field level redaction. For each input document, outputs either one or zero document.',
+	['$redact', '(New in version 2.6) Reshapes each document in the stream by restricting the content for each document based on information stored in the documents themselves. Incorporates the functionality of $project and $match. Can be used to implement field level redaction. For each input document, outputs either one or zero document.',
 `var userAccess = [ "STLW", "G" ];
 db.forecasts.aggregate(
    [
@@ -418,20 +419,20 @@ db.forecasts.aggregate(
    ]
 );`,'{$1}'],
 
-	['$limit(aggregate)', 'Passes the first n documents unmodified to the pipeline where n is the specified limit. For each input document, outputs either one document (for the first n documents) or zero documents (after the first n documents).',
+	['$limit', 'Passes the first n documents unmodified to the pipeline where n is the specified limit. For each input document, outputs either one document (for the first n documents) or zero documents (after the first n documents).',
 `db.article.aggregate(
     { $limit : 5 }
 );`],
 
-	['$skip(aggregate)', 'Skips the first n documents where n is the specified skip number and passes the remaining documents unmodified to the pipeline. For each input document, outputs either zero documents (for the first n documents) or one document (if after the first n documents).',
+	['$skip', 'Skips the first n documents where n is the specified skip number and passes the remaining documents unmodified to the pipeline. For each input document, outputs either zero documents (for the first n documents) or one document (if after the first n documents).',
 `db.article.aggregate(
     { $skip : 5 }
 );`	],
 
-	['$unwind(aggregate)', 'Deconstructs an array field from the input documents to output a document for each element. Each output document replaces the array with an element value. For each input document, outputs n documents where n is the number of array elements and can be zero for an empty array.',
+	['$unwind', 'Deconstructs an array field from the input documents to output a document for each element. Each output document replaces the array with an element value. For each input document, outputs n documents where n is the number of array elements and can be zero for an empty array.',
 `db.inventory.aggregate( [ { $unwind : "$sizes" } ] )`],
 
-	['$group(aggregate)', 'Groups input documents by a specified identifier expression and applies the accumulator expression(s), if specified, to each group. Consumes all input documents and outputs one document per each distinct group. The output documents only contain the identifier field and, if specified, accumulated fields.',
+	['$group', 'Groups input documents by a specified identifier expression and applies the accumulator expression(s), if specified, to each group. Consumes all input documents and outputs one document per each distinct group. The output documents only contain the identifier field and, if specified, accumulated fields.',
 `db.sales.aggregate(
    [
       {
@@ -445,7 +446,7 @@ db.forecasts.aggregate(
    ]
 )`,'{$1}'],
 	
-	['$sort(aggregate)', 'Reorders the document stream by a specified sort key. Only the order changes; the documents remain unmodified. For each input document, outputs one document.',
+	['$sort', 'Reorders the document stream by a specified sort key. Only the order changes; the documents remain unmodified. For each input document, outputs one document.',
 `db.users.aggregate(
    [
      { $sort : { age : -1, posts: 1 } }
@@ -477,7 +478,7 @@ db.forecasts.aggregate(
 	//Boolean Operators
 	//Boolean expressions evaluate their argument expressions as booleans and return a boolean as the result.'],
 
-	['$and(aggregate)', 'Returns true only when all its expressions evaluate to true. Accepts any number of argument expressions.',
+	['$and', 'Returns true only when all its expressions evaluate to true. Accepts any number of argument expressions.',
 `db.inventory.aggregate(
    [
      {
@@ -491,7 +492,7 @@ db.forecasts.aggregate(
    ]
 )`,'[$1]'],
 
-	['$or(aggregate)', 'Returns true when any of its expressions evaluates to true. Accepts any number of argument expressions.',
+	['$or', 'Returns true when any of its expressions evaluates to true. Accepts any number of argument expressions.',
 `db.inventory.aggregate(
    [
      {
@@ -504,7 +505,7 @@ db.forecasts.aggregate(
    ]
 )`,'[$1]'],
 
-	['$not(aggregate)', 'Returns the boolean value that is the opposite of its argument expression. Accepts a single argument expression.',
+	['$not', 'Returns the boolean value that is the opposite of its argument expression. Accepts a single argument expression.',
 `db.inventory.aggregate(
    [
      {
@@ -520,49 +521,49 @@ db.forecasts.aggregate(
 	// Set Operators
 	// Set expressions performs set operation on arrays, treating arrays as sets. Set expressions ignores the duplicate entries in each input array and the order of the elements.'],
 
-	['$setEquals(aggregate)', '(New in version 2.6) Returns true if the input sets have the same distinct elements. Accepts two or more argument expressions.',
+	['$setEquals', '(New in version 2.6) Returns true if the input sets have the same distinct elements. Accepts two or more argument expressions.',
 `db.experiments.aggregate(
    [
      { $project: { A: 1, B: 1, sameElements: { $setEquals: [ "$A", "$B" ] }, _id: 0 } }
    ]
 )`,'["$1","$2"]'],
 
-	['$setIntersection(aggregate)', '(New in version 2.6) Returns a set with elements that appear in all of the input sets. Accepts any number of argument expressions.',
+	['$setIntersection', '(New in version 2.6) Returns a set with elements that appear in all of the input sets. Accepts any number of argument expressions.',
 `db.experiments.aggregate(
    [
      { $project: { A: 1, B: 1, commonToBoth: { $setIntersection: [ "$A", "$B" ] }, _id: 0 } }
    ]
 )`,'[$1]'],
 
-	['$setUnion(aggregate)', '(New in version 2.6) Returns a set with elements that appear in any of the input sets. Accepts any number of argument expressions.',
+	['$setUnion', '(New in version 2.6) Returns a set with elements that appear in any of the input sets. Accepts any number of argument expressions.',
 `db.experiments.aggregate(
    [
      { $project: { A:1, B: 1, allValues: { $setUnion: [ "$A", "$B" ] }, _id: 0 } }
    ]
 )`,'[$1]'],
 	
-	['$setDifference(aggregate)', '(New in version 2.6) Returns a set with elements that appear in the first set but not in the second set; i.e. performs a relative complement of the second set relative to the first. Accepts exactly two argument expressions.',
+	['$setDifference', '(New in version 2.6) Returns a set with elements that appear in the first set but not in the second set; i.e. performs a relative complement of the second set relative to the first. Accepts exactly two argument expressions.',
 `db.experiments.aggregate(
    [
      { $project: { A: 1, B: 1, inBOnly: { $setDifference: [ "$B", "$A" ] }, _id: 0 } }
    ]
 )`,'[$1]'],
 
-	['$setIsSubset(aggregate)', '(New in version 2.6) Returns true if all elements of the first set appear in the second set, including when the first set equals the second set; i.e. not a strict subset. Accepts exactly two argument expressions.',
+	['$setIsSubset', '(New in version 2.6) Returns true if all elements of the first set appear in the second set, including when the first set equals the second set; i.e. not a strict subset. Accepts exactly two argument expressions.',
 `db.experiments.aggregate(
    [
      { $project: { A:1, B: 1, AisSubset: { $setIsSubset: [ "$A", "$B" ] }, _id:0 } }
    ]
 )`,'[$1]'],
 
-	['$anyElementTrue(aggregate)', '(New in version 2.6) Returns true if any elements of a set evaluate to true; otherwise, returns false. Accepts a single argument expression.',
+	['$anyElementTrue', '(New in version 2.6) Returns true if any elements of a set evaluate to true; otherwise, returns false. Accepts a single argument expression.',
 `db.survey.aggregate(
    [
      { $project: { responses: 1, isAnyTrue: { $anyElementTrue: [ "$responses" ] }, _id: 0 } }
    ]
 )`,'[$1]'],
 
-	['$allElementsTrue(aggregate)', '(New in version 2.6) Returns true if no element of a set evaluates to false, otherwise, returns false. Accepts a single argument expression.',
+	['$allElementsTrue', '(New in version 2.6) Returns true if no element of a set evaluates to false, otherwise, returns false. Accepts a single argument expression.',
 `db.survey.aggregate(
    [
      { $project: { responses: 1, isAllTrue: { $allElementsTrue: [ "$responses" ] }, _id: 0 } }
@@ -573,7 +574,7 @@ db.forecasts.aggregate(
 	// Comparison expressions return a boolean except for $cmp which returns a number.'],
 	// The comparison expressions take two argument expressions and compare both value and type, using the specified BSON comparison order for values of different types.'],
 
-	['$cmp(aggregate)', 'Returns: 0 if the two values are equivalent, 1 if the first value is greater than the second, and -1 if the first value is less than the second.',
+	['$cmp', 'Returns: 0 if the two values are equivalent, 1 if the first value is greater than the second, and -1 if the first value is less than the second.',
 `db.inventory.aggregate(
    [
      {
@@ -588,7 +589,7 @@ db.forecasts.aggregate(
    ]
 )`,'["$1",$2]'],
 
-	['$eq(aggregate)', 'Returns true if the values are equivalent.',
+	['$eq', 'Returns true if the values are equivalent.',
 `db.inventory.aggregate(
    [
      {
@@ -603,7 +604,7 @@ db.forecasts.aggregate(
    ]
 )`,'["$1",$2]'],
 
-	['$gt(aggregate)', 'Returns true if the first value is greater than the second.',
+	['$gt', 'Returns true if the first value is greater than the second.',
 `db.inventory.aggregate(
    [
      {
@@ -618,7 +619,7 @@ db.forecasts.aggregate(
    ]
 )`,'["$1",$2]'],
 
-	['$gte(aggregate)', 'Returns true if the first value is greater than or equal to the second.',
+	['$gte', 'Returns true if the first value is greater than or equal to the second.',
 `db.inventory.aggregate(
    [
      {
@@ -633,7 +634,7 @@ db.forecasts.aggregate(
    ]
 )`,'["$1",$2]'],
 
-	['$lt(aggregate)', 'Returns true if the first value is less than the second.',
+	['$lt', 'Returns true if the first value is less than the second.',
 `db.inventory.aggregate(
    [
      {
@@ -648,7 +649,7 @@ db.forecasts.aggregate(
    ]
 )`,'["$1",$2]'],
 
-	['$lte(aggregate)', 'Returns true if the first value is less than or equal to the second.',
+	['$lte', 'Returns true if the first value is less than or equal to the second.',
 `db.inventory.aggregate(
    [
      {
@@ -663,7 +664,7 @@ db.forecasts.aggregate(
    ]
 )`,'["$1",$2]'],
 
-	['$ne(aggregate)', 'Returns true if the values are not equivalent.',
+	['$ne', 'Returns true if the values are not equivalent.',
 `db.inventory.aggregate(
    [
      {
@@ -680,31 +681,31 @@ db.forecasts.aggregate(
 
 	// Arithmetic Operators
 	// Arithmetic expressions perform mathematic operations on numbers. Some arithmetic expressions can also support date arithmetic.'],
-	['$add(aggregate)', 'Adds numbers to return the sum, or adds numbers and a date to return a new date. If adding numbers and a date, treats the numbers as milliseconds. Accepts any number of argument expressions, but at most, one expression can resolve to a date.',
+	['$add', 'Adds numbers to return the sum, or adds numbers and a date to return a new date. If adding numbers and a date, treats the numbers as milliseconds. Accepts any number of argument expressions, but at most, one expression can resolve to a date.',
 `db.sales.aggregate(
    [
      { $project: { item: 1, billing_date: { $add: [ "$date", 3*24*60*60000 ] } } }
    ]
 )`,'["$1",$2]'],
 
-	['$subtract(aggregate)', 'Returns the result of subtracting the second value from the first. If the two values are numbers, return the difference. If the two values are dates, return the difference in milliseconds. If the two values are a date and a number in milliseconds, return the resulting date. Accepts two argument expressions. If the two values are a date and a number, specify the date argument first as it is not meaningful to subtract a date from a number.',
+	['$subtract', 'Returns the result of subtracting the second value from the first. If the two values are numbers, return the difference. If the two values are dates, return the difference in milliseconds. If the two values are a date and a number in milliseconds, return the resulting date. Accepts two argument expressions. If the two values are a date and a number, specify the date argument first as it is not meaningful to subtract a date from a number.',
 `db.sales.aggregate( [ { $project: { item: 1, dateDifference: { $subtract: [ new Date(), "$date" ] } } } ] )`],
 	
-	['$multiply(aggregate)', 'Multiplies numbers to return the product. Accepts any number of argument expressions.',
+	['$multiply', 'Multiplies numbers to return the product. Accepts any number of argument expressions.',
 `db.sales.aggregate(
    [
      { $project: { date: 1, item: 1, total: { $multiply: [ "$price", "$quantity" ] } } }
    ]
 )`,'["$1",$2]'],
 
-	['$divide(aggregate)', 'Returns the result of dividing the first number by the second. Accepts two argument expressions.',
+	['$divide', 'Returns the result of dividing the first number by the second. Accepts two argument expressions.',
 `db.planning.aggregate(
    [
      { $project: { name: 1, workdays: { $divide: [ "$hours", 8 ] } } }
    ]
 )`,'["$1",$2]'],
 
-	['$mod(aggregate)', 'Returns the remainder of the first number divided by the second. Accepts two argument expressions.',
+	['$mod', 'Returns the remainder of the first number divided by the second. Accepts two argument expressions.',
 `db.planning.aggregate(
    [
      { $project: { remainder: { $mod: [ "$hours", "$tasks" ] } } }
@@ -715,14 +716,14 @@ db.forecasts.aggregate(
 	// String expressions, with the exception of $concat, only have a well-defined behavior for strings of ASCII characters.'],
 	//$concat behavior is well-defined regardless of the characters used.'],
 
-	['$concat(aggregate)', 'New in version 2.4. Concatenates any number of strings.',
+	['$concat', 'New in version 2.4. Concatenates any number of strings.',
 `db.inventory.aggregate(
    [
       { $project: { itemDescription: { $concat: [ "$item", " - ", "$description" ] } } }
    ]
 )`,'["$1",$2]'],
 
-	['$substr(aggregate)', 'Returns a substring of a string, starting at a specified index position up to a specified length. Accepts three expressions as arguments: the first argument must resolve to a string, and the second and third arguments must resolve to integers.',
+	['$substr', 'Returns a substring of a string, starting at a specified index position up to a specified length. Accepts three expressions as arguments: the first argument must resolve to a string, and the second and third arguments must resolve to integers.',
 `db.inventory.aggregate(
    [
      {
@@ -736,7 +737,7 @@ db.forecasts.aggregate(
    ]
 )`,'["$1",$2,$3]'],
 
-	['$toLower(aggregate)', 'Converts a string to lowercase. Accepts a single argument expression.',
+	['$toLower', 'Converts a string to lowercase. Accepts a single argument expression.',
 `db.inventory.aggregate(
    [
      {
@@ -749,7 +750,7 @@ db.forecasts.aggregate(
    ]
 )`,'"$1"'],
 
-	['$toUpper(aggregate)', 'Converts a string to uppercase. Accepts a single argument expression.',
+	['$toUpper', 'Converts a string to uppercase. Accepts a single argument expression.',
 `db.inventory.aggregate(
    [
      {
@@ -762,7 +763,7 @@ db.forecasts.aggregate(
    ]
 )`,"$1"],
 
-	['$strcasecmp(aggregate)', 'Performs case-insensitive string comparison and returns: 0 if two strings are equivalent, 1 if the first string is greater than the second, and -1 if the first string is less than the second.',
+	['$strcasecmp', 'Performs case-insensitive string comparison and returns: 0 if two strings are equivalent, 1 if the first string is greater than the second, and -1 if the first string is less than the second.',
 `db.inventory.aggregate(
    [
      {
@@ -776,7 +777,7 @@ db.forecasts.aggregate(
 )`,'["$1",$2]'],
 
 	//Text Search Operators
-	['$meta(aggregate)', 'New in version 2.6. Access text search metadata.',
+	['$meta', 'New in version 2.6. Access text search metadata.',
 `db.articles.aggregate(
    [
      { $match: { $text: { $search: "cake" } } },
@@ -785,7 +786,7 @@ db.forecasts.aggregate(
 )`,'"$1"'],
 
 	//Array Operators
-	['$size(aggregate)', 'New in version 2.6. Returns the number of elements in the array. Accepts a single expression as argument.',
+	['$size', 'New in version 2.6. Returns the number of elements in the array. Accepts a single expression as argument.',
 `db.inventory.aggregate(
    [
       {
@@ -798,7 +799,7 @@ db.forecasts.aggregate(
 )`,'"$1"'],
 
 	//Variable Operators
-	['$map(aggregate)', 'Applies a subexpression to each element of an array and returns the array of resulting values in order. Accepts named parameters.',
+	['$map', 'Applies a subexpression to each element of an array and returns the array of resulting values in order. Accepts named parameters.',
 `db.grades.aggregate(
    [
       { $project:
@@ -816,7 +817,7 @@ db.forecasts.aggregate(
    ]
 )`, '{$1}'],
 
-	['$let(aggregate)', 'Defines variables for use within the scope of a subexpression and returns the result of the subexpression. Accepts named parameters.',
+	['$let', 'Defines variables for use within the scope of a subexpression and returns the result of the subexpression. Accepts named parameters.',
 `db.sales.aggregate( [
    {
       $project: {
@@ -834,13 +835,13 @@ db.forecasts.aggregate(
 ] )`, '{$1}'],
 
 	//Literal Operators
-	['$literal(aggregate)', 'Return a value without parsing. Use for values that the aggregation pipeline may interpret as an expression. For example, use a $literal expression to a string that starts with a $ to avoid parsing as a field path.',
+	['$literal', 'Return a value without parsing. Use for values that the aggregation pipeline may interpret as an expression. For example, use a $literal expression to a string that starts with a $ to avoid parsing as a field path.',
 `db.records.aggregate( [
    { $project: { costsOneDollar: { $eq: [ "$price", { $literal: "$1" } ] } } }
 ] )`],
 
 	//Date Operators
-	['$dayOfYear(aggregate)', 'Returns the day of the year for a date as a number between 1 and 366 (leap year).',
+	['$dayOfYear', 'Returns the day of the year for a date as a number between 1 and 366 (leap year).',
 `db.sales.aggregate(
    [
      {
@@ -861,7 +862,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$dayOfMonth(aggregate)', 'Returns the day of the month for a date as a number between 1 and 31.',
+	['$dayOfMonth', 'Returns the day of the month for a date as a number between 1 and 31.',
 `db.sales.aggregate(
    [
      {
@@ -882,7 +883,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$dayOfWeek(aggregate)', 'Returns the day of the week for a date as a number between 1 (Sunday) and 7 (Saturday).',
+	['$dayOfWeek', 'Returns the day of the week for a date as a number between 1 (Sunday) and 7 (Saturday).',
 `db.sales.aggregate(
    [
      {
@@ -903,7 +904,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$year(aggregate)', 'Returns the year for a date as a number (e.g. 2014).',
+	['$year', 'Returns the year for a date as a number (e.g. 2014).',
 `db.sales.aggregate(
    [
      {
@@ -924,7 +925,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$month(aggregate)', 'Returns the month for a date as a number between 1 (January) and 12 (December).',
+	['$month', 'Returns the month for a date as a number between 1 (January) and 12 (December).',
 `db.sales.aggregate(
    [
      {
@@ -945,7 +946,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$week(aggregate)', 'Returns the week number for a date as a number between 0 (the partial week that precedes the first Sunday of the year) and 53 (leap year).',
+	['$week', 'Returns the week number for a date as a number between 0 (the partial week that precedes the first Sunday of the year) and 53 (leap year).',
 `db.sales.aggregate(
    [
      {
@@ -966,7 +967,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$hour(aggregate)', 'Returns the hour for a date as a number between 0 and 23.',
+	['$hour', 'Returns the hour for a date as a number between 0 and 23.',
 `db.sales.aggregate(
    [
      {
@@ -987,7 +988,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$minute(aggregate)', 'Returns the minute for a date as a number between 0 and 59.',
+	['$minute', 'Returns the minute for a date as a number between 0 and 59.',
 `db.sales.aggregate(
    [
      {
@@ -1008,7 +1009,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$second(aggregate)', 'Returns the seconds for a date as a number between 0 and 60 (leap seconds).',
+	['$second', 'Returns the seconds for a date as a number between 0 and 60 (leap seconds).',
 `db.sales.aggregate(
    [
      {
@@ -1029,7 +1030,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$millisecond(aggregate)', 'Returns the milliseconds of a date as a number between 0 and 999.',
+	['$millisecond', 'Returns the milliseconds of a date as a number between 0 and 999.',
 `db.sales.aggregate(
    [
      {
@@ -1050,7 +1051,7 @@ db.forecasts.aggregate(
    ]
 )`, '"$1"'],
 
-	['$dateToString(aggregate)', 'New in version 3.0. Returns the date as a formatted string.',
+	['$dateToString', 'New in version 3.0. Returns the date as a formatted string.',
 `db.sales.aggregate(
    [
      {
@@ -1063,7 +1064,7 @@ db.forecasts.aggregate(
 )`,'{ format: "$1%Y-%m-%d", date: "\\$date" }'],
 
 	//Conditional Expressions
-	['$cond(aggregate)', 'New in version 2.6. A ternary operator that evaluates one expression, and depending on the result, returns the value of one of the other two expressions. Accepts either three expressions in an ordered list or three named parameters.',
+	['$cond', 'New in version 2.6. A ternary operator that evaluates one expression, and depending on the result, returns the value of one of the other two expressions. Accepts either three expressions in an ordered list or three named parameters.',
 `db.inventory.aggregate(
    [
       {
@@ -1079,7 +1080,7 @@ db.forecasts.aggregate(
    ]
 )`,'{ if: { $1 }, then: $2, else: $3 }'],
 
-	['$ifNull(aggregate)', 'Returns either the non-null result of the first expression or the result of the second expression if the first expression results in a null result. Null result encompasses instances of undefined values or missing fields. Accepts two expressions as arguments. The result of the second expression can be null.',
+	['$ifNull', 'Returns either the non-null result of the first expression or the result of the second expression if the first expression results in a null result. Null result encompasses instances of undefined values or missing fields. Accepts two expressions as arguments. The result of the second expression can be null.',
 `db.inventory.aggregate(
    [
       {
@@ -1093,7 +1094,7 @@ db.forecasts.aggregate(
 
 	//Accumulators
 	//Accumulators, available only for the $group stage, compute values by combining documents that share the same group key. Accumulators take as input a single expression, evaluating the expression once for each input document, and maintain their state for the group of documents.'],
-	['$sum(aggregate)', 'Returns a sum for each group. Ignores non-numeric values.',
+	['$sum', 'Returns a sum for each group. Ignores non-numeric values.',
 `db.sales.aggregate(
    [
      {
@@ -1107,7 +1108,7 @@ db.forecasts.aggregate(
    ]
 )`, '{$1}'],
 
-	['$avg(aggregate)', 'Returns an average for each group. Ignores non-numeric values.',
+	['$avg', 'Returns an average for each group. Ignores non-numeric values.',
 `db.sales.aggregate(
    [
      {
@@ -1121,7 +1122,7 @@ db.forecasts.aggregate(
    ]
 )`,'{$1}'],
 
-	['$first(aggregate)', 'Returns a value from the first document for each group. Order is only defined if the documents are in a defined order.',
+	['$first', 'Returns a value from the first document for each group. Order is only defined if the documents are in a defined order.',
 `db.sales.aggregate(
    [
      { $sort: { item: 1, date: 1 } },
@@ -1135,7 +1136,7 @@ db.forecasts.aggregate(
    ]
 )`,'"$1"'],
 
-	['$last(aggregate)', 'Returns a value from the last document for each group. Order is only defined if the documents are in a defined order.',
+	['$last', 'Returns a value from the last document for each group. Order is only defined if the documents are in a defined order.',
 `db.sales.aggregate(
    [
      { $sort: { item: 1, date: 1 } },
@@ -1149,7 +1150,7 @@ db.forecasts.aggregate(
    ]
 )`,'"$1"'],
 
-	['$max(aggregate)', 'Returns the highest expression value for each group.',
+	['$max', 'Returns the highest expression value for each group.',
 `db.sales.aggregate(
    [
      {
@@ -1163,7 +1164,7 @@ db.forecasts.aggregate(
    ]
 )`,'{$1}'],
 	
-	['$min(aggregate)', 'Returns the lowest expression value for each group.',
+	['$min', 'Returns the lowest expression value for each group.',
 `db.sales.aggregate(
    [
      {
@@ -1176,7 +1177,7 @@ db.forecasts.aggregate(
    ]
 )`,'{$1}'],
 
-	['$push(aggregate)', 'Returns an array of expression values for each group.',
+	['$push', 'Returns an array of expression values for each group.',
 `db.sales.aggregate(
    [
      {
@@ -1189,7 +1190,7 @@ db.forecasts.aggregate(
    ]
 )`,'{$1}'],
 
-	['$addToSet(aggregate)', 'Returns an array of unique expression values for each group. Order of the array elements is undefined.',
+	['$addToSet', 'Returns an array of unique expression values for each group. Order of the array elements is undefined.',
 `db.sales.aggregate(
    [
      {
@@ -1209,18 +1210,18 @@ let metaOperators = [
 	//Modifiers
 	//Many of these operators have corresponding methods in the shell. These methods provide a straightforward and user-friendly interface and are the preferred way to add these options.
 
-	['$comment(meta-operator)', 'Adds a comment to the query to identify queries in the database profiler output.',
+	['$comment', 'Adds a comment to the query to identify queries in the database profiler output.',
 `db.collection.find( { <query> } )._addSpecial( "$comment", <comment> )
 db.collection.find( { <query> } ).comment( <comment> )
 db.collection.find( { $query: { <query> }, $comment: <comment> } )`,,'"$1"'],
 
-	['$explain(meta-operator)', 'Deprecated since version 3.0: Use db.collection.explain() or cursor.explain() instead. Forces MongoDB to report on query execution plans. ','db.collection.find( { $query: {}, $explain: 1 } )',
+	['$explain', 'Deprecated since version 3.0: Use db.collection.explain() or cursor.explain() instead. Forces MongoDB to report on query execution plans. ','db.collection.find( { $query: {}, $explain: 1 } )',
 `db.collection.find()._addSpecial( "$explain", 1 )
 db.collection.find( { $query: {}, $explain: 1 } )
 //you also can retrieve query plan information through the explain() method:
 db.collection.find().explain()`,"1"],
 
-	['$hint(meta-operator)', 'Forces MongoDB to use a specific index. ',
+	['$hint', 'Forces MongoDB to use a specific index. ',
 `db.users.find().hint( { age: 1 } )
 //This operation returns all documents in the collection named users using the index on the age field.
 
@@ -1228,57 +1229,57 @@ db.collection.find().explain()`,"1"],
 db.users.find()._addSpecial( "$hint", { age : 1 } )
 db.users.find( { $query: {}, $hint: { age : 1 } } )`, '{$1}'],
 	
-	['$maxScan(meta-operator)', 'Limits the number of documents scanned.',
+	['$maxScan', 'Limits the number of documents scanned.',
 `db.collection.find( { <query> } )._addSpecial( "$maxScan" , <number> )
 db.collection.find( { $query: { <query> }, $maxScan: <number> } )`],
 
-	['$maxTimeMS(meta-operator)', 'New in version 2.6. Specifies a cumulative time limit in milliseconds for processing operations on a cursor. ',
+	['$maxTimeMS', 'New in version 2.6. Specifies a cumulative time limit in milliseconds for processing operations on a cursor. ',
 `db.collection.find().maxTimeMS(100)
 //You can also specify the option in either of the following forms:
 db.collection.find( { $query: { }, $maxTimeMS: 100 } )
 db.collection.find( { } )._addSpecial("$maxTimeMS", 100)`],
 
-	['$max(meta-operator)', 'Specifies an exclusive upper limit for the index to use in a query. ',
+	['$max', 'Specifies an exclusive upper limit for the index to use in a query. ',
 `db.collection.find( { <query> } ).max( { field1: <max value>, ... fieldN: <max valueN> } )
 //You can also specify $max with either of the two forms:
 db.collection.find( { <query> } )._addSpecial( "$max", { field1: <max value1>, ... fieldN: <max valueN> } )
 db.collection.find( { $query: { <query> }, $max: { field1: <max value1>, ... fieldN: <max valueN> } } )`,'{$1}'],
 
-	['$min(meta-operator)', 'Specifies an inclusive lower limit for the index to use in a query. ',
+	['$min', 'Specifies an inclusive lower limit for the index to use in a query. ',
 `db.collection.find( { <query> } ).min( { field1: <min value>, ... fieldN: <min valueN>} )
 //You can also specify the option with either of the two forms:
 db.collection.find( { <query> } )._addSpecial( "$min", { field1: <min value1>, ... fieldN: <min valueN> } )
 db.collection.find( { $query: { <query> }, $min: { field1: <min value1>, ... fieldN: <min valueN> } } )`,'{$1}'],
 
-	['$orderby(meta-operator)', 'Returns a cursor with documents sorted according to a sort specification. ',
+	['$orderby', 'Returns a cursor with documents sorted according to a sort specification. ',
 `db.collection.find().sort( { age: -1 } )
 //You can also specify the option in either of the following forms:
 db.collection.find()._addSpecial( "$orderby", { age : -1 } )
 db.collection.find( { $query: {}, $orderby: { age : -1 } } )`,'{$1}'],
 
-	['$returnKey(meta-operator)', 'Forces the cursor to only return fields included in the index.',
+	['$returnKey', 'Forces the cursor to only return fields included in the index.',
 `db.collection.find( { <query> } )._addSpecial( "$returnKey", true )
 db.collection.find( { $query: { <query> }, $returnKey: true } )`,'true'],
 
-	['$showDiskLoc(meta-operator)', 'Modifies the documents returned to include references to the on-disk location of each document.',
+	['$showDiskLoc', 'Modifies the documents returned to include references to the on-disk location of each document.',
 `db.collection.find().showDiskLoc()
 //You can also specify the $showDiskLoc option in either of the following forms:
 db.collection.find( { <query> } )._addSpecial("$showDiskLoc" , true)
 db.collection.find( { $query: { <query> }, $showDiskLoc: true } )`,'true'],
 
-	['$snapshot(meta-operator)', 'Forces the query to use the index on the _id field. ',
+	['$snapshot', 'Forces the query to use the index on the _id field. ',
 `db.collection.find().snapshot()
 //You can also specify the option in either of the following forms:
 db.collection.find()._addSpecial( "$snapshot", true )
 db.collection.find( { $query: {}, $snapshot: true } )`,'true'],
 
-	['$query(meta-operator)', 'Wraps a query document.',
+	['$query', 'Wraps a query document.',
 `//The following mongo operations are equivalent, and return only those documents in the collection named collection where the age field equals 25.
 db.collection.find( { $query: { age : 25 } } )
 db.collection.find( { age : 25 } )`,'{$1}'],
 
 	//Sort Order
-	['$natural(meta-operator)', 'A special sort order that orders documents using the order of documents on disk.',
+	['$natural', 'A special sort order that orders documents using the order of documents on disk.',
 `//The $natural operator uses the following syntax to return documents in the order they exist on disk:
 db.collection.find().sort( { $natural: 1 } )`, '1']
 
@@ -1286,11 +1287,11 @@ db.collection.find().sort( { $natural: 1 } )`, '1']
 
 
 var  initMongoOperators=()=>{
-  addMongoOperators('query',queryOperators);
-  addMongoOperators('projection',projectionOperator);
-  addMongoOperators('update',updateOperators);
-  addMongoOperators('aggregation',aggregationOperators)
-  addMongoOperators('meta',metaOperators);
+  addMongoOperators('query-op',queryOperators);
+  addMongoOperators('projection-op',projectionOperator);
+  addMongoOperators('update-op',updateOperators);
+  addMongoOperators('aggregation-op',aggregationOperators)
+  addMongoOperators('meta-op',metaOperators);
 }
 
 initMongoOperators();

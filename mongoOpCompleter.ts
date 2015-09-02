@@ -196,36 +196,136 @@ db.posts.find( {}, { comments: { $slice: [ 20, 10 ] } } )`]
 
 let updateOperators = [
 	//Fields
-	['$inc', 'Increments the value of the field by the specified amount.'],
-	['$mul', 'Multiplies the value of the field by the specified amount.'],
-	['$rename', 'Renames a field.'],
-	['$setOnInsert', 'Sets the value of a field if an update results in an insert of a document. Has no effect on update operations that modify existing documents.'],
-	['$set', 'Sets the value of a field in a document.'],
-	['$unset', 'Removes the specified field from a document.'],
-	['$min', 'Only updates the field if the specified value is less than the existing field value.'],
-	['$max', 'Only updates the field if the specified value is greater than the existing field value.'],
-	['$currentDate', 'Sets the value of a field to current date, either as a Date or a Timestamp.'],
+	['$inc', 'Increments the value of the field by the specified amount.',
+`db.products.update(
+   { sku: "abc123" },
+   { $inc: { quantity: -2, "metrics.orders": 1 } }
+)`,'{$0}'],
+
+	['$mul', 'Multiplies the value of the field by the specified amount.',
+`db.products.update(
+   { _id: 1 },
+   { $mul: { price: 1.25 } }
+)`,'{$0}'],
+		
+		
+	['$rename', 'Renames a field.',
+`db.students.update( { _id: 1 }, { $rename: { "name.first": "name.fname" } } )`, '{0}'],
+	
+	
+	['$setOnInsert', 'Sets the value of a field if an update results in an insert of a document. Has no effect on update operations that modify existing documents.',
+`db.products.update(
+  { _id: 1 },
+  {
+     $set: { item: "apple" },
+     $setOnInsert: { defaultQty: 100 }
+  },
+  { upsert: true }
+)`,'{$0}'],
+
+
+	['$set', 'Sets the value of a field in a document.',
+`db.products.update(
+   { _id: 100 },
+   { $set: { "details.make": "zzz" } }
+)`,'{$0}'],
+	
+	['$unset', 'Removes the specified field from a document.',
+`db.products.update(
+   { sku: "unknown" },
+   { $unset: { quantity: "", instock: "" } }
+)`, '{$0:""}'],
+
+	['$min', 'Only updates the field if the specified value is less than the existing field value.','db.scores.update( { _id: 1 }, { $min: { lowScore: 150 } } )', '{$0}'],
+	['$max', 'Only updates the field if the specified value is greater than the existing field value.','db.scores.update( { _id: 1 }, { $max: { highScore: 870 } } )', '{$0}'],
+	['$currentDate', 'Sets the value of a field to current date, either as a Date or a Timestamp.',
+`db.users.update(
+   { _id: 1 },
+   {
+     $currentDate: {
+        lastModified: true,
+        "cancellation.date": { $type: "timestamp" }
+     },
+     $set: {
+        status: "D",
+        "cancellation.reason": "user request"
+     }
+   }
+)`],
 
 	//Array
-	['$', 'Acts as a placeholder to update the first element that matches the query condition in an update.'],
-	['$addToSet', 'Adds elements to an array only if they do not already exist in the set.'],
-	['$pop', 'Removes the first or last item of an array.'],
-	['$pullAll', 'Removes all matching values from an array.'],
-	['$pull', 'Removes all array elements that match a specified query.'],
-	['$pushAll', 'Deprecated. Adds several items to an array.'],
-	['$push', 'Adds an item to an array.'],
+	//['$', 'Acts as a placeholder to update the first element that matches the query condition in an update.'],
+	['$addToSet', 'Adds elements to an array only if they do not already exist in the set.',
+`db.inventory.update(
+   { _id: 2 },
+   { $addToSet: { tags: { $each: [ "camera", "electronics", "accessories" ] } } }
+ )`],
+ 
+	['$pop', 'Removes the first or last item of an array.','db.students.update( { _id: 1 }, { $pop: { scores: 1 } } )'],
+	
+	
+	['$pullAll', 'Removes all matching values from an array.','db.survey.update( { _id: 1 }, { $pullAll: { scores: [ 0, 5 ] } } )'],
+	['$pull', 'Removes all array elements that match a specified query.','db.profiles.update( { _id: 1 }, { $pull: { votes: { $gte: 6 } } } )'],
+	['$pushAll', 'Deprecated since version 2.4: Use the $push operator with $each instead.'],
+	['$push', 'Adds an item to an array.',
+`db.students.update(
+   { name: "joe" },
+   { $push: { scores: { $each: [ 90, 92, 85 ] } } }
+)`],
 
 	//Modifiers
-	['$each', 'Modifies the $push and $addToSet operators to append multiple items for array updates.'],
-	['$slice', 'Modifies the $push operator to limit the size of updated arrays.'],
-	['$sort', 'Modifies the $push operator to reorder documents stored in an array.'],
-	['$position', 'Modifies the $push operator to specify the position in the array to add elements.'],
+	['$each', 'Modifies the $push and $addToSet operators to append multiple items for array updates.',
+`db.students.update(
+   { name: "joe" },
+   { $push: { scores: { $each: [ 90, 92, 85 ] } } }
+)`],
+
+	['$slice', 'Modifies the $push operator to limit the size of updated arrays.',
+`db.students.update(
+   { _id: 1 },
+   {
+     $push: {
+       scores: {
+         $each: [ 80, 78, 86 ],
+         $slice: -5
+       }
+     }
+   }
+)`],
+
+	['$sort', 'Modifies the $push operator to reorder documents stored in an array.',
+`db.students.update(
+   { _id: 2 },
+   { $push: { tests: { $each: [ 40, 60 ], $sort: 1 } } }
+)`],
+	
+	['$position', 'Modifies the $push operator to specify the position in the array to add elements.',
+`db.students.update(
+   { _id: 1 },
+   {
+     $push: {
+        scores: {
+           $each: [ 50, 60, 70 ],
+           $position: 0
+        }
+     }
+   }
+)`],
 
 	//Bitwise
-	['$bit', 'Performs bitwise AND, OR, and XOR updates of integer values.'],
+	['$bit', 'Performs bitwise AND, OR, and XOR updates of integer values.',
+`db.switches.update(
+   { _id: 1 },
+   { $bit: { expdata: { and: NumberInt(10) } } }
+)`],
 
 	//Isolation
-	['$isolated', 'Modifies the behavior of a write operation to increase the isolation of the operation.'],
+	['$isolated', 'Modifies the behavior of a write operation to increase the isolation of the operation.',
+`db.foo.update(
+    { status : "A" , $isolated : 1 },
+    { $inc : { count : 1 } },
+    { multi: true }
+)`],
 
 ]
 

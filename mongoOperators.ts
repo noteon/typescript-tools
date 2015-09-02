@@ -1,15 +1,54 @@
+///<reference path='typings/node/node.d.ts'/>
 
-
-
-function addOp(name: string, comment: string, example:string,snippet?: string) {
+interface MongoOp{
+	caption:string;
+  category:string;
+	snippet:string;
+	comment:string;
+	example:string;
+  docUrl:string;	
 }
 
+function getDocUrl(category,opName){
+   let op=opName.slice(1)
+   return `http://docs.mongodb.org/manual/reference/operator/${category}/${op}/`; 	
+}
+
+var mongoOperators:MongoOp[]=[];
+
+function addMongoOperators(category:string, operators:any[]) {
+  operators.forEach((it)=>{
+    
+    let opName=it[0];
+    if (opName.indexOf('(')>-1)
+      opName=opName.slice(0,opName.indexOf('('));
+      
+    let snippetPart= it[3] || "";
+
+    
+    let op:MongoOp={
+      caption:it[0],
+      category:category,
+      //value:`${opName}: ${snippetPart}`,
+      snippet:`\\${opName}: ${snippetPart}`,
+      comment:it[1],
+      example:it[2],
+      docUrl:getDocUrl(category,opName)  
+    }
+    
+    //console.log('op',op);    
+    
+    mongoOperators.push(op);
+  })
+  
+  
+}
 
 
 //category: query
 //Query and Projection Operators
 // $gt -> $gt: 
-let queryAndProjectionOperators = [
+let queryOperators = [
 	//Query Selectors
     //Comparison
 	['$eq', '(New in version 3.0) values that are equal to a specified value. The $eq expression is equivalent to { field: <value> }.', 'db.inventory.find( { qty: { $eq: 20 } } )'],
@@ -350,7 +389,7 @@ let updateOperators = [
 //category: aggregation
 //Aggregation Pipeline Operators
 //Pipeline stages appear in an array. Documents pass through the stages in sequence.
-let aggregationPipelineOperators = [
+let aggregationOperators = [
 	['$project(aggregate)', 'Reshapes each document in the stream, such as by adding new fields or removing existing fields. For each input document, outputs one document.','db.books.aggregate( [ { $project : { _id: 0, title : 1 , author : 1 } } ] )'],
 	
 	['$match(aggregate)', 'Filters the document stream to allow only matching documents to pass unmodified into the next pipeline stage. $match uses standard MongoDB queries. For each input document, outputs either one document (a match) or zero documents (no match).',
@@ -1162,7 +1201,7 @@ db.forecasts.aggregate(
 
 //Query Modifiers
 //category, meta
-let queryModifierOperators = [
+let metaOperators = [
 	//Modifiers
 	//Many of these operators have corresponding methods in the shell. These methods provide a straightforward and user-friendly interface and are the preferred way to add these options.
 
@@ -1240,3 +1279,17 @@ db.collection.find( { age : 25 } )`],
 db.collection.find().sort( { $natural: 1 } )`]
 
 ]
+
+
+var  initMongoOperators=()=>{
+  addMongoOperators('query',queryOperators);
+  addMongoOperators('projection',projectionOperator);
+  addMongoOperators('update',updateOperators);
+  addMongoOperators('aggregation',aggregationOperators)
+  addMongoOperators('meta',metaOperators);
+}
+
+initMongoOperators();
+
+export = mongoOperators;
+

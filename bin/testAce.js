@@ -123,6 +123,15 @@ function setupAceEditor() {
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
+            //console.log('prefix',prefix);
+            if (prefix[0] === '$') {
+                var mongoOperators = require('./mongoOperators');
+                mongoOperators = mongoOperators.map(function (it) {
+                    it['isMongoOperator'] = true;
+                    return it;
+                });
+                return callback(null, mongoOperators);
+            }
             // let doc = editor.getSession().getDocument()
             // let prevChar;
             // if (pos.column>0){
@@ -150,6 +159,7 @@ function setupAceEditor() {
                         value: value,
                         meta: "",
                         toolTip: currentParam && highlightTypeAndComment(currentParam),
+                        isHelpItem: true,
                         score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                     };
                 });
@@ -224,8 +234,17 @@ function setupAceEditor() {
             //console.log('completions callback elapsed', Date.now() - startAt);
         },
         getDocTooltip: function (item) {
-            if (item.toolTip) {
+            if (item.isMongoOperator) {
+                //comment:string;
+                //example:string;
+                //docUrl:string;	
+                //require('shell').openExternal(${item.docUrl})
+                item.docHTML = highlightTypeAndComment({ type: item.example, docComment: item.comment }, false) + ("<p><a href='#' onmousedown=\"require('shell').openExternal('" + item.docUrl + "')\">view online help</a></p>");
+                return;
+            }
+            if (item.isHelpItem) {
                 item.docHTML = item.toolTip;
+                return;
             }
             else {
                 var detailInfo = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
@@ -243,7 +262,7 @@ function setupAceEditor() {
         enableBasicAutocompletion: true,
     });
     editor.commands.on("afterExec", function (e) {
-        if (e.command.name == "insertstring" && /^[\w.\(\,]$/.test(e.args)) {
+        if (e.command.name == "insertstring" && /^[\w.\(\,\$]$/.test(e.args)) {
             editor.execCommand("startAutocomplete");
         }
     });
@@ -254,7 +273,8 @@ function setupAceEditor() {
         else
             return code;
     };
-    var highlightTypeAndComment = function (info) {
+    var highlightTypeAndComment = function (info, typeFirst) {
+        if (typeFirst === void 0) { typeFirst = true; }
         var docComment = "";
         if (info.docComment) {
             docComment = "<p class='hljs-comment'>" + info.docComment + "</p>";
@@ -270,7 +290,7 @@ function setupAceEditor() {
             }
             type = prefix + highLightCode(content);
         }
-        return type + docComment;
+        return typeFirst ? type + docComment : docComment + type;
     };
     var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
     editor["tokenTooltip"] = new TokenTooltip(editor, function (editor, token, pos) {

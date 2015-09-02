@@ -12,6 +12,7 @@
 		"tssCmdListener.ts",
 		"aceUtils.ts",
 		"aceTokenTooltip.ts",
+		"mongoOperators.ts",
 		"testAce.ts"
 	]
 }

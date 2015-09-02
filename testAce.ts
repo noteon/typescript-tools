@@ -179,6 +179,19 @@ export function setupAceEditor() {
     // uses http://rhymebrain.com/api.html
     var typescriptCompleter = {
         getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
+            //console.log('prefix',prefix);
+            
+            if (prefix[0]==='$'){//load mongo completeors
+                let mongoOperators=require('./mongoOperators');
+                
+                mongoOperators=mongoOperators.map((it)=>{
+                    it['isMongoOperator']=true;
+                    return it;
+                })
+                
+                return callback(null, mongoOperators)
+            }
+            
             // let doc = editor.getSession().getDocument()
 
             // let prevChar;
@@ -213,6 +226,7 @@ export function setupAceEditor() {
                         value: value,
                         meta: "",
                         toolTip:currentParam && highlightTypeAndComment(currentParam),
+                        isHelpItem:true,
                         score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                     }
                 });
@@ -312,8 +326,20 @@ export function setupAceEditor() {
         },
 
         getDocTooltip: function(item) {
-            if (item.toolTip){
+            if (item.isMongoOperator){
+                	//comment:string;
+	                //example:string;
+                    //docUrl:string;	
+                    //require('shell').openExternal(${item.docUrl})
+                item.docHTML=highlightTypeAndComment({type:item.example, docComment:item.comment}, false)+`<p><a href='#' onmousedown="require('shell').openExternal('${item.docUrl}')">view online help</a></p>`;
+                
+                return;
+            }
+            
+            if (item.isHelpItem){
                 item.docHTML=item.toolTip;
+                
+                return;
             }else{
                 var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
                 if (detailInfo.type) {
@@ -336,7 +362,7 @@ export function setupAceEditor() {
 
 
     editor.commands.on("afterExec", function(e) {
-        if (e.command.name == "insertstring" && /^[\w.\(\,]$/.test(e.args)) {
+        if (e.command.name == "insertstring" && /^[\w.\(\,\$]$/.test(e.args)) {
             editor.execCommand("startAutocomplete")
         }
     })
@@ -348,7 +374,7 @@ export function setupAceEditor() {
           return code;
     }; 
     
-    var highlightTypeAndComment=(info)=>{
+    var highlightTypeAndComment=(info, typeFirst:boolean=true)=>{
         var docComment="";
         if (info.docComment){
             docComment=`<p class='hljs-comment'>${info.docComment}</p>`
@@ -369,7 +395,7 @@ export function setupAceEditor() {
         }
         
                 
-        return type+docComment;
+        return typeFirst?type+docComment:docComment+type;
     };
 
 

@@ -1,60 +1,193 @@
 
 
 
-function addOp(name: string, comment: string, snippet?: string) {
+function addOp(name: string, comment: string, example:string,snippet?: string) {
 }
 
 //Query and Projection Operators
-
+// $gt -> $gt: 
 let queryAndProjectionOperators = [
 	//Query Selectors
     //Comparison
-	['$eq', ' values that are equal to a specified value.'],
-    ['$gt', ' values that are greater than a specified value.'],
-	['$gte', ' values that are greater than or equal to a specified value.'],
-	['$lt', ' values that are less than a specified value.'],
-	['$lte', ' values that are less than or equal to a specified value.'],
-	['$ne', ' all values that are not equal to a specified value.'],
-	['$in', ' any of the values specified in an array.'],
-	['$nin', ' none of the values specified in an array.'],
+	['$eq', ' values that are equal to a specified value. The $eq expression is equivalent to { field: <value> }.', 'db.inventory.find( { qty: { $eq: 20 } } )'],
+    ['$gt', ' values that are greater than a specified value.','db.inventory.find( { qty: { $gt: 20 } } )'],
+	['$gte', ' values that are greater than or equal to a specified value.','db.inventory.find( { qty: { $gte: 20 } } )'],
+	['$lt', ' values that are less than a specified value.','db.inventory.find( { qty: { $lt: 20 } } )'],
+	['$lte', ' values that are less than or equal to a specified value.','db.inventory.find( { qty: { $lte: 20 } } )'],
+	['$ne', ' all values that are not equal to a specified value.','db.inventory.find( { qty: { $ne: 20 } } )'],
+	['$in', ' any of the values specified in an array.', 'db.inventory.find( { qty: { $in: [ 5, 15 ] } } )', '[$0]'],
+	['$nin', ' none of the values specified in an array.','db.inventory.find( { qty: { $nin: [ 5, 15 ] } } )', '[$0]'],
 	
 	//Logical
-	['$or', 'Joins query clauses with a logical OR returns all documents that match the conditions of either clause.'],
-	['$and', 'Joins query clauses with a logical AND returns all documents that match the conditions of both clauses.'],
-	['$not', 'Inverts the effect of a query expression and returns documents that do not match the query expression.'],
-	['$nor', 'Joins query clauses with a logical NOR returns all documents that fail to match both clauses.'],
+	['$or', 'Joins query clauses with a logical OR returns all documents that match the conditions of either clause.'
+		 ,'db.inventory.find( { $or: [ { quantity: { $lt: 20 } }, { price: 10 } ] } )', '[{$0}]'],
+	['$and', 'Joins query clauses with a logical AND returns all documents that match the conditions of both clauses.'
+		 ,'db.inventory.find( { $and: [ { price: { $ne: 1.99 } }, { price: { $exists: true } } ] } )', '[{$0}]'],
+	['$not', 'Inverts the effect of a query expression and returns documents that do not match the query expression.'
+		,'db.inventory.find( { price: { $not: { $gt: 1.99 } } } )', '{$0}'],
+	['$nor', 'Joins query clauses with a logical NOR returns all documents that fail to match both clauses.'
+		,'db.inventory.find( { $nor: [ { price: 1.99 }, { sale: true } ]  } )','[{$0}]'],
 	
 	//Element
-	['$exists', 'Matches documents that have the specified field.'],
-	['$type', 'Selects documents if a field is of the specified type.'],
+	['$exists', 'Matches documents that have the specified field.','db.inventory.find( { qty: { $exists: true, $nin: [ 5, 15 ] } } )'],
+	['$type', 'Selects documents if a field is of the specified type.','db.inventory.find( { tags: { $type : 2 } } ); //type 2 is String'],
 	
 	//Evaluation
-	['$mod', 'Performs a modulo operation on the value of a field and selects documents with a specified result.'],
-	['$regex', 'Selects documents where values match a specified regular expression.'],
-	['$text', 'Performs text search.'],
-	['$where', 'Matches documents that satisfy a JavaScript expression.'],
+	['$mod', 'Performs a modulo operation on the value of a field and selects documents with a specified result.','db.inventory.find( { qty: { $mod: [ 4, 0 ] } } )','[$0, $1]'],
+	['$regex', 'Selects documents where values match a specified regular expression.','db.products.find( { sku: { $regex: /^ABC/i } } )','/$0/'],
+	['$text', 'Performs text search.','{ $text: { $search: "leche", $language: "es" } }','{ $search: $0 }'],
+	
+	['$where', 'Matches documents that satisfy a JavaScript expression.'
+		,`db.myCollection.find( { active: true, $where: "this.credits - this.debits < 0" } );
+db.myCollection.find( { active: true, $where: function() { return obj.credits - obj.debits < 0; } } );`
+		],
 	
 	//Geospatial
-	['$geoWithin', 'Selects geometries within a bounding GeoJSON geometry. The 2dsphere and 2d indexes support $geoWithin.'],
-	['$geoIntersects', 'Selects geometries that intersect with a GeoJSON geometry. The 2dsphere index supports $geoIntersects.'],
-	['$near', 'Returns geospatial objects in proximity to a point. Requires a geospatial index. The 2dsphere and 2d indexes support $near.'],
-	['$nearSphere', 'Returns geospatial objects in proximity to a point on a sphere. Requires a geospatial index. The 2dsphere and 2d indexes support $nearSphere.'],
+	['$geoWithin', 'Selects geometries within a bounding GeoJSON geometry. The 2dsphere and 2d indexes support $geoWithin.'
+,`db.places.find(
+   {
+     loc: {
+       $geoWithin: {
+          $geometry: {
+             type : "Polygon" ,
+             coordinates: [ [ [ 0, 0 ], [ 3, 6 ], [ 6, 1 ], [ 0, 0 ] ] ]
+          }
+       }
+     }
+   }
+)`,'{$0}'],
+	['$geoIntersects', 'Selects geometries that intersect with a GeoJSON geometry. The 2dsphere index supports $geoIntersects.',
+`db.places.find(
+   {
+     loc: {
+       $geoIntersects: {
+          $geometry: {
+             type: "Polygon" ,
+             coordinates: [
+               [ [ 0, 0 ], [ 3, 6 ], [ 6, 1 ], [ 0, 0 ] ]
+             ]
+          }
+       }
+     }
+   }
+)`,'{$0}'],
+	['$near', 'Returns geospatial objects in proximity to a point. Requires a geospatial index. The 2dsphere and 2d indexes support $near.',
+`db.places.find(
+   {
+     location:
+       { $near :
+          {
+            $geometry: { type: "Point",  coordinates: [ -73.9667, 40.78 ] },
+            $minDistance: 1000,
+            $maxDistance: 5000
+          }
+       }
+   }
+)`,'{$0}'],
+	['$nearSphere', 'Returns geospatial objects in proximity to a point on a sphere. Requires a geospatial index. The 2dsphere and 2d indexes support $nearSphere.',
+`db.places.find(
+   {
+     location: {
+        $nearSphere: {
+           $geometry: {
+              type : "Point",
+              coordinates : [ -73.9667, 40.78 ]
+           },
+           $minDistance: 1000,
+           $maxDistance: 5000
+        }
+     }
+   }
+)`,'{$0}'],
+   ['$geometry','The $geometry operator specifies a GeoJSON geometry for use with the following geospatial query operators: $geoWithin, $geoIntersects, $near, and $nearSphere. $geometry uses EPSG:4326 as the default coordinate reference system (CRS).',
+`db.places.find(
+   {
+     location:
+       { $near :
+          {
+            $geometry: { type: "Point",  coordinates: [ -73.9667, 40.78 ] },
+            $minDistance: 1000,
+            $maxDistance: 5000
+          }
+       }
+   }
+)`,`$geometry: {
+   type: "$0",
+   coordinates: []
+}` ],
+
+   ['$minDistance','Filters the results of a geospatial $near or $nearSphere query to those documents that are at least the specified distance from the center point.',
+`db.places.find(
+   {
+     location:
+       { $near :
+          {
+            $geometry: { type: "Point",  coordinates: [ -73.9667, 40.78 ] },
+            $minDistance: 1000,
+            $maxDistance: 5000
+          }
+       }
+   }
+)`],
+
+    ['$maxDistance','The $maxDistance operator constrains the results of a geospatial $near or $nearSphere query to the specified distance. The measuring units for the maximum distance are determined by the coordinate system in use. For GeoJSON point object, specify the distance in meters, not tradians.',
+`db.places.find( {
+   loc: { $near: [ 100 , 100 ],  $maxDistance: 10 }
+} )`],
+
+    ['$center','The $center operator specifies a circle for a $geoWithin query. The query returns legacy coordinate pairs that are within the bounds of the circle. The operator does not return GeoJSON objects.',
+`db.places.find(
+   { loc: { $geoWithin: { $center: [ [-74, 40.74], 10 ] } } }
+)`,'[ [ $0, $1 ] , $2 ]'],
+
+    ['$centerSphere','Defines a circle for a geospatial query that uses spherical geometry. The query returns documents that are within the bounds of the circle. You can use the $centerSphere operator on both GeoJSON objects and legacy coordinate pairs.',
+`db.places.find( {
+  loc: { $geoWithin: { $centerSphere: [ [ -88, 30 ], 10/3963.2 ] } }
+} )`,	'[ [ $0, $1 ] , $2 ]'],
+
+	['$box','Specifies a rectangle for a geospatial $geoWithin query to return documents that are within the bounds of the rectangle, according to their point-based location data. When used with the $box operator, $geoWithin returns documents based on grid coordinates and does not query for GeoJSON shapes.',
+``,'[ [ $0, $1 ], [ $2, $3 ] ]'],
+
+    ['$polygon','Specifies a polygon for a geospatial $geoWithin query on legacy coordinate pairs. The query returns pairs that are within the bounds of the polygon. The operator does not query for GeoJSON objects.',
+`db.places.find(
+  {
+     loc: {
+       $geoWithin: { $polygon: [ [ 0 , 0 ], [ 3 , 6 ], [ 6 , 0 ] ] }
+     }
+  }
+)`,'[ [ $0 , $1 ] ]'],
+    
+	//$uniqueDocs Deprecated since version 2.6: Geospatial queries no longer return duplicate results. The $uniqueDocs operator has no impact on results.
 	
 	//Array
-	['$all', 'Matches arrays that contain all elements specified in the query.'],
-	['$elemMatch', 'Selects documents if element in the array field matches all the specified $elemMatch conditions.'],
-	['$size', 'Selects documents if the array field is a specified size.'],
+	['$all', 'Matches arrays that contain all elements specified in the query.','db.inventory.find( { tags: { $all: [ "appliance", "school", "book" ] } } )','[$0]'],
+	['$elemMatch', 'Selects documents if element in the array field matches all the specified $elemMatch conditions.',
+`db.scores.find(
+   { results: { $elemMatch: { $gte: 80, $lt: 85 } } }
+)`,'{$0}'],
+	['$size', 'Selects documents if the array field is a specified size.','db.collection.find( { field: { $size: 2 } } );'],
 	
 	//Comments
-	['$comment', 'Adds a comment to a query predicate.'],
+	['$comment', 'Adds a comment to a query predicate.',
+`db.records.find(
+   {
+     x: { $mod: [ 2, 0 ] },
+     $comment: "Find even values."
+   }
+)`],
 	
 	//Projection Operators
 	
 	//['$',	'Projects the first element in an array that matches the query condition.'],
-	['$elemMatch', 'Projects the first element in an array that matches the specified $elemMatch condition.'],
-	['$meta', 'Projects the document’s score assigned during $text operation.'],
-	['$slice', 'Limits the number of elements projected from an array. Supports skip and limit slices.'],
-
+	//['$elemMatch', 'Projects the first element in an array that matches the specified $elemMatch condition.'],
+	['$meta', 'Projects the document’s score assigned during $text operation.',`db.collection.find(
+   <query>,
+   { score: { $meta: "textScore" } }
+).sort( { score: { $meta: "textScore" } } )`],
+	['$slice', 'Limits the number of elements projected from an array. Supports skip and limit slices.',
+`db.posts.find( {}, { comments: { $slice: 5 } } );
+db.posts.find( {}, { comments: { $slice: -5 } } );
+db.posts.find( {}, { comments: { $slice: [ 20, 10 ] } } )`]
 ]
 
 

@@ -93,7 +93,8 @@
     var aceTs=require("./aceTypescript");
 
     var tsEditor=aceTs.setupAceEditor({
-        fileName:"/guid.ts",
+        tsFilePath:"/tmp/guild.ts",
+        tsTypings:[__dirname+"/lodash.d.ts",__dirname+"/moment/moment-node.d.ts",__dirname+"/moment/moment.d.ts"],
         editorElem:'ts-editor'
     })
     
@@ -103,7 +104,7 @@
     jsEditor.$blockScrolling = Infinity;
 
     setInterval(function(){
-      jsEditor.getSession().setValue(tsEditor.transpile());
+      jsEditor.getSession().setValue(tsEditor.transpile());
     },1*1000);
    
 </script>

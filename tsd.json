@@ -10,6 +10,12 @@
     },
     "lodash/lodash.d.ts": {
       "commit": "a278148f0ec80f2aa9a2ec22f5089308f74dda47"
+    },
+    "moment/moment.d.ts": {
+      "commit": "9ce3cd4ded7536d40b8d65264ad729f442f5a052"
+    },
+    "moment/moment-node.d.ts": {
+      "commit": "9ce3cd4ded7536d40b8d65264ad729f442f5a052"
     }
   }
 }

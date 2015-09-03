@@ -3,7 +3,8 @@ var aceUtils = require("./aceUtils");
 var ts = require("./typescriptService");
 var tsCompleters = require('./typescriptCompleters');
 var mongoCompleters = require('./mongoCompleters');
-_ = require('lodash');
+var typescript = require("typescript");
+_ = require("lodash");
 //default theme twilight
 function setupAceEditor(params) {
     var langTools = ace.require("ace/ext/language_tools");
@@ -15,9 +16,18 @@ function setupAceEditor(params) {
     editor.setTheme("ace/theme/" + theme);
     editor.getSession().setMode("ace/mode/typescript");
     var tsServ = new ts.TypescriptService();
-    var fileName = params.fileName;
+    var fileName = params.tsFilePath;
+    //console.log(__dirname+"/lodash.d.ts");
+    var tsAndTypingFiles = [];
+    tsAndTypingFiles.push({ name: fileName, content: params.tsFileInitContent || "//////" });
+    params.tsTypings && params.tsTypings.forEach(function (it) {
+        if (it.path)
+            tsAndTypingFiles.push({ name: it.path, content: it.content || typescript.sys.readFile(it.path) });
+        else
+            tsAndTypingFiles.push({ name: it, content: typescript.sys.readFile(it.path) });
+    });
     //target 1= ES5
-    tsServ.setup([{ name: fileName, content: params.initFileContent || "//////" }], { target: 1, "module": "commonjs" });
+    tsServ.setup(tsAndTypingFiles, { target: 1, "module": "commonjs" });
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
     var syncStop = false;

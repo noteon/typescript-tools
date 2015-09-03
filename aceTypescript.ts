@@ -4,8 +4,10 @@ import aceUtils = require("./aceUtils");
 import ts = require("./typescriptService");
 import tsCompleters=require('./typescriptCompleters');
 import mongoCompleters=require('./mongoCompleters');
+import typescript=require("typescript");
 
-_ = require('lodash');
+import fs=require("fs");
+_ = require("lodash");
 
 interface AceTs{
    editor:AceAjax.Editor;
@@ -13,7 +15,7 @@ interface AceTs{
 }
 
 //default theme twilight
-export function setupAceEditor(params:{fileName:string, initFileContent?:string, editorElem:string|HTMLElement, editorTheme?:string}):AceTs {
+export function setupAceEditor(params:{tsFilePath:string; tsFileInitContent?:string, tsTypings?:(string|{path:string; content?:string})[], editorElem:string|HTMLElement, editorTheme?:string}):AceTs {
 
     var langTools = ace.require("ace/ext/language_tools");
     var AceRange = ace.require('ace/range').Range;
@@ -27,10 +29,23 @@ export function setupAceEditor(params:{fileName:string, initFileContent?:string,
     editor.getSession().setMode("ace/mode/typescript");
     
     var tsServ=new ts.TypescriptService();
-    var fileName=params.fileName;
+    var fileName=params.tsFilePath;
+    //console.log(__dirname+"/lodash.d.ts");
+    
+    var tsAndTypingFiles=[];
+    tsAndTypingFiles.push({ name: fileName, content: params.tsFileInitContent || "//////" });
+    
+    params.tsTypings && params.tsTypings.forEach((it:any)=>{
+        if (it.path)
+            tsAndTypingFiles.push({ name: it.path, content: it.content || typescript.sys.readFile(it.path) })
+        else
+            tsAndTypingFiles.push({ name: it, content: typescript.sys.readFile(it.path) });
+
+    })
+    
     
     //target 1= ES5
-    tsServ.setup([{ name: fileName, content: params.initFileContent || "//////" }], { target: 1, "module":"commonjs" });
+    tsServ.setup(tsAndTypingFiles, { target: 1, "module":"commonjs" });
 
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);

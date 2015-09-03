@@ -102,6 +102,7 @@ export class TypescriptService {
       var fullFileName=resolvePath(file.name);
       if (!file.content){
         var source = this.compilerHost.getSourceFile(fullFileName,options.target);
+        
         if (source) {
           seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
           this.fileCache.addFile(fullFileName,source.text);

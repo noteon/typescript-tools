@@ -303,6 +303,9 @@ var TypescriptService = (function () {
         var files = this.rootFiles.map(function (it) { return { name: it }; });
         return this.setup(files, this.compilerOptions);
     };
+    TypescriptService.prototype.transpile = function (fileName) {
+        return this.ls.getEmitOutput(fileName);
+    };
     return TypescriptService;
 })();
 exports.TypescriptService = TypescriptService;

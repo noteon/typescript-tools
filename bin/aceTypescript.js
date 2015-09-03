@@ -16,7 +16,8 @@ function setupAceEditor(params) {
     editor.getSession().setMode("ace/mode/typescript");
     var tsServ = new ts.TypescriptService();
     var fileName = params.fileName;
-    tsServ.setup([{ name: fileName, content: params.initFileContent || "//////" }], { module: "amd" });
+    //target 1= ES5
+    tsServ.setup([{ name: fileName, content: params.initFileContent || "//////" }], { target: 1, "module": "commonjs" });
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
     var syncStop = false;
@@ -134,6 +135,12 @@ function setupAceEditor(params) {
         }
     });
     require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName);
-    return editor;
+    return {
+        editor: editor,
+        transpile: function () {
+            var tsRst = tsServ.transpile(fileName);
+            return tsRst && tsRst.outputFiles && tsRst.outputFiles[0] && tsRst.outputFiles[0].text;
+        }
+    };
 }
 exports.setupAceEditor = setupAceEditor;

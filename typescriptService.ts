@@ -87,7 +87,7 @@ export class TypescriptService {
   /** load file and dependencies, prepare language service for queries */
   public setup(files:{name:string, content?:string}[],options) {
     this.fileCache = new FileCache();
-
+    
     this.rootFiles = files.map(file=>resolvePath(file.name));
 
     this.compilerOptions = options;
@@ -398,6 +398,10 @@ export class TypescriptService {
     
     
       return this.setup(files,this.compilerOptions);
+  }
+  
+  public transpile(fileName){
+    return this.ls.getEmitOutput(fileName)
   }
   
 

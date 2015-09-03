@@ -10,10 +10,21 @@
     body {
         overflow: hidden;
     }
-    #editor {
+    
+    #ts-editor {
         margin: 0;
-        position: absolute;
+        position: fixed;
+        height: 60%;
         top: 0;
+        /*bottom: 0;*/
+        left: 0;
+        right: 0;
+    }
+    
+    #js-editor {
+        margin: 0;
+        position: fixed;
+        height: 39%;
         bottom: 0;
         left: 0;
         right: 0;
@@ -47,30 +58,32 @@
 </head>
 <body>
 
-<pre id="editor">class Greeter {
-	greeting: string;
-	constructor (message: string) {
-		this.greeting = message;
-	}
-	greet() {
-		return "Hello, " + this.greeting;
-	}
-}
-
-var greeter = new Greeter("world");
-
-var button = document.createElement('button')
-button.innerText = "Say Hello"
-button.onclick = function() {
-	alert(greeter.greet())
+  <pre id="ts-editor">class Greeter {
+    greeting: string;
+    constructor (message: string) {
+      this.greeting = message;
+    }
+    greet() {
+      return "Hello, " + this.greeting;
+    }
+  }
   
-}
-
-document.body.appendChild(button)
-
-alert()
+  var greeter = new Greeter("world");
+  
+  var button = document.createElement('button')
+  button.innerText = "Say Hello"
+  button.onclick = function() {
+    alert(greeter.greet())
+    
+  }
+  
+  document.body.appendChild(button)
+  
+  alert()
 </pre>
 
+<pre id="js-editor">
+</pre>  
 
 <script src="../node_modules/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="../node_modules/ace-builds/src-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
@@ -79,10 +92,19 @@ alert()
 <script>
     var aceTs=require("./aceTypescript");
 
-    aceTs.setupAceEditor({
-        fileName:"/tmp/testfile.ts",
-        editorElem:'editor'    
+    var tsEditor=aceTs.setupAceEditor({
+        fileName:"/guid.ts",
+        editorElem:'ts-editor'
     })
+    
+     var jsEditor = ace.edit("js-editor");
+    jsEditor.setTheme("ace/theme/twilight");
+    jsEditor.getSession().setMode("ace/mode/javascript");
+    jsEditor.$blockScrolling = Infinity;
+
+    setInterval(function(){
+      jsEditor.getSession().setValue(tsEditor.transpile());
+    },1*1000);
    
 </script>
 

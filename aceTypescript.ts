@@ -7,8 +7,13 @@ import mongoCompleters=require('./mongoCompleters');
 
 _ = require('lodash');
 
+interface AceTs{
+   editor:AceAjax.Editor;
+   transpile:()=>any;    
+}
+
 //default theme twilight
-export function setupAceEditor(params:{fileName:string, initFileContent?:string, editorElem:string|HTMLElement, editorTheme?:string}):AceAjax.Editor {
+export function setupAceEditor(params:{fileName:string, initFileContent?:string, editorElem:string|HTMLElement, editorTheme?:string}):AceTs {
 
     var langTools = ace.require("ace/ext/language_tools");
     var AceRange = ace.require('ace/range').Range;
@@ -24,7 +29,8 @@ export function setupAceEditor(params:{fileName:string, initFileContent?:string,
     var tsServ=new ts.TypescriptService();
     var fileName=params.fileName;
     
-    tsServ.setup([{ name: fileName, content: params.initFileContent || "//////" }], { module: "amd" });
+    //target 1= ES5
+    tsServ.setup([{ name: fileName, content: params.initFileContent || "//////" }], { target: 1, "module":"commonjs" });
 
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
@@ -186,6 +192,13 @@ export function setupAceEditor(params:{fileName:string, initFileContent?:string,
 
     require('./quickAndDefinitionTooltip').setupTooltip(editor,tsServ,fileName);
     
-    return editor;
+    return {
+        editor,
+        transpile:()=>{
+           var tsRst=tsServ.transpile(fileName); 
+            
+           return tsRst && tsRst.outputFiles && tsRst.outputFiles[0] && tsRst.outputFiles[0].text;  
+        }
+    }
 }	
 	

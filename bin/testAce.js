@@ -306,7 +306,7 @@ function setupAceEditor() {
         var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
         if (!isModKeyPressed()) {
             var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
-            if (quickInfo && quickInfo.type) {
+            if (quickInfo && quickInfo.type && quickInfo.type !== "any") {
                 return highlightTypeAndComment(quickInfo);
             }
         }

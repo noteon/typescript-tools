@@ -415,7 +415,8 @@ export function setupAceEditor() {
 
         if (!isModKeyPressed()) {
             var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
-            if (quickInfo && quickInfo.type){                
+            
+            if (quickInfo && quickInfo.type && quickInfo.type!=="any"){//any is invalid tooltip                
                 return highlightTypeAndComment(quickInfo)
             }
         }else{

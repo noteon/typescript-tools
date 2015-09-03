@@ -305,4 +305,4 @@ var TypescriptService = (function () {
     };
     return TypescriptService;
 })();
-module.exports = TypescriptService;
+exports.TypescriptService = TypescriptService;

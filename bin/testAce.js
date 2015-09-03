@@ -1,9 +1,10 @@
 /// <reference path="./typings/tsd.d.ts" />
-/// <reference path="./typings/lodash/lodash.d.ts" />
-var TypescriptService = require('./typescriptService');
+var ts = require('./typescriptService');
 var aceUtils = require('./aceUtils');
+var tsCompleters = require('./typescriptCompleters');
+var mongoCompleters = require('./mongoCompleters');
 _ = require('lodash');
-var tsServ = new TypescriptService();
+var tsServ = new ts.TypescriptService();
 var FILE_NAME = "/tmp/inplaceText.ts";
 tsServ.setup([{ name: FILE_NAME, content: "//////" }], { module: "amd" });
 function setupAceEditor() {
@@ -120,179 +121,41 @@ function setupAceEditor() {
         //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     }
     ;
-    // uses http://rhymebrain.com/api.html
-    var typescriptCompleter = {
-        getCompletions: function (editor, session, pos, prefix, callback) {
-            //console.log('prefix',prefix);
-            if (prefix[0] === '$') {
-                var mongoOperators = require('./mongoOperators');
-                mongoOperators = mongoOperators.map(function (it) {
-                    it['isMongoOperator'] = true;
-                    return it;
-                });
-                //                mongoOperators=(_.sortBy(mongoOperators,'caption'));
-                return callback(null, mongoOperators);
-            }
-            // let doc = editor.getSession().getDocument()
-            // let prevChar;
-            // if (pos.column>0){
-            //     prevChar = session.getValue().charAt(aceUtils.getChars(doc,{row:pos.row, column:pos.column-1}));
-            // }
-            var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
-            //console.log("Enter Typescript Completer getCompletions",{pos, prefix, prevChar});
-            var helpItems = tsServ.getSignatureInfoByPos(FILE_NAME, posChar);
-            if (helpItems) {
-                var filterText = "";
-                var completionsItems = helpItems.items.map(function (it, idx) {
-                    var currentParam = undefined;
-                    var paramsText = (it.parameters.map(function (param, paramIdx) {
-                        if (paramIdx === helpItems.argumentIndex) {
-                            currentParam = param;
-                            return param.type;
-                        }
-                        else
-                            return param.type;
-                    }).join(it.separator));
-                    var value = it.prefix + paramsText + it.suffix;
-                    return {
-                        caption: value,
-                        exactMatch: true,
-                        value: value,
-                        meta: "",
-                        toolTip: currentParam && highlightTypeAndComment(currentParam),
-                        isHelpItem: true,
-                        score: (idx === helpItems.selectedItemIndex) ? 1 : 0
-                    };
-                });
-                //console.log("filterText",filterText);
-                // var quickInfo=tsServ.getQuickInfoByPos(FILE_NAME, posChar);
-                // console.log('QuickInfo',quickInfo);
-                window['langTools'] = langTools;
-                window['aceEditor'] = editor;
-                // var definitionInfo=tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
-                // console.log('definition', definitionInfo);
-                // setTimeout(() => {
-                //     if (editor.completer && editor.completer.completions) {
-                //         console.log("setFilterText",filterText);
-                //         editor.completer.completions.setFilter(filterText)
-                //         editor.completer.openPopup(editor, filterText, true);
-                //     }
-                // }, 0)
-                return callback(null, completionsItems);
-            }
-            //? why pos, not pos.row, pos.column
-            var completionsInfo = tsServ.getCompletionsInfoByPos(true, FILE_NAME, posChar);
-            if (!completionsInfo) {
-                //try to refresh
-                //console.log("try refresh tsServ",prefix); 
-                //有时候Script Snapshot会混乱掉，需要有个机制重新刷新 script
-                var startAt = Date.now();
-                //tsServ.updateScript(FILE_NAME, session.getValue());  
-                //console.log('updateScript elapsed', Date.now()-startAt);
-                return callback(null, []);
-            }
-            //console.log("completionsInfo",completionsInfo.entries);
-            var completions = completionsInfo.entries.map(function (it) {
-                return {
-                    name: it.name,
-                    value: it.name,
-                    meta: it.kind,
-                    //toolTip:it.type,
-                    pos: posChar,
-                    srcProps: it,
-                };
-            });
-            var matchFunc = function (elm) {
-                return elm.name.indexOf(prefix) == 0 ? 1 : 0;
-            };
-            var matchCompare = function (a, b) {
-                return matchFunc(b) - matchFunc(a);
-            };
-            var textCompare = function (a, b) {
-                if (a.name == b.name) {
-                    return 0;
-                }
-                else {
-                    return (a.name > b.name) ? 1 : -1;
-                }
-            };
-            var compare = function (a, b) {
-                var ret = matchCompare(a, b);
-                return (ret != 0) ? ret : textCompare(a, b);
-            };
-            completions = completions.sort(compare);
-            //console.log('getCompletionsInfoByPos elapsed', Date.now() - startAt);
-            //             kind: "method"
-            // kindModifiers: ""
-            // name: "greet"
-            // type: "(method) Greeter.greet(): string"
-            //console.log("completions",completions);
-            //console.log("prefix",prefix);
-            //console.log(session.getValue());
-            //if (prefix.length === 0) { callback(null, []); return }
-            startAt = Date.now();
-            callback(null, completions);
-            //console.log('completions callback elapsed', Date.now() - startAt);
-        },
-        getDocTooltip: function (item) {
-            if (item.isMongoOperator) {
-                //comment:string;
-                //example:string;
-                //docUrl:string;	
-                //require('shell').openExternal(${item.docUrl})
-                item.docHTML = highlightTypeAndComment({ type: item.example, docComment: item.comment }, false) + ("<p><a href='#' onmousedown=\"require('shell').openExternal('" + item.docUrl + "')\">view online help</a></p>");
-                return;
-            }
-            if (item.isHelpItem) {
-                item.docHTML = item.toolTip;
-                return;
-            }
-            else {
-                var detailInfo = tsServ.getCompletionEntryDetailsInfo(FILE_NAME, item.pos, item.name) || { type: "" };
-                if (detailInfo.type) {
-                    item.docHTML = highlightTypeAndComment(detailInfo);
-                }
-            }
-            // console.log('tooltip fired',item.srcProps);
-        }
-    };
     //langTools.snippetCompleter
     //langTools.setCompleters([]);
-    langTools.setCompleters([typescriptCompleter]);
+    var typeScriptCompleters = tsCompleters.getTypeScriptCompleters(tsServ, FILE_NAME);
+    var mongoFieldCompleter = mongoCompleters.getFieldCompleter(tsServ, FILE_NAME, function (scriptFile) {
+        return [{
+                caption: '_id',
+                value: '_id',
+                meta: "order-field",
+            },
+            {
+                caption: 'amount',
+                value: 'amount',
+                meta: "order-field",
+            },
+            {
+                caption: 'user.fname',
+                value: 'user.fname',
+                meta: "order-field",
+            },
+            {
+                caption: 'user.lname',
+                value: 'user.lname',
+                meta: "order-field",
+            }];
+    });
+    langTools.setCompleters([typeScriptCompleters.typeScriptParameterCompleter, typeScriptCompleters.typescriptAutoCompleter, mongoFieldCompleter, mongoCompleters.operatorsCompleter]);
+    //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);
     editor.setOptions({
         enableBasicAutocompletion: true,
     });
     editor.commands.on("afterExec", function (e) {
-        if (e.command.name == "insertstring" && /^[\w.\(\,\$]$/.test(e.args)) {
+        if (e.command.name == "insertstring" && /^[\w.\(\,\$\'\"]$/.test(e.args)) {
             editor.execCommand("startAutocomplete");
         }
     });
-    var highLightCode = function (code) {
-        if (hljs) {
-            return hljs.highlight('typescript', code, true).value;
-        }
-        else
-            return code;
-    };
-    var highlightTypeAndComment = function (info, typeFirst) {
-        if (typeFirst === void 0) { typeFirst = true; }
-        var docComment = "";
-        if (info.docComment) {
-            docComment = "<p class='hljs-comment'>" + info.docComment + "</p>";
-        }
-        var type = "";
-        if (info.type) {
-            var matches = info.type.match(/^(\(method\)|\(property\)) ?(.*)$/);
-            var prefix = "";
-            var content = info.type;
-            if (matches && matches.length === 3) {
-                prefix = "<span class='hljs-name'>" + matches[1] + " </span>";
-                content = matches[2];
-            }
-            type = prefix + highLightCode(content);
-        }
-        return typeFirst ? type + docComment : docComment + type;
-    };
     var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
     editor["tokenTooltip"] = new TokenTooltip(editor, function (editor, token, pos) {
         var isModKeyPressed = function () {
@@ -308,14 +171,14 @@ function setupAceEditor() {
         if (!isModKeyPressed()) {
             var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
             if (quickInfo && quickInfo.type && quickInfo.type !== "any") {
-                return highlightTypeAndComment(quickInfo);
+                return aceUtils.highlightTypeAndComment(quickInfo);
             }
         }
         else {
             var definitionInfo = tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
             //console.log('definitionInfo',definitionInfo);
             if (definitionInfo && definitionInfo.content)
-                return highLightCode(definitionInfo.content);
+                return aceUtils.highLightCode(definitionInfo.content);
         }
     });
 }

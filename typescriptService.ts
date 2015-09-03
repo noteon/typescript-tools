@@ -46,7 +46,7 @@ var EOL = require("os").EOL;
 /** TypeScript Services Server,
     an interactive commandline tool
     for getting info on .ts projects */
-class TypescriptService {
+export class TypescriptService {
   public compilerOptions: ts.CompilerOptions;
   public compilerHost: ts.CompilerHost;
   public lsHost : ts.LanguageServiceHost;
@@ -402,5 +402,3 @@ class TypescriptService {
   
 
 }
-
-export = TypescriptService;

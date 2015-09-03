@@ -1,4 +1,5 @@
 /// <reference path="./typings/tsd.d.ts" />
+declare var hljs: any;
 
 export var EOL = require("os").EOL;
 
@@ -35,3 +36,48 @@ export var getPosition = function(doc, chars) {
     column: chars - count
   };
 };
+
+//tsServ, typeScript Service, Session: aceSession
+export var getParameterHelpItems = (tsServ, fileName, session, pos) => {
+      let doc = session.getDocument()
+      let prevChar = session.getValue().charAt(getChars(doc, { row: pos.row, column: pos.column - 1 }));
+
+      if (!(prevChar === '(' || prevChar === ',')) return;
+
+      var posChar = tsServ.fileCache.lineColToPosition(fileName, pos.row + 1, pos.column + 1);
+
+      return tsServ.getSignatureInfoByPos(fileName, posChar);
+}
+
+
+export var highLightCode = (code) => {
+    if (hljs) {
+        return hljs.highlight('typescript', code, true).value;
+    } else
+        return code;
+};
+
+
+export  var highlightTypeAndComment = (info, typeFirst: boolean = true) => {
+        var docComment = "";
+        if (info.docComment) {
+            docComment = `<p class='hljs-comment'>${info.docComment}</p>`
+        }
+
+        var type = "";
+        if (info.type) {
+            var matches = info.type.match(/^(\(method\)|\(property\)) ?(.*)$/);
+            var prefix = "";
+            var content = info.type;
+            if (matches && matches.length === 3) {
+                prefix = `<span class='hljs-name'>${matches[1]} </span>`;
+                content = matches[2];
+            }
+
+            type = prefix + highLightCode(content);
+            // console.log('typeHtml',type);
+        }
+
+
+        return typeFirst ? type + docComment : docComment + type;
+    };

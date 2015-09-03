@@ -4,7 +4,7 @@ function getDocUrl(category, opName) {
     return "http://docs.mongodb.org/manual/reference/operator/" + category + "/" + op + "/";
 }
 var mongoOperators = [];
-var maxScore = 1000;
+var maxScore = -10000;
 var captionScoreMap = {};
 function addMongoOperators(category, operators) {
     operators.forEach(function (it) {
@@ -117,10 +117,10 @@ var updateOperators = [
         "db.products.update(\n   { _id: 1 },\n   { $mul: { price: 1.25 } }\n)", '{$0}'],
     ['$rename', 'Renames a field.',
         "db.students.update( { _id: 1 }, { $rename: { \"name.first\": \"name.fname\" } } )", '{$1}'],
-    ['$setOnInsert', '(New in version 2.4) Sets the value of a field if an update results in an insert of a document. Has no effect on update operations that modify existing documents.',
-        "db.products.update(\n  { _id: 1 },\n  {\n     $set: { item: \"apple\" },\n     $setOnInsert: { defaultQty: 100 }\n  },\n  { upsert: true }\n)", '{$0}'],
     ['$set', 'Sets the value of a field in a document.',
         "db.products.update(\n   { _id: 100 },\n   { $set: { \"details.make\": \"zzz\" } }\n)", '{$0}'],
+    ['$setOnInsert', '(New in version 2.4) Sets the value of a field if an update results in an insert of a document. Has no effect on update operations that modify existing documents.',
+        "db.products.update(\n  { _id: 1 },\n  {\n     $set: { item: \"apple\" },\n     $setOnInsert: { defaultQty: 100 }\n  },\n  { upsert: true }\n)", '{$0}'],
     ['$unset', 'Removes the specified field from a document.',
         "db.products.update(\n   { sku: \"unknown\" },\n   { $unset: { quantity: \"\", instock: \"\" } }\n)", '{$0:""}'],
     ['$min', 'Only updates the field if the specified value is less than the existing field value.', 'db.scores.update( { _id: 1 }, { $min: { lowScore: 150 } } )', '{$0}'],
@@ -132,11 +132,11 @@ var updateOperators = [
     ['$addToSet', 'Adds elements to an array only if they do not already exist in the set.',
         "db.inventory.update(\n   { _id: 2 },\n   { $addToSet: { tags: { $each: [ \"camera\", \"electronics\", \"accessories\" ] } } }\n )", '{$1}'],
     ['$pop', 'Removes the first or last item of an array.', 'db.students.update( { _id: 1 }, { $pop: { scores: 1 } } )', '{$1}'],
-    ['$pullAll', 'Removes all matching values from an array.', 'db.survey.update( { _id: 1 }, { $pullAll: { scores: [ 0, 5 ] } } )', '{$1}'],
     ['$pull', 'Removes all array elements that match a specified query.', 'db.profiles.update( { _id: 1 }, { $pull: { votes: { $gte: 6 } } } )', '{$1}'],
-    ['$pushAll', 'Deprecated since version 2.4: Use the $push operator with $each instead.'],
+    ['$pullAll', 'Removes all matching values from an array.', 'db.survey.update( { _id: 1 }, { $pullAll: { scores: [ 0, 5 ] } } )', '{$1}'],
     ['$push', 'Adds an item to an array.',
         "db.students.update(\n   { name: \"joe\" },\n   { $push: { scores: { $each: [ 90, 92, 85 ] } } }\n)", '{$1}'],
+    ['$pushAll', 'Deprecated since version 2.4: Use the $push operator with $each instead.'],
     //Modifiers
     ['$each', 'Modifies the $push and $addToSet operators to append multiple items for array updates.',
         "db.students.update(\n   { name: \"joe\" },\n   { $push: { scores: { $each: [ 90, 92, 85 ] } } }\n)", '[$1]'],

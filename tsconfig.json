@@ -13,6 +13,8 @@
 		"aceUtils.ts",
 		"aceTokenTooltip.ts",
 		"mongoOperators.ts",
+		"mongoCompleters.ts",
+		"typescriptCompleters.ts",
 		"testAce.ts"
 	]
 }

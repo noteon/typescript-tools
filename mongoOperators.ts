@@ -19,7 +19,7 @@ function getDocUrl(category,opName){
 var mongoOperators:MongoOp[]=[];
 
 
-let maxScore=1000;
+let maxScore=-10000;
 
 let captionScoreMap={
   
@@ -281,6 +281,11 @@ let updateOperators = [
 	['$rename', 'Renames a field.',
 `db.students.update( { _id: 1 }, { $rename: { "name.first": "name.fname" } } )`, '{$1}'],
 	
+	['$set', 'Sets the value of a field in a document.',
+`db.products.update(
+   { _id: 100 },
+   { $set: { "details.make": "zzz" } }
+)`,'{$0}'],
 	
 	['$setOnInsert', '(New in version 2.4) Sets the value of a field if an update results in an insert of a document. Has no effect on update operations that modify existing documents.',
 `db.products.update(
@@ -293,11 +298,6 @@ let updateOperators = [
 )`,'{$0}'],
 
 
-	['$set', 'Sets the value of a field in a document.',
-`db.products.update(
-   { _id: 100 },
-   { $set: { "details.make": "zzz" } }
-)`,'{$0}'],
 	
 	['$unset', 'Removes the specified field from a document.',
 `db.products.update(
@@ -332,18 +332,19 @@ let updateOperators = [
  
 	['$pop', 'Removes the first or last item of an array.','db.students.update( { _id: 1 }, { $pop: { scores: 1 } } )','{$1}'],
 	
-	
-	['$pullAll', 'Removes all matching values from an array.','db.survey.update( { _id: 1 }, { $pullAll: { scores: [ 0, 5 ] } } )','{$1}'],
-	
 	['$pull', 'Removes all array elements that match a specified query.','db.profiles.update( { _id: 1 }, { $pull: { votes: { $gte: 6 } } } )','{$1}'],
 	
-	['$pushAll', 'Deprecated since version 2.4: Use the $push operator with $each instead.'],
 	
+	['$pullAll', 'Removes all matching values from an array.','db.survey.update( { _id: 1 }, { $pullAll: { scores: [ 0, 5 ] } } )','{$1}'],
+  
 	['$push', 'Adds an item to an array.',
 `db.students.update(
    { name: "joe" },
    { $push: { scores: { $each: [ 90, 92, 85 ] } } }
 )`,'{$1}'],
+	
+	['$pushAll', 'Deprecated since version 2.4: Use the $push operator with $each instead.'],
+	
 
 	//Modifiers
 	['$each', 'Modifies the $push and $addToSet operators to append multiple items for array updates.',

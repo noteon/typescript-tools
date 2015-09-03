@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 ///<reference path='node_modules/typescript/bin/typescript.d.ts'/>
 var ts = require("typescript");
 var path = require("path");
-var TypescriptService = require("./typescriptService");
+var tsServ = require("./typescriptService");
 function resolvePath(rpath) {
     return switchToForwardSlashes(path.resolve(rpath));
 }
@@ -227,5 +227,5 @@ var TSSCmdListener = (function (_super) {
         return '"' + prefix + ' ' + this.rootFiles[0] + more + ', TSS listening.."';
     };
     return TSSCmdListener;
-})(TypescriptService);
+})(tsServ.TypescriptService);
 module.exports = TSSCmdListener;

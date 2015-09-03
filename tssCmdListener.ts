@@ -7,7 +7,7 @@
 
 import ts = require("typescript");
 import path = require("path");
-import TypescriptService=require("./typescriptService");
+import tsServ=require("./typescriptService");
 
 function resolvePath(rpath) {
   return switchToForwardSlashes(path.resolve(rpath));
@@ -35,7 +35,7 @@ interface Readline {
 var readline:Readline = require("./readline");
 
 
-class TSSCmdListener extends TypescriptService {
+class TSSCmdListener extends tsServ.TypescriptService {
 
 
   // /** flatten messageChain into string|string[] */

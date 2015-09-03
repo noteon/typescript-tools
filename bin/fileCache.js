@@ -47,7 +47,7 @@ var FileCache = (function () {
             this.fileNames.unshift(fileName);
         }
         this.fileNameToScript[fileName] = new harness.ScriptInfo(fileName, text);
-        console.log("addFile", fileName);
+        //console.log("addFile", fileName);
         this.snapshots[fileName] = new harness.ScriptSnapshot(this.getScriptInfo(fileName));
     };
     /**

@@ -1,28 +1,30 @@
 /// <reference path="./typings/tsd.d.ts" />
 
-import ts = require('./typescriptService');
-import aceUtils = require('./aceUtils');
+import aceUtils = require("./aceUtils");
+import ts = require("./typescriptService");
 import tsCompleters=require('./typescriptCompleters');
 import mongoCompleters=require('./mongoCompleters');
 
-
 _ = require('lodash');
 
-var tsServ = new ts.TypescriptService();
-
-var FILE_NAME = "/tmp/inplaceText.ts"
-
-tsServ.setup([{ name: FILE_NAME, content: "//////" }], { module: "amd" });
-
-export function setupAceEditor() {
+//default theme twilight
+export function setupAceEditor(params:{fileName:string, initFileContent?:string, editorElem:string|HTMLElement, editorTheme?:string}):AceAjax.Editor {
 
     var langTools = ace.require("ace/ext/language_tools");
     var AceRange = ace.require('ace/range').Range;
 
-    var editor = ace.edit("editor");
+    var editor = ace.edit(<any>params.editorElem);
     editor.setOptions({ enableBasicAutocompletion: false });
-    editor.setTheme("ace/theme/twilight");
+    editor.$blockScrolling = Infinity;
+    
+    var theme=params.editorTheme || 'twilight';
+    editor.setTheme(`ace/theme/${theme}`);
     editor.getSession().setMode("ace/mode/typescript");
+    
+    var tsServ=new ts.TypescriptService();
+    var fileName=params.fileName;
+    
+    tsServ.setup([{ name: fileName, content: params.initFileContent || "//////" }], { module: "amd" });
 
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
@@ -30,28 +32,7 @@ export function setupAceEditor() {
     var syncStop = false;
 
     function reloadDocument() {
-        //syncStop = true;
-        tsServ.updateScript(FILE_NAME, editor.getSession().getValue());
-        //syncStop = false;
-        // var errors = this.serviceShim.languageService.getScriptErrors("temp.ts", 100);
-        // var annotations = [];
-        // var self = this;
-        // this.sender.emit("compiled", this.compile(this.doc.getValue()));
-
-        // errors.forEach(function(error){
-        //     var pos = DocumentPositionUtil.getPosition(self.doc, error.minChar);
-        //     annotations.push({
-        //         row: pos.row,
-        //         column: pos.column,
-        //         text: error.message,
-        //         minChar:error.minChar,
-        //         limChar:error.limChar,
-        //         type: "error",
-        //         raw: error.message
-        //     });
-        // });
-
-        // this.sender.emit("compileErrors", annotations);
+        tsServ.updateScript(fileName, editor.getSession().getValue());
     };
 
     reloadDocument();
@@ -60,8 +41,8 @@ export function setupAceEditor() {
     function updateMarker(e: AceAjax.EditorChangeEvent) {
         var addPhase = phase => d => { d.phase = phase; return d };
 
-        var syntactic = tsServ.ls.getSyntacticDiagnostics(FILE_NAME);
-        var semantic = tsServ.ls.getSemanticDiagnostics(FILE_NAME);
+        var syntactic = tsServ.ls.getSyntacticDiagnostics(fileName);
+        var semantic = tsServ.ls.getSemanticDiagnostics(fileName);
         // this.ls.languageService.getEmitOutput(file).diagnostics;
         var errors = [].concat(syntactic.map(addPhase("Syntax"))
             , semantic.map(addPhase("Semantics")));
@@ -110,18 +91,7 @@ export function setupAceEditor() {
             });
         });
 
-        session.setAnnotations(annotations);
-            
-        //          row: number;
-
-        //  column: number;
-
-        //  text: string;
-
-        //  type: string;
-                  
-
-        //console.log('error',errors);
+        session.setAnnotations(annotations);           
     }
 
 
@@ -130,10 +100,9 @@ export function setupAceEditor() {
 
     function onChangeDocument(e: AceAjax.EditorChangeEvent) {
         //reloadDocument();
-        //console.log("onChangeDoc",e);
         if (!syncStop) {
             try {
-                syncTypeScriptServiceContent(FILE_NAME, e);
+                syncTypeScriptServiceContent(fileName, e);
 
                 var startAt = Date.now();
 
@@ -172,11 +141,8 @@ export function setupAceEditor() {
         //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     };
 
-    //langTools.snippetCompleter
-    //langTools.setCompleters([]);
-    
-    var typeScriptCompleters=tsCompleters.getTypeScriptCompleters(tsServ,FILE_NAME);
-    var mongoFieldCompleter=mongoCompleters.getFieldCompleter(tsServ,FILE_NAME,(scriptFile)=>{
+    var typeScriptCompleters=tsCompleters.getTypeScriptCompleters(tsServ,fileName);
+    var mongoFieldCompleter=mongoCompleters.getFieldCompleter(tsServ,fileName,(scriptFile)=>{
         return [{
                     caption: '_id',
                     value: '_id',
@@ -200,7 +166,8 @@ export function setupAceEditor() {
                 }];
     });
     
-    langTools.setCompleters([typeScriptCompleters.typeScriptParameterCompleter, typeScriptCompleters.typescriptAutoCompleter, mongoFieldCompleter, mongoCompleters.operatorsCompleter]);
+    langTools.setCompleters([typeScriptCompleters.typeScriptParameterCompleter, typeScriptCompleters.typescriptAutoCompleter,
+                             mongoFieldCompleter, mongoCompleters.operatorsCompleter]);
     
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);
     
@@ -217,34 +184,8 @@ export function setupAceEditor() {
     })
 
 
-
-    var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
-    editor["tokenTooltip"] = new TokenTooltip(editor, (editor, token, pos) => {
-        var isModKeyPressed = () => {
-            const commandKey = 91;
-            const ctrlKey = 17;
-            var os = require('os');
-            var modKey = (os.platform() === 'darwin') ? commandKey : ctrlKey;
-            var keymaster = require('keymaster');
-            return keymaster.isPressed(modKey);
-        }
-         
-        //console.log('show token tooltip',token,pos);
-        var posChar = tsServ.fileCache.lineColToPosition(FILE_NAME, pos.row + 1, pos.column + 1);
-
-        if (!isModKeyPressed()) {
-            var quickInfo = tsServ.getQuickInfoByPos(FILE_NAME, posChar);
-
-            if (quickInfo && quickInfo.type && quickInfo.type !== "any") {//any is invalid tooltip                
-                return aceUtils.highlightTypeAndComment(quickInfo)
-            }
-        } else {
-            var definitionInfo = tsServ.getDefinitionInfoByPos(FILE_NAME, posChar);
-            //console.log('definitionInfo',definitionInfo);
-            
-            if (definitionInfo && definitionInfo.content)
-                return aceUtils.highLightCode(definitionInfo.content)
-        }
-    });
+    require('./quickAndDefinitionTooltip').setupTooltip(editor,tsServ,fileName);
+    
+    return editor;
 }	
 	

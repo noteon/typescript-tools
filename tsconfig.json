@@ -15,6 +15,7 @@
 		"mongoOperators.ts",
 		"mongoCompleters.ts",
 		"typescriptCompleters.ts",
-		"testAce.ts"
+		"quickAndDefinitionTooltip.ts",
+		"aceTypescript.ts"
 	]
 }

@@ -44,6 +44,8 @@ exports.getTypeScriptCompleters = function (tsServ, scriptFileName) {
     var typescriptAutoCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
             var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
+            if (/^[0-9]$/.test(prefix[0]))
+                return callback(null, []);
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
                 return callback(null, []);
             }

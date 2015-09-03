@@ -189,6 +189,8 @@ export function setupAceEditor() {
                     return it;
                 })
                 
+//                mongoOperators=(_.sortBy(mongoOperators,'caption'));
+                
                 return callback(null, mongoOperators)
             }
             

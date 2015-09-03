@@ -130,6 +130,7 @@ function setupAceEditor() {
                     it['isMongoOperator'] = true;
                     return it;
                 });
+                //                mongoOperators=(_.sortBy(mongoOperators,'caption'));
                 return callback(null, mongoOperators);
             }
             // let doc = editor.getSession().getDocument()

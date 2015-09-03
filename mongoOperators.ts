@@ -8,6 +8,7 @@ interface MongoOp{
 	example:string;
   docUrl:string;
   meta:string;	
+  score:number;
 }
 
 function getDocUrl(category,opName){
@@ -17,6 +18,13 @@ function getDocUrl(category,opName){
 
 var mongoOperators:MongoOp[]=[];
 
+
+let maxScore=1000;
+
+let captionScoreMap={
+  
+}
+
 function addMongoOperators(category:string, operators:any[]) {
   operators.forEach((it)=>{
     
@@ -25,7 +33,6 @@ function addMongoOperators(category:string, operators:any[]) {
       opName=opName.slice(0,opName.indexOf('('));
       
     let snippetPart= it[3] || "";
-
     
     let op:MongoOp={
       caption:it[0],
@@ -34,8 +41,11 @@ function addMongoOperators(category:string, operators:any[]) {
       comment:it[1],
       example:it[2],
       docUrl:getDocUrl(category,opName),
-      meta:category
+      meta:category,
+      score: captionScoreMap[it[0]] || maxScore--
     }
+    
+    captionScoreMap[op.caption]=op.score;
     
     //console.log('op',op);    
     
@@ -52,7 +62,6 @@ function addMongoOperators(category:string, operators:any[]) {
 let queryOperators = [
 	//Query Selectors
     //Comparison
-	['$eq', '(New in version 3.0) values that are equal to a specified value. The $eq expression is equivalent to { field: <value> }.', 'db.inventory.find( { qty: { $eq: 20 } } )'],
   ['$gt', ' values that are greater than a specified value.','db.inventory.find( { qty: { $gt: 20 } } )'],
 	['$gte', ' values that are greater than or equal to a specified value.','db.inventory.find( { qty: { $gte: 20 } } )'],
 	['$lt', ' values that are less than a specified value.','db.inventory.find( { qty: { $lt: 20 } } )'],
@@ -60,6 +69,7 @@ let queryOperators = [
 	['$ne', ' all values that are not equal to a specified value.','db.inventory.find( { qty: { $ne: 20 } } )'],
 	['$in', ' any of the values specified in an array.', 'db.inventory.find( { qty: { $in: [ 5, 15 ] } } )', '[$0]'],
 	['$nin', ' none of the values specified in an array.','db.inventory.find( { qty: { $nin: [ 5, 15 ] } } )', '[$0]'],
+	['$eq', '(New in version 3.0) values that are equal to a specified value. The $eq expression is equivalent to { field: <value> }.', 'db.inventory.find( { qty: { $eq: 20 } } )'],
 	
 	//Logical
 	['$or', 'Joins query clauses with a logical OR returns all documents that match the conditions of either clause.'
@@ -1288,10 +1298,12 @@ db.collection.find().sort( { $natural: 1 } )`, '1']
 
 var  initMongoOperators=()=>{
   addMongoOperators('query',queryOperators);
-  addMongoOperators('projection',projectionOperator);
   addMongoOperators('update',updateOperators);
+  addMongoOperators('projection',projectionOperator);
   addMongoOperators('aggregation',aggregationOperators)
   addMongoOperators('meta',metaOperators);
+  
+  captionScoreMap={};
 }
 
 initMongoOperators();

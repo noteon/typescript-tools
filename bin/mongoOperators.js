@@ -334,11 +334,11 @@ var metaOperators = [
         "//The $natural operator uses the following syntax to return documents in the order they exist on disk:\ndb.collection.find().sort( { $natural: 1 } )", '1']
 ];
 var initMongoOperators = function () {
-    addMongoOperators('query-op', queryOperators);
-    addMongoOperators('projection-op', projectionOperator);
-    addMongoOperators('update-op', updateOperators);
-    addMongoOperators('aggregation-op', aggregationOperators);
-    addMongoOperators('meta-op', metaOperators);
+    addMongoOperators('query', queryOperators);
+    addMongoOperators('projection', projectionOperator);
+    addMongoOperators('update', updateOperators);
+    addMongoOperators('aggregation', aggregationOperators);
+    addMongoOperators('meta', metaOperators);
 };
 initMongoOperators();
 module.exports = mongoOperators;

@@ -1287,11 +1287,11 @@ db.collection.find().sort( { $natural: 1 } )`, '1']
 
 
 var  initMongoOperators=()=>{
-  addMongoOperators('query-op',queryOperators);
-  addMongoOperators('projection-op',projectionOperator);
-  addMongoOperators('update-op',updateOperators);
-  addMongoOperators('aggregation-op',aggregationOperators)
-  addMongoOperators('meta-op',metaOperators);
+  addMongoOperators('query',queryOperators);
+  addMongoOperators('projection',projectionOperator);
+  addMongoOperators('update',updateOperators);
+  addMongoOperators('aggregation',aggregationOperators)
+  addMongoOperators('meta',metaOperators);
 }
 
 initMongoOperators();

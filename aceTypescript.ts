@@ -10,8 +10,9 @@ import fs=require("fs");
 _ = require("lodash");
 
 interface AceTs{
-   editor:AceAjax.Editor;
-   transpile:()=>any;    
+   ts:ts.TypescriptService; 
+   transpile:()=>string;    
+   format:()=>string;
 }
 
 interface AceTsSetupParams{
@@ -193,13 +194,22 @@ export function setupAceEditor(params:AceTsSetupParams):AceTs {
 
     require('./quickAndDefinitionTooltip').setupTooltip(editor,tsServ,fileName);
     
-    return {
-        editor,
+    var rst= {
+        //editor,
+        ts:tsServ,
         transpile:()=>{
-           var tsRst=tsServ.transpile(fileName); 
+           return tsServ.transpile(fileName)  
+        },
+        format:()=>{
+            var newText=tsServ.format(fileName);
+            editor.setValue(newText);
             
-           return tsRst && tsRst.outputFiles && tsRst.outputFiles[0] && tsRst.outputFiles[0].text;  
+            return newText;
         }
     }
+    
+    editor["typescriptServ"]=rst;
+    
+    return rst;
 }	
 	

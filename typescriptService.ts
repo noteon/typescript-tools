@@ -403,8 +403,30 @@ export class TypescriptService {
   }
   
   public transpile(fileName){
-    return this.ls.getEmitOutput(fileName)
+    var tsRst=this.ls.getEmitOutput(fileName) 
+    
+    return tsRst && tsRst.outputFiles && tsRst.outputFiles[0] && tsRst.outputFiles[0].text;  
   }
-  
+
+  public createDefaultFormatCodeOptions(): ts.FormatCodeOptions {
+    return {
+        IndentSize: 4,
+        TabSize: 4,
+        NewLineCharacter: '\r\n',
+        ConvertTabsToSpaces: true,
+        InsertSpaceAfterCommaDelimiter: true,
+        InsertSpaceAfterSemicolonInForStatements: true,
+        InsertSpaceBeforeAndAfterBinaryOperators: true,
+        InsertSpaceAfterKeywordsInControlFlowStatements: true,
+        InsertSpaceAfterFunctionKeywordForAnonymousFunctions: false,
+        InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,
+        PlaceOpenBraceOnNewLineForFunctions: false,
+        PlaceOpenBraceOnNewLineForControlBlocks: false
+    };
+ }
+
+  public format(fileName,options?:ts.FormatCodeOptions){
+     return require('./tsFormatter')(fileName, this.fileCache.getScriptInfo(fileName).content);
+  }
 
 }

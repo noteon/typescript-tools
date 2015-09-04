@@ -124,12 +124,19 @@ function setupAceEditor(params) {
         }
     });
     require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName);
-    return {
-        editor: editor,
+    var rst = {
+        //editor,
+        ts: tsServ,
         transpile: function () {
-            var tsRst = tsServ.transpile(fileName);
-            return tsRst && tsRst.outputFiles && tsRst.outputFiles[0] && tsRst.outputFiles[0].text;
+            return tsServ.transpile(fileName);
+        },
+        format: function () {
+            var newText = tsServ.format(fileName);
+            editor.setValue(newText);
+            return newText;
         }
     };
+    editor["typescriptServ"] = rst;
+    return rst;
 }
 exports.setupAceEditor = setupAceEditor;

@@ -95,11 +95,12 @@
     var tsEditor=aceTs.setupAceEditor({
         tsFilePath:"/tmp/guild.ts",
         tsTypings:[__dirname+"/lodash.d.ts",__dirname+"/moment/moment-node.d.ts",__dirname+"/moment/moment.d.ts"],
+        editorTheme:"monokai",
         editorElem:'ts-editor'
     })
     
      var jsEditor = ace.edit("js-editor");
-    jsEditor.setTheme("ace/theme/twilight");
+    jsEditor.setTheme("ace/theme/monokai");
     jsEditor.getSession().setMode("ace/mode/javascript");
     jsEditor.$blockScrolling = Infinity;
 

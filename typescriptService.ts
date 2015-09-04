@@ -71,8 +71,9 @@ export class TypescriptService {
                               ,semantic.map(addPhase("Semantics")));
       });
       return errors;
-
   }
+  
+  
   
 
   /** flatten messageChain into string|string[] */

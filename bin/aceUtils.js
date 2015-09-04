@@ -7,8 +7,11 @@ exports.getLinesChars = function (lines) {
     });
     return count;
 };
-exports.getChars = function (doc, pos) {
-    return exports.getLinesChars(doc.getLines(0, pos.row - 1)) + pos.column;
+exports.getChars = function (docOrSession, pos) {
+    return exports.getLinesChars(docOrSession.getLines(0, pos.row - 1)) + pos.column;
+};
+exports.getPrevChar = function (docOrSession, pos) {
+    return docOrSession.getValue().charAt(exports.getChars(docOrSession, { row: pos.row, column: pos.column - 1 }));
 };
 exports.getPosition = function (doc, chars) {
     var count, i, line, lines, row;
@@ -33,8 +36,7 @@ exports.getPosition = function (doc, chars) {
 };
 //tsServ, typeScript Service, Session: aceSession
 exports.getParameterHelpItems = function (tsServ, fileName, session, pos) {
-    var doc = session.getDocument();
-    var prevChar = session.getValue().charAt(exports.getChars(doc, { row: pos.row, column: pos.column - 1 }));
+    var prevChar = exports.getPrevChar(session, pos);
     if (!(prevChar === '(' || prevChar === ','))
         return;
     var posChar = tsServ.fileCache.lineColToPosition(fileName, pos.row + 1, pos.column + 1);

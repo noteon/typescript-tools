@@ -7,33 +7,33 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
                 return callback(null, []);
             }
+            var prevChar = aceUtils.getPrevChar(session, pos);
+            var getCollectionName = function () {
+                var currentLine = session.getLine(pos.row);
+                var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*)\)/);
+                if (colMatches && colMatches[1])
+                    return colMatches[1].substring(1, colMatches[1].length - 1);
+                var dotMatches = currentLine.match(/[^\w]?db\.(.*)\.$/);
+                if (dotMatches && dotMatches[1])
+                    return colMatches[1];
+            };
+            var getFields = function () {
+                if (prevChar === ".") {
+                    return fieldsFetcher(getCollectionName());
+                }
+                else {
+                    return fieldsFetcher('');
+                }
+            };
             var score = -100000;
-            var collectionName = ""; //unimplement, need to find it
-            var fields = fieldsFetcher(scriptFileName).map(function (it) { return _.assign({ score: score }, it); });
-            // fields.push({
-            //     caption: '_id',
-            //     value: '_id',
-            //     meta: "order-field",
-            //     score: score
-            // });
-            // fields.push({
-            //     caption: 'amount',
-            //     value: 'amount',
-            //     meta: "order-field",
-            //     score: score
-            // });
-            // fields.push({
-            //     caption: 'user.fname',
-            //     value: 'user.fname',
-            //     meta: "order-field",
-            //     score: score
-            // });
-            // fields.push({
-            //     caption: 'user.lname',
-            //     value: 'user.lname',
-            //     meta: "order-field",
-            //     score: score
-            // });
+            var fields = getFields().map(function (it) {
+                return {
+                    caption: it.fieldName,
+                    value: it.fieldName,
+                    meta: it.collection,
+                    score: score
+                };
+            });
             callback(null, fields);
         }
     };

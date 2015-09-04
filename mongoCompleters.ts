@@ -4,50 +4,47 @@ import aceUtils = require("./aceUtils");
 import ts = require("./typescriptService");
 _=require("lodash");
 
-export var getFieldCompleter = (tsServ:ts.TypescriptService, scriptFileName:string, fieldsFetcher:(scriptFileName:string)=>{caption:string; value:string; meta:string}[]) => {
+export var getFieldCompleter = (tsServ:ts.TypescriptService, scriptFileName:string, fieldsFetcher:(scriptFileName:string)=>{fieldName:string; collection:string}[]) => {
 
     var fieldsCompleter = {
-        getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
+        getCompletions: function(editor:AceAjax.Editor, session:AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
                 return callback(null, [])
             }
             
-
+            let prevChar = aceUtils.getPrevChar(session, pos);
+            
+            var getCollectionName=()=>{
+                let currentLine= session.getLine(pos.row);
+                let  colMatches=currentLine.match(/[^\w]?db\.getCollection\((.*)\)/);
+                if (colMatches && colMatches[1])
+                   return colMatches[1].substring(1,colMatches[1].length-1);
+                   
+                let  dotMatches=currentLine.match(/[^\w]?db\.(.*)\.$/)
+                if (dotMatches && dotMatches[1])
+                   return colMatches[1];
+                       
+            }
+            
+            var getFields=()=>{
+                if (prevChar==="."){
+                   return fieldsFetcher(getCollectionName());
+                }else{
+                   return fieldsFetcher('');
+                }
+            }
+               
             let score = -100000;
             
-            let collectionName="";//unimplement, need to find it
+            let fields=getFields().map((it)=>{
+                return {
+                    caption:it.fieldName,
+                    value: it.fieldName,
+                    meta: it.collection,
+                    score
+                }
+            });
             
-            let fields=fieldsFetcher(scriptFileName).map((it)=>_.assign({score},it));
-
-            // fields.push({
-            //     caption: '_id',
-            //     value: '_id',
-            //     meta: "order-field",
-            //     score: score
-            // });
-
-            // fields.push({
-            //     caption: 'amount',
-            //     value: 'amount',
-            //     meta: "order-field",
-            //     score: score
-            // });
-
-            // fields.push({
-            //     caption: 'user.fname',
-            //     value: 'user.fname',
-            //     meta: "order-field",
-            //     score: score
-            // });
-
-            // fields.push({
-            //     caption: 'user.lname',
-            //     value: 'user.lname',
-            //     meta: "order-field",
-            //     score: score
-            // });
-
-
             callback(null, fields);
         }
     }

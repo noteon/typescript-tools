@@ -11,9 +11,14 @@ export var getLinesChars = function(lines) {
   return count;
 };
 
-export var getChars = function(doc, pos:AceAjax.Position) {
-  return getLinesChars(doc.getLines(0, pos.row - 1)) + pos.column;
+export var getChars = function(docOrSession, pos:AceAjax.Position) {
+  return getLinesChars(docOrSession.getLines(0, pos.row - 1)) + pos.column;
 }
+
+export var getPrevChar=function(docOrSession, pos:AceAjax.Position){
+  return docOrSession.getValue().charAt(getChars(docOrSession, { row: pos.row, column: pos.column - 1 }));
+}
+
 
 export var getPosition = function(doc, chars) {
   var count, i, line, lines, row;
@@ -39,8 +44,7 @@ export var getPosition = function(doc, chars) {
 
 //tsServ, typeScript Service, Session: aceSession
 export var getParameterHelpItems = (tsServ, fileName, session, pos) => {
-      let doc = session.getDocument()
-      let prevChar = session.getValue().charAt(getChars(doc, { row: pos.row, column: pos.column - 1 }));
+      let prevChar = getPrevChar(session,pos);
 
       if (!(prevChar === '(' || prevChar === ',')) return;
 

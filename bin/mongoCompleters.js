@@ -20,10 +20,9 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             var getFields = function () {
                 if (prevChar === ".") {
                     var colName = getCollectionName();
-                    if (!colName)
-                        return [];
-                    else
-                        return fieldsFetcher(getCollectionName());
+                    if (colName)
+                        fieldsFetcher(getCollectionName());
+                    return [];
                 }
                 else {
                     return fieldsFetcher('');

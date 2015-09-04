@@ -29,9 +29,10 @@ export var getFieldCompleter = (tsServ:ts.TypescriptService, scriptFileName:stri
             var getFields=()=>{
                 if (prevChar==="."){
                     var colName=getCollectionName();
-                    if (!colName) return []
-                    else
-                       return fieldsFetcher(getCollectionName());
+                    if (colName)  
+                       fieldsFetcher(getCollectionName());
+                       
+                    return []
                 }else{
                    return fieldsFetcher('');
                 }

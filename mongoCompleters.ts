@@ -22,13 +22,16 @@ export var getFieldCompleter = (tsServ:ts.TypescriptService, scriptFileName:stri
                    
                 let  dotMatches=currentLine.match(/[^\w]?db\.(.*)\.$/)
                 if (dotMatches && dotMatches[1])
-                   return colMatches[1];
+                   return dotMatches[1];
                        
             }
             
             var getFields=()=>{
                 if (prevChar==="."){
-                   return fieldsFetcher(getCollectionName());
+                    var colName=getCollectionName();
+                    if (!colName) return []
+                    else
+                       return fieldsFetcher(getCollectionName());
                 }else{
                    return fieldsFetcher('');
                 }

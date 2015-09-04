@@ -15,11 +15,15 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     return colMatches[1].substring(1, colMatches[1].length - 1);
                 var dotMatches = currentLine.match(/[^\w]?db\.(.*)\.$/);
                 if (dotMatches && dotMatches[1])
-                    return colMatches[1];
+                    return dotMatches[1];
             };
             var getFields = function () {
                 if (prevChar === ".") {
-                    return fieldsFetcher(getCollectionName());
+                    var colName = getCollectionName();
+                    if (!colName)
+                        return [];
+                    else
+                        return fieldsFetcher(getCollectionName());
                 }
                 else {
                     return fieldsFetcher('');

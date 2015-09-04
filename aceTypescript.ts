@@ -14,8 +14,16 @@ interface AceTs{
    transpile:()=>any;    
 }
 
+interface AceTsSetupParams{
+    tsFilePath:string;
+    tsFileInitContent?:string;
+    tsTypings?:(string|{path:string; content?:string})[];
+    editorElem:string|HTMLElement, editorTheme?:string;
+    dbFieldsFetcher:(collectionName?:string)=>{fieldName:string; collection:string}[];
+}
+
 //default theme twilight
-export function setupAceEditor(params:{tsFilePath:string; tsFileInitContent?:string, tsTypings?:(string|{path:string; content?:string})[], editorElem:string|HTMLElement, editorTheme?:string}):AceTs {
+export function setupAceEditor(params:AceTsSetupParams):AceTs {
 
     var langTools = ace.require("ace/ext/language_tools");
     var AceRange = ace.require('ace/range').Range;
@@ -163,29 +171,7 @@ export function setupAceEditor(params:{tsFilePath:string; tsFileInitContent?:str
     };
 
     var typeScriptCompleters=tsCompleters.getTypeScriptCompleters(tsServ,fileName);
-    var mongoFieldCompleter=mongoCompleters.getFieldCompleter(tsServ,fileName,(scriptFile)=>{
-        return [{
-                    caption: '_id',
-                    value: '_id',
-                    meta: "order-field",
-                },
-                {    
-                    caption: 'amount',
-                    value: 'amount',
-                    meta: "order-field",
-                },
-
-                {
-                    caption: 'user.fname',
-                    value: 'user.fname',
-                    meta: "order-field",
-                },
-                {
-                    caption: 'user.lname',
-                    value: 'user.lname',
-                    meta: "order-field",
-                }];
-    });
+    var mongoFieldCompleter=mongoCompleters.getFieldCompleter(tsServ,fileName, params.dbFieldsFetcher);
     
     langTools.setCompleters([typeScriptCompleters.typeScriptParameterCompleter, typeScriptCompleters.typescriptAutoCompleter,
                              mongoFieldCompleter, mongoCompleters.operatorsCompleter]);

@@ -111,28 +111,7 @@ function setupAceEditor(params) {
     }
     ;
     var typeScriptCompleters = tsCompleters.getTypeScriptCompleters(tsServ, fileName);
-    var mongoFieldCompleter = mongoCompleters.getFieldCompleter(tsServ, fileName, function (scriptFile) {
-        return [{
-                caption: '_id',
-                value: '_id',
-                meta: "order-field",
-            },
-            {
-                caption: 'amount',
-                value: 'amount',
-                meta: "order-field",
-            },
-            {
-                caption: 'user.fname',
-                value: 'user.fname',
-                meta: "order-field",
-            },
-            {
-                caption: 'user.lname',
-                value: 'user.lname',
-                meta: "order-field",
-            }];
-    });
+    var mongoFieldCompleter = mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher);
     langTools.setCompleters([typeScriptCompleters.typeScriptParameterCompleter, typeScriptCompleters.typescriptAutoCompleter,
         mongoFieldCompleter, mongoCompleters.operatorsCompleter]);
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);

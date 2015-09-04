@@ -96,8 +96,44 @@
         tsFilePath:"/tmp/guild.ts",
         tsTypings:[__dirname+"/lodash.d.ts",__dirname+"/moment/moment-node.d.ts",__dirname+"/moment/moment.d.ts"],
         editorTheme:"monokai",
-        editorElem:'ts-editor'
-    })
+        editorElem:'ts-editor',
+        dbFieldsFetcher: function (collectionName){
+          return [{
+                      fieldName: '_id',
+                      collection: "order",
+                  },
+                  {    
+                      fieldName: 'amount',
+                      collection: "order",
+                  },
+  
+                  {
+                      fieldName: 'user.fname',
+                      collection: "order",
+                  },
+                  
+                  {
+                      fieldName: 'user.lname',
+                      collection: "order",
+                  },
+                  
+                  {
+                      fieldName: 'fname',
+                      collection: "user",
+                  },
+                  
+                  {
+                      fieldName: 'lname',
+                      collection: "user",
+                  }
+                  
+                  ].filter(function(it){
+                    if (!collectionName) return true
+                    return collectionName===it.collection
+                  })
+  
+      }
+    });
     
      var jsEditor = ace.edit("js-editor");
     jsEditor.setTheme("ace/theme/monokai");

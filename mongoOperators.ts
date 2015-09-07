@@ -228,6 +228,11 @@ db.myCollection.find( { active: true, $where: function() { return obj.credits - 
 let projectionOperator = [
   //Projection Operators
   //['$',	'Projects the first element in an array that matches the query condition.'],
+  ['$slice', 'Limits the number of elements projected from an array. Supports skip and limit slices.',
+    `db.posts.find( {}, { comments: { $slice: 5 } } );
+db.posts.find( {}, { comments: { $slice: -5 } } );
+db.posts.find( {}, { comments: { $slice: [ 20, 10 ] } } )`, ''], 
+
 
   ['$elemMatch', '(New in version 2.2) Projects the first element in an array that matches the specified $elemMatch condition.',
     `db.schools.find( { zipcode: "63109" },
@@ -239,12 +244,7 @@ let projectionOperator = [
    { score: { $meta: "textScore" } }
 ).sort( { score: { $meta: "textScore" } } )`, '"${1:textScore}"'],
 
-  ['$slice', 'Limits the number of elements projected from an array. Supports skip and limit slices.',
-    `db.posts.find( {}, { comments: { $slice: 5 } } );
-db.posts.find( {}, { comments: { $slice: -5 } } );
-db.posts.find( {}, { comments: { $slice: [ 20, 10 ] } } )`]
-
-]
+];
 
 
 //category : update
@@ -347,7 +347,7 @@ let updateOperators = [
          $slice: -5
        }
      }
-   })`],
+   })`, ' '],
 
   ['$sort', '(New in version 2.4) Modifies the $push operator to reorder documents stored in an array.',
     `db.students.update(
@@ -1210,8 +1210,8 @@ db.collection.find().sort( { $natural: 1 } )`, '1']
 
 var initMongoOperators = () => {
   addMongoOperators('query', queryOperators);
-  addMongoOperators('update', updateOperators);
   addMongoOperators('projection', projectionOperator);
+  addMongoOperators('update', updateOperators);
   addMongoOperators('aggregation', aggregationOperators)
   addMongoOperators('meta', metaOperators);
 

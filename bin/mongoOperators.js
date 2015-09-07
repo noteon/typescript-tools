@@ -98,12 +98,12 @@ var queryOperators = [
 var projectionOperator = [
     //Projection Operators
     //['$',	'Projects the first element in an array that matches the query condition.'],
+    ['$slice', 'Limits the number of elements projected from an array. Supports skip and limit slices.',
+        "db.posts.find( {}, { comments: { $slice: 5 } } );\ndb.posts.find( {}, { comments: { $slice: -5 } } );\ndb.posts.find( {}, { comments: { $slice: [ 20, 10 ] } } )", ''],
     ['$elemMatch', '(New in version 2.2) Projects the first element in an array that matches the specified $elemMatch condition.',
         "db.schools.find( { zipcode: \"63109\" },\n                 { students: { $elemMatch: { school: 102 } } } )", '{$1}'],
     ['$meta', '(New in version 2.6) Projects the document’s score assigned during $text operation.',
         "db.collection.find(\n   <query>,\n   { score: { $meta: \"textScore\" } }\n).sort( { score: { $meta: \"textScore\" } } )", '"${1:textScore}"'],
-    ['$slice', 'Limits the number of elements projected from an array. Supports skip and limit slices.',
-        "db.posts.find( {}, { comments: { $slice: 5 } } );\ndb.posts.find( {}, { comments: { $slice: -5 } } );\ndb.posts.find( {}, { comments: { $slice: [ 20, 10 ] } } )"]
 ];
 //category : update
 //Update Operators
@@ -140,7 +140,7 @@ var updateOperators = [
     ['$each', 'Modifies the $push and $addToSet operators to append multiple items for array updates.',
         "db.students.update(\n   { name: \"joe\" },\n   { $push: { scores: { $each: [ 90, 92, 85 ] } } }\n)", '[$1]'],
     ['$slice', '(New in version 2.4) Modifies the $push operator to limit the size of updated arrays.',
-        "db.students.update({ _id: 1 },\n   {\n     $push: {\n       scores: {\n         $each: [ 80, 78, 86 ],\n         $slice: -5\n       }\n     }\n   })"],
+        "db.students.update({ _id: 1 },\n   {\n     $push: {\n       scores: {\n         $each: [ 80, 78, 86 ],\n         $slice: -5\n       }\n     }\n   })", ' '],
     ['$sort', '(New in version 2.4) Modifies the $push operator to reorder documents stored in an array.',
         "db.students.update(\n   { _id: 2 },\n   { $push: { tests: { $each: [ 40, 60 ], $sort: 1 } } }\n)", '1'],
     ['$position', '(New in version 2.6) Modifies the $push operator to specify the position in the array to add elements.',
@@ -338,8 +338,8 @@ var metaOperators = [
 ];
 var initMongoOperators = function () {
     addMongoOperators('query', queryOperators);
-    addMongoOperators('update', updateOperators);
     addMongoOperators('projection', projectionOperator);
+    addMongoOperators('update', updateOperators);
     addMongoOperators('aggregation', aggregationOperators);
     addMongoOperators('meta', metaOperators);
     captionScoreMap = {};

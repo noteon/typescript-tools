@@ -22,6 +22,14 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     var colName = getCollectionName();
                     if (colName)
                         fieldsFetcher(getCollectionName());
+                    else {
+                        var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
+                        var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar - 2);
+                        //console.log("quickInfo",quickInfo);
+                        if (quickInfo && quickInfo.type && /^.*\: any$/.test(quickInfo.type)) {
+                            return fieldsFetcher('');
+                        }
+                    }
                     return [];
                 }
                 else {

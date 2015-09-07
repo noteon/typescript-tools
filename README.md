@@ -15,6 +15,10 @@
 * $ bower install
 * $ npm install 
 
+## 编译
+
+* $ tsc
+
 ## 运行 demo
 
 * $ npm start

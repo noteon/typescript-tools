@@ -13,7 +13,8 @@
     "test",
     "tests"
   ],
-  "dependencies": {
+  "devDependencies": {
+    "ace-builds": "~1.2.0",
     "highlightjs": "~8.7.0"
   }
 }

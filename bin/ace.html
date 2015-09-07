@@ -91,13 +91,23 @@
 
 <script>
     var aceTs=require("./aceTypescript");
+    var lodashTypingFile=__dirname+"/lodash.d.ts";
+    var appendedMethod=false
 
     var tsEditor=aceTs.setupAceEditor({
         tsFilePath:"/tmp/guid.ts",
-        tsTypings:[__dirname+"/lodash.d.ts"],
+        tsTypings:[lodashTypingFile],
         editorTheme:"monokai",
         editorElem:'ts-editor',
         dbFieldsFetcher: function (collectionName){
+          // if (collectionName && !appendedMethod){
+          //    appendedMethod=true;
+          //    tsEditor.typescriptServ.ts.appendScriptContent(lodashTypingFile,["","interface String { toTestCapitalA:(a:string,b:number)=>string; }"]);
+          //    tsEditor.typescriptServ.ts.appendScriptContent(lodashTypingFile,["","interface String { toTestCapitalB:(a:string,b:number)=>string; }"]);
+             
+          //    console.log(tsEditor.typescriptServ.ts.fileCache.getScriptInfo(lodashTypingFile).content);
+          // }
+          
           return [{
                       fieldName: '_id',
                       collection: "order",

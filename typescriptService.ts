@@ -351,6 +351,14 @@ export class TypescriptService {
     this.fileCache.editScript(file, startPos, endPos, newLines.join(EOL));
   }
   
+  public appendScriptContent(file, newLines:string[]){
+    var script = this.fileCache.getScriptInfo(file);
+    var startPos= script.content.length;
+    var endPos=script.content.length;
+    
+    this.fileCache.editScript(file, startPos, endPos, newLines.join(EOL));
+  }
+  
   public getErrorsInfo(){
    
     

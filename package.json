@@ -1,6 +1,6 @@
 {
   "name": "ace-typescript-mongo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "TypeScript and mongodb for ace",
   "main" : "./bin/aceTypescript.js",
   "repository": {
@@ -22,6 +22,7 @@
     "typescript": "^1.5.3"
   },
   "scripts": {
-    "start": "electron ./bin/main.js"
+    "start": "electron ./bin/main.js",
+    "prepublish": "tsc && rm ./*.ts"
   }
 }

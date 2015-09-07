@@ -112,8 +112,12 @@ function setupAceEditor(params) {
     ;
     var typeScriptCompleters = tsCompleters.getTypeScriptCompleters(tsServ, fileName);
     var mongoFieldCompleter = mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher);
-    langTools.setCompleters([typeScriptCompleters.typeScriptParameterCompleter, typeScriptCompleters.typescriptAutoCompleter,
-        mongoFieldCompleter, mongoCompleters.operatorsCompleter]);
+    langTools.setCompleters([
+        mongoFieldCompleter,
+        mongoCompleters.operatorsCompleter,
+        typeScriptCompleters.typeScriptParameterCompleter,
+        typeScriptCompleters.typescriptAutoCompleter,
+    ]);
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);
     editor.setOptions({
         enableBasicAutocompletion: true,

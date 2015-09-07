@@ -93,7 +93,7 @@
     var aceTs=require("./aceTypescript");
 
     var tsEditor=aceTs.setupAceEditor({
-        tsFilePath:"/tmp/guild.ts",
+        tsFilePath:"/tmp/guid.ts",
         tsTypings:[__dirname+"/lodash.d.ts",__dirname+"/moment/moment-node.d.ts",__dirname+"/moment/moment.d.ts"],
         editorTheme:"monokai",
         editorElem:'ts-editor',
@@ -135,13 +135,14 @@
       }
     });
     
+    
      var jsEditor = ace.edit("js-editor");
     jsEditor.setTheme("ace/theme/monokai");
     jsEditor.getSession().setMode("ace/mode/javascript");
     jsEditor.$blockScrolling = Infinity;
 
     setInterval(function(){
-      jsEditor.getSession().setValue(tsEditor.transpile());
+      jsEditor.getSession().setValue(tsEditor.typescriptServ.transpile());
     },1*1000);
    
 </script>

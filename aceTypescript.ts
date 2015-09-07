@@ -2,29 +2,29 @@
 
 import aceUtils = require("./aceUtils");
 import ts = require("./typescriptService");
-import tsCompleters=require('./typescriptCompleters');
-import mongoCompleters=require('./mongoCompleters');
-import typescript=require("typescript");
+import tsCompleters = require('./typescriptCompleters');
+import mongoCompleters = require('./mongoCompleters');
+import typescript = require("typescript");
 
-import fs=require("fs");
+import fs = require("fs");
 _ = require("lodash");
 
-interface AceTs{
-   ts:ts.TypescriptService; 
-   transpile:()=>string;    
-   format:()=>string;
+interface AceTs {
+    ts: ts.TypescriptService;
+    transpile: () => string;
+    format: () => string;
 }
 
-interface AceTsSetupParams{
-    tsFilePath:string;
-    tsFileInitContent?:string;
-    tsTypings?:(string|{path:string; content?:string})[];
-    editorElem:string|HTMLElement, editorTheme?:string;
-    dbFieldsFetcher:(collectionName?:string)=>{fieldName:string; collection:string}[];
+interface AceTsSetupParams {
+    tsFilePath: string;
+    tsFileInitContent?: string;
+    tsTypings?: (string|{ path: string; content?: string })[];
+    editorElem: string|HTMLElement, editorTheme?: string;
+    dbFieldsFetcher: (collectionName?: string) => { fieldName: string; collection: string }[];
 }
 
 //default theme twilight
-export function setupAceEditor(params:AceTsSetupParams):AceTs {
+export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
 
     var langTools = ace.require("ace/ext/language_tools");
     var AceRange = ace.require('ace/range').Range;
@@ -32,19 +32,19 @@ export function setupAceEditor(params:AceTsSetupParams):AceTs {
     var editor = ace.edit(<any>params.editorElem);
     editor.setOptions({ enableBasicAutocompletion: false });
     editor.$blockScrolling = Infinity;
-    
-    var theme=params.editorTheme || 'twilight';
+
+    var theme = params.editorTheme || 'twilight';
     editor.setTheme(`ace/theme/${theme}`);
     editor.getSession().setMode("ace/mode/typescript");
-    
-    var tsServ=new ts.TypescriptService();
-    var fileName=params.tsFilePath;
+
+    var tsServ = new ts.TypescriptService();
+    var fileName = params.tsFilePath;
     //console.log(__dirname+"/lodash.d.ts");
     
-    var tsAndTypingFiles=[];
+    var tsAndTypingFiles = [];
     tsAndTypingFiles.push({ name: fileName, content: params.tsFileInitContent || "//////" });
-    
-    params.tsTypings && params.tsTypings.forEach((it:any)=>{
+
+    params.tsTypings && params.tsTypings.forEach((it: any) => {
         if (it.path)
             tsAndTypingFiles.push({ name: it.path, content: it.content || typescript.sys.readFile(it.path) })
         else
@@ -54,7 +54,7 @@ export function setupAceEditor(params:AceTsSetupParams):AceTs {
     
     
     //target 1= ES5
-    tsServ.setup(tsAndTypingFiles, { target: 1, "module":"commonjs" });
+    tsServ.setup(tsAndTypingFiles, { target: 1, "module": "commonjs" });
 
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
@@ -121,7 +121,7 @@ export function setupAceEditor(params:AceTsSetupParams):AceTs {
             });
         });
 
-        session.setAnnotations(annotations);           
+        session.setAnnotations(annotations);
     }
 
 
@@ -171,11 +171,11 @@ export function setupAceEditor(params:AceTsSetupParams):AceTs {
         //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     };
 
-    var typeScriptCompleters=tsCompleters.getTypeScriptCompleters(tsServ,fileName);
-    var mongoFieldCompleter=mongoCompleters.getFieldCompleter(tsServ,fileName, params.dbFieldsFetcher);
-    
+    var typeScriptCompleters = tsCompleters.getTypeScriptCompleters(tsServ, fileName);
+    var mongoFieldCompleter = mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher);
+
     langTools.setCompleters([typeScriptCompleters.typeScriptParameterCompleter, typeScriptCompleters.typescriptAutoCompleter,
-                             mongoFieldCompleter, mongoCompleters.operatorsCompleter]);
+        mongoFieldCompleter, mongoCompleters.operatorsCompleter]);
     
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);
     
@@ -192,24 +192,35 @@ export function setupAceEditor(params:AceTsSetupParams):AceTs {
     })
 
 
-    require('./quickAndDefinitionTooltip').setupTooltip(editor,tsServ,fileName);
-    
-    var rst= {
+    require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName);
+
+    var rst = {
         //editor,
-        ts:tsServ,
-        transpile:()=>{
-           return tsServ.transpile(fileName)  
+        ts: tsServ,
+        transpile: () => {
+            return tsServ.transpile(fileName)
         },
-        format:()=>{
-            var newText=tsServ.format(fileName);
+        format: () => {
+            var newText = tsServ.format(fileName);
             editor.setValue(newText);
-            
+
             return newText;
         }
     }
+
+    editor["typescriptServ"] = rst;
     
-    editor["typescriptServ"]=rst;
-    
-    return rst;
+    editor.commands.addCommand({
+        name: 'Format Code',
+        bindKey: { win: 'Alt-Shift-F', mac: 'Alt-Shift-F' },
+        exec: function(editor) {
+            //console.log("bindKey executed format Code");
+            editor["typescriptServ"].format();
+        }
+    });
+
+    require("./aceElectronContextMenu")(editor);
+
+    return editor;
 }	
 	

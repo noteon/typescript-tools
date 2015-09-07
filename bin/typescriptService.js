@@ -324,7 +324,7 @@ var TypescriptService = (function () {
         };
     };
     TypescriptService.prototype.format = function (fileName, options) {
-        return require('./tsFormatter')(fileName, this.fileCache.getScriptInfo(fileName).content);
+        return require('./tsFormatter')(fileName, this.fileCache.getScriptInfo(fileName).content, options);
     };
     return TypescriptService;
 })();

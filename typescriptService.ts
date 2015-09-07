@@ -426,7 +426,7 @@ export class TypescriptService {
  }
 
   public format(fileName,options?:ts.FormatCodeOptions){
-     return require('./tsFormatter')(fileName, this.fileCache.getScriptInfo(fileName).content);
+     return require('./tsFormatter')(fileName, this.fileCache.getScriptInfo(fileName).content, options);
   }
 
 }

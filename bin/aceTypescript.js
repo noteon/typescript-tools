@@ -137,6 +137,15 @@ function setupAceEditor(params) {
         }
     };
     editor["typescriptServ"] = rst;
-    return rst;
+    editor.commands.addCommand({
+        name: 'Format Code',
+        bindKey: { win: 'Alt-Shift-F', mac: 'Alt-Shift-F' },
+        exec: function (editor) {
+            //console.log("bindKey executed format Code");
+            editor["typescriptServ"].format();
+        }
+    });
+    require("./aceElectronContextMenu")(editor);
+    return editor;
 }
 exports.setupAceEditor = setupAceEditor;

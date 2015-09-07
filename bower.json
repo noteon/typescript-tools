@@ -1,0 +1,19 @@
+{
+  "name": "typescript-tools",
+  "version": "0.3.1",
+  "homepage": "https://github.com/noteon/typescript-tools",
+  "authors": [
+    "qinghai <noteon@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "highlightjs": "~8.7.0"
+  }
+}

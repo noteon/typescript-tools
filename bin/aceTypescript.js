@@ -133,7 +133,7 @@ function setupAceEditor(params) {
         format: function () {
             var newText = tsServ.format(fileName);
             editor.setValue(newText);
-            return newText;
+            return newText;  
         }
     };
     editor["typescriptServ"] = rst;

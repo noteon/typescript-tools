@@ -11,7 +11,7 @@
 ## 安装及依赖 (开发）
 
 * $ git clone git://github.com/noteon/typescript-tools.git
-* $ npm install -g electron bower
+* $ npm install -g electron bower typescript
 * $ bower install
 * $ npm install 
 

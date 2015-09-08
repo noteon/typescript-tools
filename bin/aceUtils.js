@@ -68,3 +68,9 @@ exports.highlightTypeAndComment = function (info, typeFirst) {
     }
     return typeFirst ? type + docComment : docComment + type;
 };
+exports.highlightTypeCommentAndHelp = function (type, docComment, docUrl) {
+    if (!docUrl)
+        return exports.highlightTypeAndComment({ type: type, docComment: docComment }, true);
+    else
+        return exports.highlightTypeAndComment({ type: type, docComment: docComment }, false) + ("<p><a href='#' onmousedown=\"require('shell').openExternal('" + docUrl + "')\">view online help</a></p>");
+};

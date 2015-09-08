@@ -85,3 +85,10 @@ export  var highlightTypeAndComment = (info, typeFirst: boolean = true) => {
 
         return typeFirst ? type + docComment : docComment + type;
     };
+
+export var highlightTypeCommentAndHelp=(type, docComment, docUrl?:string)=>{
+  if (!docUrl)
+      return highlightTypeAndComment({ type: type, docComment: docComment }, true) 
+    else
+     return highlightTypeAndComment({ type: type, docComment: docComment }, false)+  `<p><a href='#' onmousedown="require('shell').openExternal('${docUrl}')">view online help</a></p>`;
+}

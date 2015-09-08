@@ -20,7 +20,8 @@ interface AceTsSetupParams {
     tsFileInitContent?: string;
     tsTypings?: (string|{ path: string; content?: string })[];
     editorElem: string|HTMLElement, editorTheme?: string;
-    dbFieldsFetcher: (collectionName?: string) => { fieldName: string; collection: string }[];
+    dbFieldsFetcher?: (collectionName?: string) => { fieldName: string; collection: string }[];
+    helpUrlFetcher?:(methodDotName:string)=>string;//methodDotName like: " mongo.ICollection.find"
 }
 
 //default theme twilight
@@ -52,9 +53,10 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
 
     })
     
-    
     //target 1= ES5
-    tsServ.setup(tsAndTypingFiles, { target: 1, "module": "commonjs" });
+    let compilerOptions={ target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
+    
+    tsServ.setup(tsAndTypingFiles, compilerOptions);
 
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
@@ -171,14 +173,13 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
         //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     };
 
-    var typeScriptCompleters = tsCompleters.getTypeScriptCompleters(tsServ, fileName);
     var mongoFieldCompleter = mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher);
 
     langTools.setCompleters([
          mongoFieldCompleter,
          mongoCompleters.operatorsCompleter,
-         typeScriptCompleters.typeScriptParameterCompleter,
-         typeScriptCompleters.typescriptAutoCompleter,
+         tsCompleters.getTypescriptParameterCompleter(tsServ,fileName),
+         tsCompleters.getTypeScriptAutoCompleters(tsServ,fileName,params.helpUrlFetcher),
         ]);
     
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);
@@ -201,14 +202,24 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     var rst = {
         //editor,
         ts: tsServ,
-        transpile: () => {
-            return tsServ.transpile(fileName)
+        transpile: (forSelection?) => {
+            if (forSelection){
+              let selectedText=editor.getSession().doc.getTextRange(editor.selection.getRange());
+              //console.log('editor selectedText', selectedText);
+                
+              return typescript.transpile(selectedText,<any>compilerOptions)   
+            }else
+             return tsServ.transpile(fileName)
         },
         format: () => {
             var newText = tsServ.format(fileName);
             editor.setValue(newText);
 
             return newText;
+        },
+        
+        appendScriptContent:(scriptFile, lines:string[])=>{
+             return tsServ.appendScriptContent(scriptFile, lines);
         }
     }
 

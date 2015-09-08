@@ -1,6 +1,6 @@
 /// <reference path="./typings/tsd.d.ts" />
 var aceUtils = require('./aceUtils');
-exports.getTypeScriptCompleters = function (tsServ, scriptFileName) {
+exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
     var typeScriptParameterCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
             var helpItems = aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
@@ -40,6 +40,9 @@ exports.getTypeScriptCompleters = function (tsServ, scriptFileName) {
                 item.docHTML = item.toolTip;
         }
     };
+    return typeScriptParameterCompleter;
+};
+exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHelpUrlGetter) {
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
@@ -89,15 +92,29 @@ exports.getTypeScriptCompleters = function (tsServ, scriptFileName) {
             if (item.isAutoComplete) {
                 var detailInfo = tsServ.getCompletionEntryDetailsInfo(scriptFileName, item.pos, item.name) || { type: "" };
                 if (detailInfo && detailInfo.type) {
-                    item.docHTML = aceUtils.highlightTypeAndComment(detailInfo);
+                    var helpUrl = "";
+                    if (methodHelpUrlGetter) {
+                        var getMethodDotName = function () {
+                            if (detailInfo.kind === "method" || detailInfo.kind === "property") {
+                                var parts = detailInfo.type.split(" ");
+                                if (parts.length >= 2) {
+                                    var subParts = parts[1].split("(");
+                                    return (subParts[0] || "").trim();
+                                }
+                            }
+                            return "";
+                        };
+                        var methodDotName = getMethodDotName();
+                        if (methodDotName) {
+                            helpUrl = methodHelpUrlGetter(methodDotName);
+                        }
+                    }
+                    item.docHTML = aceUtils.highlightTypeCommentAndHelp(detailInfo.type, detailInfo.docComment, helpUrl);
                 }
                 else
                     item.docHTML = '';
             }
         }
     };
-    return {
-        typeScriptParameterCompleter: typeScriptParameterCompleter,
-        typescriptAutoCompleter: typescriptAutoCompleter
-    };
+    return typescriptAutoCompleter;
 };

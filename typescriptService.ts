@@ -433,8 +433,12 @@ export class TypescriptService {
     };
  }
 
-  public format(fileName,options?:ts.FormatCodeOptions){
-     return require('./tsFormatter')(fileName, this.fileCache.getScriptInfo(fileName).content, options);
+  public format(fileName,text?:string, options?:ts.FormatCodeOptions){
+    let content=text;
+    if (!content)
+        content=this.fileCache.getScriptInfo(fileName).content;
+    
+     return require('./tsFormatter')(fileName, content, options);
   }
 
 }

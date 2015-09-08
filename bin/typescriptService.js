@@ -329,8 +329,11 @@ var TypescriptService = (function () {
             PlaceOpenBraceOnNewLineForControlBlocks: false
         };
     };
-    TypescriptService.prototype.format = function (fileName, options) {
-        return require('./tsFormatter')(fileName, this.fileCache.getScriptInfo(fileName).content, options);
+    TypescriptService.prototype.format = function (fileName, text, options) {
+        var content = text;
+        if (!content)
+            content = this.fileCache.getScriptInfo(fileName).content;
+        return require('./tsFormatter')(fileName, content, options);
     };
     return TypescriptService;
 })();

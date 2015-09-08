@@ -63,7 +63,6 @@ exports.operatorsCompleter = {
     },
     getDocTooltip: function (item) {
         if (item.isMongoOperator)
-            item.docHTML = aceUtils.highlightTypeAndComment({ type: item.example, docComment: item.comment }, false) +
-                ("<p><a href='#' onmousedown=\"require('shell').openExternal('" + item.docUrl + "')\">view online help</a></p>");
+            item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
     }
 };

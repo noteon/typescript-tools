@@ -27,7 +27,8 @@ function setupAceEditor(params) {
             tsAndTypingFiles.push({ name: it, content: typescript.sys.readFile(it.path) });
     });
     //target 1= ES5
-    tsServ.setup(tsAndTypingFiles, { target: 1, "module": "commonjs" });
+    var compilerOptions = { target: 1 /* ES5 */, "module": 1 /* CommonJS */ };
+    tsServ.setup(tsAndTypingFiles, compilerOptions);
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
     var syncStop = false;
@@ -110,13 +111,12 @@ function setupAceEditor(params) {
         //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     }
     ;
-    var typeScriptCompleters = tsCompleters.getTypeScriptCompleters(tsServ, fileName);
     var mongoFieldCompleter = mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher);
     langTools.setCompleters([
         mongoFieldCompleter,
         mongoCompleters.operatorsCompleter,
-        typeScriptCompleters.typeScriptParameterCompleter,
-        typeScriptCompleters.typescriptAutoCompleter,
+        tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
+        tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
     ]);
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);
     editor.setOptions({
@@ -131,13 +131,22 @@ function setupAceEditor(params) {
     var rst = {
         //editor,
         ts: tsServ,
-        transpile: function () {
-            return tsServ.transpile(fileName);
+        transpile: function (forSelection) {
+            if (forSelection) {
+                var selectedText = editor.getSession().doc.getTextRange(editor.selection.getRange());
+                //console.log('editor selectedText', selectedText);
+                return typescript.transpile(selectedText, compilerOptions);
+            }
+            else
+                return tsServ.transpile(fileName);
         },
         format: function () {
             var newText = tsServ.format(fileName);
             editor.setValue(newText);
             return newText;
+        },
+        appendScriptContent: function (scriptFile, lines) {
+            return tsServ.appendScriptContent(scriptFile, lines);
         }
     };
     editor["typescriptServ"] = rst;

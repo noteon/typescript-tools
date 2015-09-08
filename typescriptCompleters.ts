@@ -3,8 +3,7 @@
 import aceUtils = require('./aceUtils');
 import ts = require('./typescriptService');
 
-export var getTypeScriptCompleters = (tsServ: ts.TypescriptService, scriptFileName: string) => {
-    
+export var getTypescriptParameterCompleter=(tsServ: ts.TypescriptService, scriptFileName: string)=>{
     var typeScriptParameterCompleter = {
         getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
             var helpItems = aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
@@ -51,7 +50,11 @@ export var getTypeScriptCompleters = (tsServ: ts.TypescriptService, scriptFileNa
         }
 
     }
-   
+    
+    return typeScriptParameterCompleter;
+}
+
+export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFileName: string, methodHelpUrlGetter?:(methodDotName:string)=>string) => {
     
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
@@ -112,7 +115,28 @@ export var getTypeScriptCompleters = (tsServ: ts.TypescriptService, scriptFileNa
             if (item.isAutoComplete) {
                 var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(scriptFileName, item.pos, item.name) || { type: "" };
                 if (detailInfo && detailInfo.type) {
-                    item.docHTML = aceUtils.highlightTypeAndComment(detailInfo);
+                    let helpUrl="";
+                    if (methodHelpUrlGetter){
+                        let getMethodDotName=():string=>{
+                            if (detailInfo.kind==="method" || detailInfo.kind==="property"){
+                            let parts=detailInfo.type.split(" ");
+                            if (parts.length>=2){
+                                let subParts=parts[1].split("(")
+                                return (subParts[0] || "").trim();
+                            }
+                            }
+                            
+                            return "";
+                        }
+                    
+                        let methodDotName=getMethodDotName();
+                        
+                        if (methodDotName){
+                            helpUrl=methodHelpUrlGetter(methodDotName);                         
+                        }
+                    }
+                    
+                    item.docHTML = aceUtils.highlightTypeCommentAndHelp(detailInfo.type, detailInfo.docComment, helpUrl);
                 }
                 else item.docHTML = '';
             }
@@ -120,9 +144,6 @@ export var getTypeScriptCompleters = (tsServ: ts.TypescriptService, scriptFileNa
         }
     }
 
-    return {
-        typeScriptParameterCompleter,
-        typescriptAutoCompleter
-    }
+    return typescriptAutoCompleter;
 }
     

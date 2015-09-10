@@ -138,14 +138,12 @@ function setupAceEditor(params) {
     var rst = {
         //editor,
         ts: tsServ,
-        transpile: function (forSelection) {
-            if (forSelection) {
-                var selectedText = editor.getSession().doc.getTextRange(editor.selection.getRange());
-                //console.log('editor selectedText', selectedText);
-                return typescript.transpile(selectedText, compilerOptions);
-            }
-            else
-                return tsServ.transpile(fileName);
+        transpile: function (transferFunc) {
+            var selectedText = editor.getSession().doc.getTextRange(editor.selection.getRange());
+            var src = selectedText ? selectedText : editor.getValue();
+            if (transferFunc)
+                src = transferFunc(src);
+            return typescript.transpile(src, compilerOptions);
         },
         format: function () {
             var newText = tsServ.format(fileName);

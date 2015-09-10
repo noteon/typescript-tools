@@ -209,14 +209,13 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     var rst = {
         //editor,
         ts: tsServ,
-        transpile: (forSelection?) => {
-            if (forSelection){
-              let selectedText=editor.getSession().doc.getTextRange(editor.selection.getRange());
-              //console.log('editor selectedText', selectedText);
-                
-              return typescript.transpile(selectedText,<any>compilerOptions)   
-            }else
-             return tsServ.transpile(fileName)
+        transpile: (transferFunc?:(src:string)=>string) => {
+            let selectedText=editor.getSession().doc.getTextRange(editor.selection.getRange());
+            let src=selectedText?selectedText:editor.getValue();
+            if (transferFunc)
+               src=transferFunc(src);
+            
+            return typescript.transpile(src,<any>compilerOptions)   
         },
         format: () => {
             var newText = tsServ.format(fileName);

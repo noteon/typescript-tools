@@ -85,3 +85,22 @@ export var operatorsCompleter = {
             item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
     }
 }
+
+
+export var shellCmdCompleter={
+    getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
+        let mongoShellCommands = require('./mongoShellCommands');
+
+        mongoShellCommands.map((it) => {
+            it.isMongoShellCommand = true;
+            return it
+        });
+
+        return callback(null, mongoShellCommands)
+    },
+
+    getDocTooltip: function(item) {
+        if (item.isMongoShellCommand)
+            item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+    }
+}

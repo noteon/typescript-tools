@@ -18,6 +18,7 @@
 		"quickAndDefinitionTooltip.ts",
 		"aceElectronContextMenu.ts",
 		"tsFormatter.ts",
+		"mongoShellCommands.ts",
 		"aceTypescript.ts"
 	]
 }

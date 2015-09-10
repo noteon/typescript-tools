@@ -97,6 +97,14 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
             var end = aceUtils.getPosition(doc, error.start + error.length);
             var range = new AceRange(start.row, start.column, end.row, end.column);
             
+            //ignore mongo command like: user db1
+            if (start.row===end.row){
+                var line=editor.getSession().getLine(start.row);
+                //console.log("error marker", line, start.row)
+                if (/^(help|use|show) ?$/.test(line) || /^(help|use|show) .*$/.test(line))
+                   return;
+            }
+            
             //console.log("session push marker",start.row,start.column);
             errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
             
@@ -178,6 +186,7 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     langTools.setCompleters([
          mongoFieldCompleter,
          mongoCompleters.operatorsCompleter,
+         mongoCompleters.shellCmdCompleter,
          tsCompleters.getTypescriptParameterCompleter(tsServ,fileName),
          tsCompleters.getTypeScriptAutoCompleters(tsServ,fileName,params.helpUrlFetcher),
         ]);

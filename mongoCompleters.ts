@@ -2,62 +2,62 @@
 
 import aceUtils = require("./aceUtils");
 import ts = require("./typescriptService");
-_=require("lodash");
+_ = require("lodash");
 
-export var getFieldCompleter = (tsServ:ts.TypescriptService, scriptFileName:string, fieldsFetcher:(scriptFileName:string)=>{fieldName:string; collection:string}[]) => {
+export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: string, fieldsFetcher: (scriptFileName: string) => { fieldName: string; collection: string }[]) => {
 
     var fieldsCompleter = {
-        getCompletions: function(editor:AceAjax.Editor, session:AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
+        getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
                 return callback(null, [])
             }
-            
+
             let prevChar = aceUtils.getPrevChar(session, pos);
-            
-            var getCollectionName=()=>{
-                let currentLine= session.getLine(pos.row);
-                let  colMatches=currentLine.match(/[^\w]?db\.getCollection\((.*)\)/);
+
+            var getCollectionName = () => {
+                let currentLine = session.getLine(pos.row);
+                let colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*)\)/);
                 if (colMatches && colMatches[1])
-                   return colMatches[1].substring(1,colMatches[1].length-1);
-                   
-                let  dotMatches=currentLine.match(/[^\w]?db\.(.*)\.$/)
+                    return colMatches[1].substring(1, colMatches[1].length - 1);
+
+                let dotMatches = currentLine.match(/[^\w]?db\.(.*)\.$/)
                 if (dotMatches && dotMatches[1])
-                   return dotMatches[1];
-                       
+                    return dotMatches[1];
+
             }
-            
-            var getFields=()=>{
-                if (prevChar==="."){
-                    var colName=getCollectionName();
-                    if (colName)  
-                       fieldsFetcher(getCollectionName());
-                    else{
-                        var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);    
-                        var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar-2);
+
+            var getFields = () => {
+                if (prevChar === ".") {
+                    var colName = getCollectionName();
+                    if (colName)
+                        fieldsFetcher(getCollectionName());
+                    else {
+                        var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
+                        var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar - 2);
                         //console.log("quickInfo",quickInfo);
         
-                        if  (quickInfo && quickInfo.type && /^.*\: any$/.test(quickInfo.type)) {
+                        if (quickInfo && quickInfo.type && /^.*\: any$/.test(quickInfo.type)) {
                             return fieldsFetcher('');
-                        }                                        
+                        }
                     }
-                       
+
                     return []
-                }else{
-                   return fieldsFetcher('');
+                } else {
+                    return fieldsFetcher('');
                 }
             }
-               
+
             let score = -100000;
-            
-            let fields=getFields().map((it)=>{
+
+            let fields = getFields().map((it) => {
                 return {
-                    caption:it.fieldName,
+                    caption: it.fieldName,
                     value: it.fieldName,
                     meta: it.collection,
                     score
                 }
             });
-            
+
             callback(null, fields);
         }
     }
@@ -87,20 +87,30 @@ export var operatorsCompleter = {
 }
 
 
-export var shellCmdCompleter={
-    getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
-        let mongoShellCommands = require('./mongoShellCommands');
+export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName: string, fieldsFetcher: (scriptFileName: string) => { fieldName: string; collection: string }[]) => {
 
-        mongoShellCommands.map((it) => {
-            it.isMongoShellCommand = true;
-            return it
-        });
+    var shellCmdCompleter = {
+        getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
+            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+                return callback(null, [])
+            }
 
-        return callback(null, mongoShellCommands)
-    },
+            let mongoShellCommands = require('./mongoShellCommands');
 
-    getDocTooltip: function(item) {
-        if (item.isMongoShellCommand)
-            item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+            mongoShellCommands.map((it) => {
+                it.isMongoShellCommand = true;
+                return it
+            });
+
+            return callback(null, mongoShellCommands)
+        },
+
+        getDocTooltip: function(item) {
+            if (item.isMongoShellCommand)
+                item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+        }
     }
+
+    return shellCmdCompleter
 }
+

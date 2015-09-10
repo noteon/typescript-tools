@@ -66,17 +66,23 @@ exports.operatorsCompleter = {
             item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
     }
 };
-exports.shellCmdCompleter = {
-    getCompletions: function (editor, session, pos, prefix, callback) {
-        var mongoShellCommands = require('./mongoShellCommands');
-        mongoShellCommands.map(function (it) {
-            it.isMongoShellCommand = true;
-            return it;
-        });
-        return callback(null, mongoShellCommands);
-    },
-    getDocTooltip: function (item) {
-        if (item.isMongoShellCommand)
-            item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
-    }
+exports.getShellCmdCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
+    var shellCmdCompleter = {
+        getCompletions: function (editor, session, pos, prefix, callback) {
+            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+                return callback(null, []);
+            }
+            var mongoShellCommands = require('./mongoShellCommands');
+            mongoShellCommands.map(function (it) {
+                it.isMongoShellCommand = true;
+                return it;
+            });
+            return callback(null, mongoShellCommands);
+        },
+        getDocTooltip: function (item) {
+            if (item.isMongoShellCommand)
+                item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+        }
+    };
+    return shellCmdCompleter;
 };

@@ -57,7 +57,7 @@ function setupAceEditor(params) {
             var range = new AceRange(start.row, start.column, end.row, end.column);
             //ignore mongo command like: user db1
             if (start.row === end.row) {
-                var line = editor.getSession().getLine(start.row);
+                var line = editor.getSession().getLine(start.row).trim();
                 //console.log("error marker", line, start.row)
                 if (/^(help|use|show) ?$/.test(line) || /^(help|use|show) .*$/.test(line))
                     return;
@@ -118,11 +118,10 @@ function setupAceEditor(params) {
         //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     }
     ;
-    var mongoFieldCompleter = mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher);
     langTools.setCompleters([
-        mongoFieldCompleter,
+        mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
-        mongoCompleters.shellCmdCompleter,
+        mongoCompleters.getShellCmdCompleter(tsServ, fileName, params.dbFieldsFetcher),
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
     ]);

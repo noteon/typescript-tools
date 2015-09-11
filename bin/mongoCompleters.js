@@ -8,20 +8,12 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                 return callback(null, []);
             }
             var prevChar = aceUtils.getPrevChar(session, pos);
-            var getCollectionName = function () {
-                var currentLine = session.getLine(pos.row);
-                var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*)\)/);
-                if (colMatches && colMatches[1])
-                    return colMatches[1].substring(1, colMatches[1].length - 1);
-                var dotMatches = currentLine.match(/[^\w]?db\.(.*)\.$/);
-                if (dotMatches && dotMatches[1])
-                    return dotMatches[1];
-            };
             var getFields = function () {
                 if (prevChar === ".") {
-                    var colName = getCollectionName();
+                    var currentLine = session.getLine(pos.row);
+                    var colName = aceUtils.getCollectionName(currentLine);
                     if (colName)
-                        fieldsFetcher(getCollectionName());
+                        fieldsFetcher(aceUtils.getCollectionName(currentLine));
                     else {
                         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
                         var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar - 2);

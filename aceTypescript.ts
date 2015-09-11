@@ -21,7 +21,7 @@ interface AceTsSetupParams {
     tsTypings?: (string|{ path: string; content?: string })[];
     editorElem: string|HTMLElement, editorTheme?: string;
     dbFieldsFetcher?: (collectionName?: string) => { fieldName: string; collection: string }[];
-    helpUrlFetcher?:(methodDotName:string)=>string;//methodDotName like: " mongo.ICollection.find"
+    helpUrlFetcher?: (methodDotName: string) => string;//methodDotName like: " mongo.ICollection.find"
 }
 
 //default theme twilight
@@ -54,8 +54,8 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     })
     
     //target 1= ES5
-    let compilerOptions={ target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
-    
+    let compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
+
     tsServ.setup(tsAndTypingFiles, compilerOptions);
 
     editor.addEventListener("change", onChangeDocument);
@@ -98,11 +98,11 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
             var range = new AceRange(start.row, start.column, end.row, end.column);
             
             //ignore mongo command like: user db1
-            if (start.row===end.row){
-                var line=editor.getSession().getLine(start.row).trim();
+            if (start.row === end.row) {
+                var line = editor.getSession().getLine(start.row).trim();
                 //console.log("error marker", line, start.row)
                 if (/^(help|use|show) ?$/.test(line) || /^(help|use|show) .*$/.test(line))
-                   return;
+                    return;
             }
             
             //console.log("session push marker",start.row,start.column);
@@ -173,6 +173,18 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
             end = end - (e.lines.join(aceUtils.EOL).length);
 
             tsServ.editScriptByPos(script, start, end, e.lines);
+
+            e.lines.forEach((line) => {
+                if (!line) return;
+                if (line.length<3) return; // db.
+                
+                var colName = aceUtils.getCollectionName(line);
+                // console.log("syncType",line, colName);
+
+                
+                if (colName)
+                    params.dbFieldsFetcher(aceUtils.getCollectionName(line));
+            })
         } else if (action == "remove") {
             var end = start + (e.lines.join(aceUtils.EOL).length)
 
@@ -182,12 +194,12 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     };
 
     langTools.setCompleters([
-         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
-         mongoCompleters.operatorsCompleter,
-         mongoCompleters.getShellCmdCompleter(tsServ, fileName, params.dbFieldsFetcher),
-         tsCompleters.getTypescriptParameterCompleter(tsServ,fileName),
-         tsCompleters.getTypeScriptAutoCompleters(tsServ,fileName,params.helpUrlFetcher),
-        ]);
+        mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
+        mongoCompleters.operatorsCompleter,
+        mongoCompleters.getShellCmdCompleter(tsServ, fileName, params.dbFieldsFetcher),
+        tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
+        tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
+    ]);
     
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);
     
@@ -209,13 +221,13 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     var rst = {
         //editor,
         ts: tsServ,
-        transpile: (transferFunc?:(src:string)=>string) => {
-            let selectedText=editor.getSession().doc.getTextRange(editor.selection.getRange());
-            let src=selectedText?selectedText:editor.getValue();
+        transpile: (transferFunc?: (src: string) => string) => {
+            let selectedText = editor.getSession().doc.getTextRange(editor.selection.getRange());
+            let src = selectedText ? selectedText : editor.getValue();
             if (transferFunc)
-               src=transferFunc(src);
-            
-            return typescript.transpile(src,<any>compilerOptions)   
+                src = transferFunc(src);
+
+            return typescript.transpile(src, <any>compilerOptions)
         },
         format: () => {
             var newText = tsServ.format(fileName);
@@ -223,14 +235,14 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
 
             return newText;
         },
-        
-        appendScriptContent:(scriptFile, lines:string[])=>{
-             return tsServ.appendScriptContent(scriptFile, lines);
+
+        appendScriptContent: (scriptFile, lines: string[]) => {
+            return tsServ.appendScriptContent(scriptFile, lines);
         }
     }
 
     editor["typescriptServ"] = rst;
-    
+
     editor.commands.addCommand({
         name: 'Format Code',
         bindKey: { win: 'Alt-Shift-F', mac: 'Alt-Shift-F' },

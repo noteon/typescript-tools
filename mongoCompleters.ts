@@ -14,23 +14,12 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
 
             let prevChar = aceUtils.getPrevChar(session, pos);
 
-            var getCollectionName = () => {
-                let currentLine = session.getLine(pos.row);
-                let colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*)\)/);
-                if (colMatches && colMatches[1])
-                    return colMatches[1].substring(1, colMatches[1].length - 1);
-
-                let dotMatches = currentLine.match(/[^\w]?db\.(.*)\.$/)
-                if (dotMatches && dotMatches[1])
-                    return dotMatches[1];
-
-            }
-
             var getFields = () => {
                 if (prevChar === ".") {
-                    var colName = getCollectionName();
+                    let currentLine = session.getLine(pos.row);
+                    var colName = aceUtils.getCollectionName(currentLine);
                     if (colName)
-                        fieldsFetcher(getCollectionName());
+                        fieldsFetcher(aceUtils.getCollectionName(currentLine));
                     else {
                         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
                         var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar - 2);

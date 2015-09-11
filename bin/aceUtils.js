@@ -74,3 +74,11 @@ exports.highlightTypeCommentAndHelp = function (type, docComment, docUrl) {
     else
         return exports.highlightTypeAndComment({ type: type, docComment: docComment }, false) + ("<p><a href='#' onmousedown=\"require('shell').openExternal('" + docUrl + "')\">view online help</a></p>");
 };
+exports.getCollectionName = function (currentLine) {
+    var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);
+    if (colMatches && colMatches[1])
+        return colMatches[1].substring(1, colMatches[1].length - 1);
+    var dotMatches = currentLine.match(/[^\w]?db\.(.*?)\..*$/);
+    if (dotMatches && dotMatches[1])
+        return dotMatches[1];
+};

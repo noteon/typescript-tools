@@ -110,6 +110,16 @@ function setupAceEditor(params) {
             var end = aceUtils.getChars(doc, e.end);
             end = end - (e.lines.join(aceUtils.EOL).length);
             tsServ.editScriptByPos(script, start, end, e.lines);
+            e.lines.forEach(function (line) {
+                if (!line)
+                    return;
+                if (line.length < 3)
+                    return; // db.
+                var colName = aceUtils.getCollectionName(line);
+                // console.log("syncType",line, colName);
+                if (colName)
+                    params.dbFieldsFetcher(aceUtils.getCollectionName(line));
+            });
         }
         else if (action == "remove") {
             var end = start + (e.lines.join(aceUtils.EOL).length);

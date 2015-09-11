@@ -61,8 +61,6 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
 
-    var syncStop = false;
-
     function reloadDocument() {
         tsServ.updateScript(fileName, editor.getSession().getValue());
     };
@@ -140,24 +138,22 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
 
     function onChangeDocument(e: AceAjax.EditorChangeEvent) {
         //reloadDocument();
-        if (!syncStop) {
-            try {
-                syncTypeScriptServiceContent(fileName, e);
+        try {
+            syncTypeScriptServiceContent(fileName, e);
 
-                var startAt = Date.now();
+            var startAt = Date.now();
 
-                var cursorRow = editor.getCursorPosition().row;
+            var cursorRow = editor.getCursorPosition().row;
 
-                if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
-                    debounceUpdateMarker(e)
-                } else
-                    throttledUpdateMarker(e)
+            if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
+                debounceUpdateMarker(e)
+            } else
+                throttledUpdateMarker(e)
                 
-                //console.log("update Error Markers", Date.now()-startAt);        
+            //console.log("update Error Markers", Date.now()-startAt);        
                 
-            } catch (ex) {
+        } catch (ex) {
 
-            }
         }
     }
     
@@ -176,7 +172,7 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
 
             e.lines.forEach((line) => {
                 if (!line) return;
-                if (line.length<3) return; // db.
+                if (line.length < 3) return; // db.
                 
                 var colName = aceUtils.getCollectionName(line);
                 // console.log("syncType",line, colName);

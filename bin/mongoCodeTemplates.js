@@ -49,14 +49,14 @@ var mongoUpdateTemplates = [
     //update$modifier
     {
         caption: "update",
-        snippet: "update(\n   { $2 },\n   { $set: { $3 } }\n)",
+        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } }\n)",
         comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
-        example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } }\n)",
+        example: "db.products.update(\n   { _id: 100 },\n   { \\$set: { quantity: 500 } }\n)",
         score: 1000
     },
     {
         caption: "update$set",
-        snippet: "update(\n   { $2 },\n   { $set: { $3 } }\n)",
+        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } }\n)",
         comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } }\n)",
         meta: "template",
@@ -64,23 +64,23 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "update$inc",
-        snippet: "update(\n   { $2 },\n   { $inc: { $3 } }\n)",
+        snippet: "update(\n   { $2 },\n   { \\$inc: { $3 } }\n)",
         comment: 'Modifies an existing document or documents in a collection. The $inc operator increments a field by a specified value.',
-        example: "db.products.update(\n   { sku: \"abc123\" },\n   { $inc: { quantity: -2, \"metrics.orders\": 1 } }\n)",
+        example: "db.products.update(\n   { sku: \"abc123\" },\n   { \\$inc: { quantity: -2, \"metrics.orders\": 1 } }\n)",
         meta: "template",
         score: 90,
     },
     {
         caption: "update$push",
-        snippet: "update(\n   { $2 },\n   { $push: { $3 } }\n)",
+        snippet: "update(\n   { $2 },\n   { \\$push: { $3 } }\n)",
         comment: 'Modifies an existing document or documents in a collection. $push adds the array field with the value as its element.',
-        example: "db.students.update(\n   { _id: 1 },\n   { $push: { scores: 89 } }\n)",
+        example: "db.students.update(\n   { _id: 1 },\n   { \\$push: { scores: 89 } }\n)",
         meta: "template",
         score: 90,
     },
     {
         caption: "update$addToSet",
-        snippet: "update(\n   { $2 },\n   { $addToSet: { $3 } }\n)",
+        snippet: "update(\n   { $2 },\n   { \\$addToSet: { $3 } }\n)",
         comment: 'Modifies an existing document or documents in a collection. The $addToSet operator adds a value to an array unless the value is already present, in which case $addToSet does nothing to that array.',
         example: "db.test.update(\n   { _id: 1 },\n   { $addToSet: {letters: [ \"c\", \"d\" ] } }\n)",
         meta: "template",
@@ -88,7 +88,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "upsert",
-        snippet: "update(\n   { $2 },\n   { $set: { $3 } },\n   { upsert: true}\n)",
+        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } },\n   { upsert: true}\n)",
         comment: ' An upsert updates the documentif found or inserts it if not. ',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } },\n   { upsert: true}\n)",
         meta: "template",
@@ -96,7 +96,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "update with multi option",
-        snippet: "update(\n   { $2 },\n   { $set: { $3 } },\n   { multi: true }\n)",
+        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } },\n   { multi: true }\n)",
         comment: 'update with multi option',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } },\n   { multi: true }\n)",
         meta: "template",
@@ -104,7 +104,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "update with upsert and multi options",
-        snippet: "update(\n   { $2 },\n   { $set: { $3 } },\n   { upsert:true, multi: true }\n)",
+        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } },\n   { upsert:true, multi: true }\n)",
         comment: 'Combine the upsert and multi Options',
         example: "db.books.update(\n   { item: \"EFG222\" },\n   { $set: { reorder: false, tags: [ \"literature\", \"translated\" ] } },\n   { upsert: true, multi: true }\n)",
         meta: "template",

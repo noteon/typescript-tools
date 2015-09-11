@@ -109,7 +109,9 @@ export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName:
     return shellCmdCompleter
 }
 
-export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, scriptFileName: string) => {
+let docUrlAssigned:boolean=false;
+
+export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, scriptFileName: string,  helpUrlFetcher?: (methodDotName: string) => string) => {
 
     var collectionMethodsCompleter = {
         getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
@@ -119,7 +121,19 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
 
             let currentLine = session.getLine(pos.row);
             let hasDot = currentLine.indexOf('.') > -1;
+            
+            
             let templates = require('./mongoCodeTemplates');
+            
+            if (!docUrlAssigned){
+                templates=templates.map((it)=>{
+                    if (helpUrlFetcher)
+                        it.docUrl=helpUrlFetcher(it.methodDotName);
+                        
+                    return it;
+                });
+                docUrlAssigned=true;
+            }
 
             if (hasDot) {
                 let posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);

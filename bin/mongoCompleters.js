@@ -81,7 +81,8 @@ exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
     };
     return shellCmdCompleter;
 };
-exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName) {
+var docUrlAssigned = false;
+exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUrlFetcher) {
     var collectionMethodsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
@@ -90,6 +91,14 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName) {
             var currentLine = session.getLine(pos.row);
             var hasDot = currentLine.indexOf('.') > -1;
             var templates = require('./mongoCodeTemplates');
+            if (!docUrlAssigned) {
+                templates = templates.map(function (it) {
+                    if (helpUrlFetcher)
+                        it.docUrl = helpUrlFetcher(it.methodDotName);
+                    return it;
+                });
+                docUrlAssigned = true;
+            }
             if (hasDot) {
                 var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
                 var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);

@@ -21,7 +21,7 @@ interface AceTsSetupParams {
     tsTypings?: (string|{ path: string; content?: string })[];
     editorElem: string|HTMLElement, editorTheme?: string;
     dbFieldsFetcher?: (collectionName?: string) => { fieldName: string; collection: string }[];
-    helpUrlFetcher?: (methodDotName: string) => string;//methodDotName like: " mongo.ICollection.find"
+    helpUrlFetcher?: (methodDotName: string) => string;//methodDotName like: "mongo.ICollection.find"
 }
 
 //default theme twilight
@@ -193,7 +193,7 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),
-        mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName),
+        mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName, params.helpUrlFetcher),
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
     ]);

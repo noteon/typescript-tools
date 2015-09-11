@@ -364,10 +364,13 @@ var mongoInsertTemplates = [
 
 let mongoCodeTemplates=[];
 
-let addMongoCodeTemplates=(templates:any[])=>{
+
+
+let addMongoCodeTemplates=(mongoMethod,templates:any[])=>{
     let theTmpls=templates.map((it)=>{
           it.meta="code template"
           it.isMongoTemplateCommand=true;
+          it.methodDotName="mongo.ICollection."+mongoMethod;  //for help url
           
           return it;
     })  
@@ -376,14 +379,14 @@ let addMongoCodeTemplates=(templates:any[])=>{
 }
 
 let initMongoCodeTemplates=()=>{
-      addMongoCodeTemplates(mongoFindTemplates);
-      addMongoCodeTemplates(mongoFindOneTemplates);
-      addMongoCodeTemplates(mongoFindAndModifyTemplates);
-      addMongoCodeTemplates(mongoInsertTemplates);
-      addMongoCodeTemplates(mongoUpdateTemplates);
-      addMongoCodeTemplates(mongoDistinctTemplates);
-      addMongoCodeTemplates(mongoRemoveTemplates);
-      addMongoCodeTemplates(mongoDistinctTemplates);
+      addMongoCodeTemplates("find",mongoFindTemplates);
+      addMongoCodeTemplates("findOne",mongoFindOneTemplates);
+      addMongoCodeTemplates("findAndModify",mongoFindAndModifyTemplates);
+      addMongoCodeTemplates("insert",mongoInsertTemplates);
+      addMongoCodeTemplates("update",mongoUpdateTemplates);
+      addMongoCodeTemplates("distinct",mongoDistinctTemplates);
+      addMongoCodeTemplates("remove",mongoRemoveTemplates);
+      addMongoCodeTemplates("mapReduce",mongoMapReduceTemplates);
 }
 initMongoCodeTemplates();
 

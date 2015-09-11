@@ -178,23 +178,24 @@ var mongoInsertTemplates = [
     }
 ];
 var mongoCodeTemplates = [];
-var addMongoCodeTemplates = function (templates) {
+var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
         it.meta = "code template";
         it.isMongoTemplateCommand = true;
+        it.methodDotName = "mongo.ICollection." + mongoMethod; //for help url
         return it;
     });
     mongoCodeTemplates = mongoCodeTemplates.concat(templates);
 };
 var initMongoCodeTemplates = function () {
-    addMongoCodeTemplates(mongoFindTemplates);
-    addMongoCodeTemplates(mongoFindOneTemplates);
-    addMongoCodeTemplates(mongoFindAndModifyTemplates);
-    addMongoCodeTemplates(mongoInsertTemplates);
-    addMongoCodeTemplates(mongoUpdateTemplates);
-    addMongoCodeTemplates(mongoDistinctTemplates);
-    addMongoCodeTemplates(mongoRemoveTemplates);
-    addMongoCodeTemplates(mongoDistinctTemplates);
+    addMongoCodeTemplates("find", mongoFindTemplates);
+    addMongoCodeTemplates("findOne", mongoFindOneTemplates);
+    addMongoCodeTemplates("findAndModify", mongoFindAndModifyTemplates);
+    addMongoCodeTemplates("insert", mongoInsertTemplates);
+    addMongoCodeTemplates("update", mongoUpdateTemplates);
+    addMongoCodeTemplates("distinct", mongoDistinctTemplates);
+    addMongoCodeTemplates("remove", mongoRemoveTemplates);
+    addMongoCodeTemplates("mapReduce", mongoMapReduceTemplates);
 };
 initMongoCodeTemplates();
 module.exports = mongoCodeTemplates;

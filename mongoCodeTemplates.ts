@@ -84,13 +84,13 @@ var mongoUpdateTemplates = [
             snippet: 
 `update(
    { $2 },
-   { $set: { $3 } }
+   { \\$set: { $3 } }
 )`,
             comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
             example:
 `db.products.update(
    { _id: 100 },
-   { $set: { quantity: 500 } }
+   { \\$set: { quantity: 500 } }
 )`,
             score:1000
       },
@@ -100,7 +100,7 @@ var mongoUpdateTemplates = [
             snippet: 
 `update(
    { $2 },
-   { $set: { $3 } }
+   { \\$set: { $3 } }
 )`,
             comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
             example:
@@ -118,13 +118,13 @@ var mongoUpdateTemplates = [
             snippet: 
 `update(
    { $2 },
-   { $inc: { $3 } }
+   { \\$inc: { $3 } }
 )`,
             comment: 'Modifies an existing document or documents in a collection. The $inc operator increments a field by a specified value.',
             example:
 `db.products.update(
    { sku: "abc123" },
-   { $inc: { quantity: -2, "metrics.orders": 1 } }
+   { \\$inc: { quantity: -2, "metrics.orders": 1 } }
 )`,
             meta: "template",
             score:90,
@@ -136,13 +136,13 @@ var mongoUpdateTemplates = [
             snippet:
 `update(
    { $2 },
-   { $push: { $3 } }
+   { \\$push: { $3 } }
 )`,
             comment: 'Modifies an existing document or documents in a collection. $push adds the array field with the value as its element.',
             example:
 `db.students.update(
    { _id: 1 },
-   { $push: { scores: 89 } }
+   { \\$push: { scores: 89 } }
 )`,
             meta: "template",
             score:90,
@@ -154,7 +154,7 @@ var mongoUpdateTemplates = [
             snippet:
 `update(
    { $2 },
-   { $addToSet: { $3 } }
+   { \\$addToSet: { $3 } }
 )`,
             comment: 'Modifies an existing document or documents in a collection. The $addToSet operator adds a value to an array unless the value is already present, in which case $addToSet does nothing to that array.',
             example:
@@ -173,7 +173,7 @@ var mongoUpdateTemplates = [
             snippet:
 `update(
    { $2 },
-   { $set: { $3 } },
+   { \\$set: { $3 } },
    { upsert: true}
 )`,
             comment: ' An upsert updates the documentif found or inserts it if not. ',
@@ -193,7 +193,7 @@ var mongoUpdateTemplates = [
             snippet:
 `update(
    { $2 },
-   { $set: { $3 } },
+   { \\$set: { $3 } },
    { multi: true }
 )`,
             comment: 'update with multi option',
@@ -213,7 +213,7 @@ var mongoUpdateTemplates = [
             snippet:
 `update(
    { $2 },
-   { $set: { $3 } },
+   { \\$set: { $3 } },
    { upsert:true, multi: true }
 )`,
             comment: 'Combine the upsert and multi Options',

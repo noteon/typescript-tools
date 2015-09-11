@@ -107,6 +107,8 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             };
 
             completions = completions.sort(compare);
+            
+            
 
             callback(null, completions)
         },

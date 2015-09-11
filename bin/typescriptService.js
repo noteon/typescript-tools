@@ -226,7 +226,8 @@ var TypescriptService = (function () {
                     var prefix = source.slice(startPos, pos);
                     info["prefix"] = prefix;
                     var len = prefix.length;
-                    info.entries = info.entries.filter(function (e) { return e.name.substr(0, len) === prefix; });
+                    //console.log("info.entries",info.entries);
+                    info.entries = info.entries.filter(function (e) { return e.name.substr(0, len).toLowerCase() === prefix.toLowerCase(); });
                 }
             })();
         }

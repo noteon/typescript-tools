@@ -94,6 +94,12 @@ export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName:
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
                 return callback(null, [])
             }
+            
+            let currentLine = session.getLine(pos.row).trim();
+            
+            if  (currentLine && (!/^\b.*\b$/.test(currentLine)))
+                 return callback(null,[]);
+            
 
             let mongoShellCommands = require('./mongoShellCommands');
 

@@ -72,6 +72,9 @@ exports.getShellCmdCompleter = function (tsServ, scriptFileName, fieldsFetcher) 
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
                 return callback(null, []);
             }
+            var currentLine = session.getLine(pos.row).trim();
+            if (currentLine && (!/^\b.*\b$/.test(currentLine)))
+                return callback(null, []);
             var mongoShellCommands = require('./mongoShellCommands');
             mongoShellCommands.map(function (it) {
                 it.isMongoShellCommand = true;

@@ -192,7 +192,8 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     langTools.setCompleters([
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
-        mongoCompleters.getShellCmdCompleter(tsServ, fileName, params.dbFieldsFetcher),
+        mongoCompleters.getShellCmdCompleter(tsServ, fileName),
+        mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName),
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
     ]);

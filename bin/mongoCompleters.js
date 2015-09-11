@@ -58,7 +58,7 @@ exports.operatorsCompleter = {
             item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
     }
 };
-exports.getShellCmdCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
+exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
     var shellCmdCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
@@ -80,4 +80,45 @@ exports.getShellCmdCompleter = function (tsServ, scriptFileName, fieldsFetcher) 
         }
     };
     return shellCmdCompleter;
+};
+exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName) {
+    var collectionMethodsCompleter = {
+        getCompletions: function (editor, session, pos, prefix, callback) {
+            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+                return callback(null, []);
+            }
+            var currentLine = session.getLine(pos.row);
+            var hasDot = currentLine.indexOf('.') > -1;
+            var templates = require('./mongoCodeTemplates');
+            if (hasDot) {
+                var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
+                var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
+                var isCollectionType = function (type) {
+                    if (_.endsWith(quickInfo.type, ": mongo.ICollection"))
+                        return true;
+                    if (_.endsWith(quickInfo.type, ": ICollection"))
+                        return true;
+                    return false;
+                };
+                if (quickInfo && isCollectionType(quickInfo.type)) {
+                    return callback(null, templates);
+                }
+                else
+                    return callback(null, []);
+            }
+            else {
+                var completions = templates.map(function (it) {
+                    var cloneIt = _.clone(it);
+                    cloneIt.snippet = 'db.getCollection("$1").' + cloneIt.snippet;
+                    return cloneIt;
+                });
+                return callback(null, completions);
+            }
+        },
+        getDocTooltip: function (item) {
+            if (item.isMongoTemplateCommand)
+                item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+        }
+    };
+    return collectionMethodsCompleter;
 };

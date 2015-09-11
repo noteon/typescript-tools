@@ -76,19 +76,19 @@ export var operatorsCompleter = {
 }
 
 
-export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName: string, fieldsFetcher: (scriptFileName: string) => { fieldName: string; collection: string }[]) => {
+export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName: string) => {
 
     var shellCmdCompleter = {
         getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
             if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
                 return callback(null, [])
             }
-            
+
             let currentLine = session.getLine(pos.row).trim();
-            
-            if  (currentLine && (!/^\b.*\b$/.test(currentLine)))
-                 return callback(null,[]);
-            
+
+            if (currentLine && (!/^\b.*\b$/.test(currentLine)))
+                return callback(null, []);
+
 
             let mongoShellCommands = require('./mongoShellCommands');
 
@@ -107,5 +107,56 @@ export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName:
     }
 
     return shellCmdCompleter
+}
+
+export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, scriptFileName: string) => {
+
+    var collectionMethodsCompleter = {
+        getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
+            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+                return callback(null, [])
+            }
+
+            let currentLine = session.getLine(pos.row);
+            let hasDot = currentLine.indexOf('.') > -1;
+            let templates = require('./mongoCodeTemplates');
+
+            if (hasDot) {
+                let posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
+                let quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
+
+                let isCollectionType = (type) => {
+                    if (_.endsWith(quickInfo.type, ": mongo.ICollection")) return true;
+
+                    if (_.endsWith(quickInfo.type, ": ICollection")) return true;
+
+                    return false;
+
+                }
+
+                if (quickInfo && isCollectionType(quickInfo.type)) {
+                    return callback(null, templates)
+                } else
+                    return callback(null, []);
+            } else {
+                let completions = templates.map((it) => {
+                    let cloneIt = _.clone(it);
+                    cloneIt.snippet = 'db.getCollection("$1").' + cloneIt.snippet;
+
+                    return cloneIt;
+                });
+
+                return callback(null, completions)
+            }
+
+        },
+
+        getDocTooltip: function(item) {
+            if (item.isMongoTemplateCommand)
+                item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+        }
+    }
+
+    return collectionMethodsCompleter
 }
 

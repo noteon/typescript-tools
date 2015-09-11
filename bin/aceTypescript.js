@@ -31,7 +31,6 @@ function setupAceEditor(params) {
     tsServ.setup(tsAndTypingFiles, compilerOptions);
     editor.addEventListener("change", onChangeDocument);
     //    editor.addEventListener("update", onUpdateDocument);
-    var syncStop = false;
     function reloadDocument() {
         tsServ.updateScript(fileName, editor.getSession().getValue());
     }
@@ -86,19 +85,17 @@ function setupAceEditor(params) {
     var debounceUpdateMarker = _.debounce(throttledUpdateMarker, 500);
     function onChangeDocument(e) {
         //reloadDocument();
-        if (!syncStop) {
-            try {
-                syncTypeScriptServiceContent(fileName, e);
-                var startAt = Date.now();
-                var cursorRow = editor.getCursorPosition().row;
-                if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
-                    debounceUpdateMarker(e);
-                }
-                else
-                    throttledUpdateMarker(e);
+        try {
+            syncTypeScriptServiceContent(fileName, e);
+            var startAt = Date.now();
+            var cursorRow = editor.getCursorPosition().row;
+            if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
+                debounceUpdateMarker(e);
             }
-            catch (ex) {
-            }
+            else
+                throttledUpdateMarker(e);
+        }
+        catch (ex) {
         }
     }
     //sync LanguageService content and ace editor content
@@ -131,7 +128,8 @@ function setupAceEditor(params) {
     langTools.setCompleters([
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
-        mongoCompleters.getShellCmdCompleter(tsServ, fileName, params.dbFieldsFetcher),
+        mongoCompleters.getShellCmdCompleter(tsServ, fileName),
+        mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName),
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
     ]);

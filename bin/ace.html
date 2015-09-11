@@ -156,7 +156,11 @@
     jsEditor.$blockScrolling = Infinity;
 
     setInterval(function(){
-      jsEditor.getSession().setValue(tsEditor.typescriptServ.transpile());
+      jsEditor.getSession().setValue(tsEditor.typescriptServ.transpile(function(src){
+        src="//// transpiled from typescript\n"+src;
+        return src
+        
+      }));
     },1*1000);
    
 </script>

@@ -19,7 +19,7 @@
 		"aceElectronContextMenu.ts",
 		"tsFormatter.ts",
 		"mongoShellCommands.ts",
-		"mongoCodeTemplates.ts",
+		"mongoCollectionSnippets.ts",
 		"aceTypescript.ts"
 	]
 }

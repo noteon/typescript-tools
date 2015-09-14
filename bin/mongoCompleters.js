@@ -94,41 +94,58 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
             }
             var currentLine = session.getLine(pos.row);
             var hasDot = currentLine.indexOf('.') > -1;
-            var templates = require('./mongoCodeTemplates');
-            if (!docUrlAssigned) {
-                templates = templates.map(function (it) {
-                    if (it.docUrl)
-                        return it;
-                    if (helpUrlFetcher)
-                        it.docUrl = helpUrlFetcher(it.methodDotName);
-                    return it;
-                });
-                docUrlAssigned = true;
-            }
+            var posChar;
+            var quickInfo;
             if (hasDot) {
-                var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
-                var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
-                var isCollectionType = function (type) {
-                    if (_.endsWith(quickInfo.type, ": mongo.ICollection"))
-                        return true;
-                    if (_.endsWith(quickInfo.type, ": ICollection"))
-                        return true;
-                    return false;
-                };
-                if (quickInfo && isCollectionType(quickInfo.type)) {
-                    return callback(null, templates);
+                posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
+                quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
+            }
+            var getCompletionsByMongoClass = function (typeEnds, requireJsPath, helpDotPrefix) {
+                if (helpDotPrefix === void 0) { helpDotPrefix = ""; }
+                var templates = require(requireJsPath);
+                if (!docUrlAssigned) {
+                    templates = templates.map(function (it) {
+                        if (it.docUrl)
+                            return it;
+                        if (helpUrlFetcher)
+                            it.docUrl = helpUrlFetcher(it.methodDotName);
+                        return it;
+                    });
+                    docUrlAssigned = true;
                 }
-                else
-                    return callback(null, []);
-            }
-            else {
-                var completions = templates.map(function (it) {
-                    var cloneIt = _.clone(it);
-                    cloneIt.snippet = 'db.getCollection("$1").' + cloneIt.snippet;
-                    return cloneIt;
-                });
-                return callback(null, completions);
-            }
+                if (hasDot) {
+                    var isCollectionType = function (type) {
+                        return _.some(typeEnds, function (endStr) {
+                            return _.endsWith(quickInfo.type, endStr);
+                        });
+                    };
+                    if (quickInfo && isCollectionType(quickInfo.type)) {
+                        return templates;
+                    }
+                    else
+                        return [];
+                }
+                else {
+                    if (!helpDotPrefix)
+                        return [];
+                    var completions = templates.map(function (it) {
+                        var cloneIt = _.clone(it);
+                        cloneIt.snippet = helpDotPrefix + cloneIt.snippet;
+                        return cloneIt;
+                    });
+                    return completions;
+                }
+            };
+            var concatTmpls = [];
+            [
+                getCompletionsByMongoClass([": mongo.ICollection", ": ICollection"], "./mongoCollectionSnippets", 'db.getCollection("$1").'),
+                getCompletionsByMongoClass([": mongo.ICursor", ": ICursor"], "./mongoCursorSnippets"),
+            ].forEach(function (it) {
+                if (it)
+                    concatTmpls = concatTmpls.concat(it);
+            });
+            //console.log("concat", concatTmpls);
+            callback(null, concatTmpls);
         },
         getDocTooltip: function (item) {
             if (item.isMongoTemplateCommand)

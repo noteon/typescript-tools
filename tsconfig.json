@@ -20,6 +20,7 @@
 		"tsFormatter.ts",
 		"mongoShellCommands.ts",
 		"mongoCollectionSnippets.ts",
+		"mongoCursorSnippets.ts",
 		"aceTypescript.ts"
 	]
 }

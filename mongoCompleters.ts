@@ -39,7 +39,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
             let score = -100000;
 
             let fields = getFields().map((it) => {
-                let fieldValue= prefix[0]==="$"? "$"+it.fieldName: it.fieldName;
+                let fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 return {
                     caption: fieldValue,
                     value: fieldValue,
@@ -114,9 +114,10 @@ export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName:
     return shellCmdCompleter
 }
 
-let docUrlAssigned:boolean=false;
+let docUrlAssigned: boolean = false;
 
-export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, scriptFileName: string,  helpUrlFetcher?: (methodDotName: string) => string) => {
+export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, scriptFileName: string, helpUrlFetcher?: (methodDotName: string) => string) => {
+
 
     var collectionMethodsCompleter = {
         getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
@@ -127,49 +128,65 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
             let currentLine = session.getLine(pos.row);
             let hasDot = currentLine.indexOf('.') > -1;
             
-            
-            let templates = require('./mongoCodeTemplates');
-            
-            if (!docUrlAssigned){
-                templates=templates.map((it)=>{
-                    if (it.docUrl) return it;
-                    
-                    if (helpUrlFetcher)
-                        it.docUrl=helpUrlFetcher(it.methodDotName);
-                        
-                    return it;
-                });
-                docUrlAssigned=true;
+            let posChar;
+            let quickInfo;
+            if (hasDot){
+                posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
+                quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
             }
 
-            if (hasDot) {
-                let posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
-                let quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
+            var getCompletionsByMongoClass = (typeEnds: string[], requireJsPath, helpDotPrefix=""):any[] => {
+                let templates = require(requireJsPath);
 
-                let isCollectionType = (type) => {
-                    if (_.endsWith(quickInfo.type, ": mongo.ICollection")) return true;
+                if (!docUrlAssigned) {
+                    templates = templates.map((it) => {
+                        if (it.docUrl) return it;
 
-                    if (_.endsWith(quickInfo.type, ": ICollection")) return true;
+                        if (helpUrlFetcher)
+                            it.docUrl = helpUrlFetcher(it.methodDotName);
 
-                    return false;
-
+                        return it;
+                    });
+                    docUrlAssigned = true;
                 }
 
-                if (quickInfo && isCollectionType(quickInfo.type)) {
-                    return callback(null, templates)
-                } else
-                    return callback(null, []);
-            } else {
-                let completions = templates.map((it) => {
-                    let cloneIt = _.clone(it);
-                    cloneIt.snippet = 'db.getCollection("$1").' + cloneIt.snippet;
+                if (hasDot) {
+                    let isCollectionType = (type) => {
+                        return _.some(typeEnds,(endStr)=>{
+                           return _.endsWith(quickInfo.type, endStr) 
+                        })
+                    }
 
-                    return cloneIt;
-                });
+                    if (quickInfo && isCollectionType(quickInfo.type)) {
+                        return templates
+                    } else
+                        return [];
+                } else {
+                    if (!helpDotPrefix) return [];
+                    
+                    let completions = templates.map((it) => {
+                        let cloneIt = _.clone(it);
+                        cloneIt.snippet = helpDotPrefix + cloneIt.snippet;
 
-                return callback(null, completions)
+                        return cloneIt;
+                    });
+
+                    return completions
+                }
+
             }
 
+           let concatTmpls=[]; 
+           [
+                getCompletionsByMongoClass([": mongo.ICollection",": ICollection"],"./mongoCollectionSnippets", 'db.getCollection("$1").'),
+                getCompletionsByMongoClass([": mongo.ICursor",": ICursor"],"./mongoCursorSnippets"),   
+           ].forEach((it)=>{
+               if (it)
+                  concatTmpls=concatTmpls.concat(it);
+           })     
+           //console.log("concat", concatTmpls);
+                
+           callback(null, concatTmpls) 
         },
 
         getDocTooltip: function(item) {

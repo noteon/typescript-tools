@@ -4,7 +4,7 @@ var mongoFindTemplates = [
       {
             caption: "find",
             snippet: 
-`find({ $2 })`,
+`find({$2})`,
             comment: 'Selects documents in a collection and returns a cursor to the selected documents.',
             example:
 `db.products.find( { qty: { $gte: 25, $lt: 35 } })`,
@@ -14,7 +14,7 @@ var mongoFindTemplates = [
       {
             caption: "find with a projection",
             snippet: 
-`find( { $2 }, { _id: 0, $3: 1 } )`,
+`find({$2}, {_id: 0, $3: 1})`,
             comment: 'The projection parameter specifies which fields to return. corresponds to the SELECT statement in SQL. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
             example:
 `db.products.find( { qty: { $gte: 25, $lt: 35 } }, { _id: 0, qty: 1 } )`,
@@ -24,7 +24,7 @@ var mongoFindTemplates = [
       {
             caption: "find with forEach method",
             snippet: 
-`find( { $2 }, { _id: 0, $3: 1 } )`,
+`find({$2}, {_id: 0, $3: 1})`,
             comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
             example:
 `db.products.find({$2},{name:1})
@@ -39,7 +39,7 @@ var mongoFindTemplates = [
       {
             caption: "find sort and limit",
             snippet: 
-`find({ $2 }).sort({ name: 1}).limit(5)`,
+`find({$2}).sort({name: 1}).limit(5)`,
             comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
             example:
 `db.bios.find().sort({name:1}).limit(5)`,
@@ -63,8 +63,8 @@ var mongoFindOneTemplates = [
             caption: "findOne with a projection",
             snippet: 
 `findOne(
-    { $2 },
-    { name: 1}
+    {$2},
+    {name:1}
 )`,
             comment: 'The projection parameter specifies which fields to return. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
             example:
@@ -83,8 +83,8 @@ var mongoUpdateTemplates = [
             caption: "update",
             snippet: 
 `update(
-   { $2 },
-   { \\$set: { $3 } }
+   {$2},
+   {\\$set: {$3}}
 )`,
             comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
             example:
@@ -99,8 +99,8 @@ var mongoUpdateTemplates = [
             caption: "update$set",
             snippet: 
 `update(
-   { $2 },
-   { \\$set: { $3 } }
+   {$2},
+   {\\$set: {$3}}
 )`,
             comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
             example:
@@ -117,8 +117,8 @@ var mongoUpdateTemplates = [
             caption: "update$inc",
             snippet: 
 `update(
-   { $2 },
-   { \\$inc: { $3 } }
+   {$2},
+   {\\$inc: {$3}}
 )`,
             comment: 'Modifies an existing document or documents in a collection. The $inc operator increments a field by a specified value.',
             example:
@@ -135,8 +135,8 @@ var mongoUpdateTemplates = [
             caption: "update$push",
             snippet:
 `update(
-   { $2 },
-   { \\$push: { $3 } }
+   {$2},
+   {\\$push: {$3}}
 )`,
             comment: 'Modifies an existing document or documents in a collection. $push adds the array field with the value as its element.',
             example:
@@ -153,8 +153,8 @@ var mongoUpdateTemplates = [
             caption: "update$addToSet",
             snippet:
 `update(
-   { $2 },
-   { \\$addToSet: { $3 } }
+   {$2},
+   {\\$addToSet: {$3}}
 )`,
             comment: 'Modifies an existing document or documents in a collection. The $addToSet operator adds a value to an array unless the value is already present, in which case $addToSet does nothing to that array.',
             example:
@@ -172,9 +172,9 @@ var mongoUpdateTemplates = [
             caption: "upsert",
             snippet:
 `update(
-   { $2 },
-   { \\$set: { $3 } },
-   { upsert: true}
+   {$2},
+   {\\$set: {$3}},
+   {upsert: true}
 )`,
             comment: ' An upsert updates the documentif found or inserts it if not. ',
             example:
@@ -192,16 +192,16 @@ var mongoUpdateTemplates = [
             caption: "update with multi option",
             snippet:
 `update(
-   { $2 },
-   { \\$set: { $3 } },
-   { multi: true }
+   {$2},
+   {\\$set: {$3}},
+   {multi: true}
 )`,
             comment: 'update with multi option',
             example:
 `db.products.update(
-   { _id: 100 },
-   { $set: { quantity: 500 } },
-   { multi: true }
+   {_id: 100},
+   {$set: {quantity: 500}},
+   {multi: true}
 )`,
 
             meta: "template",
@@ -212,9 +212,9 @@ var mongoUpdateTemplates = [
             caption: "update with upsert and multi options",
             snippet:
 `update(
-   { $2 },
-   { \\$set: { $3 } },
-   { upsert:true, multi: true }
+   {$2},
+   {\\$set: {$3}},
+   {upsert:true, multi:true}
 )`,
             comment: 'Combine the upsert and multi Options',
             example:
@@ -234,9 +234,9 @@ var mongoFindAndModifyTemplates = [
             caption: "findAndModify",
             snippet: 
 `findAndModify({
-    query: { $2 },
-    sort: { $3 },
-    update: { $4 },
+    query: {$2},
+    sort: {$3},
+    update: {$4},
     new: true
 })`,
             comment: 'Modifies and returns a single document. By default, the returned document does not include the modifications made on the update. To return the document with the modifications made on the update, use the new option.',
@@ -253,8 +253,8 @@ var mongoFindAndModifyTemplates = [
             caption: "findAndModify sort and remove",
             snippet: 
 `findAndModify({
-     query: { $2 },
-     sort: { $3 },
+     query: {$2},
+     sort: {$3},
      remove: true
 })`,
             comment: 'Modifies and returns a single document. By default, the returned document does not include the modifications made on the update. To return the document with the modifications made on the update, use the new option.',
@@ -274,7 +274,7 @@ var mongoDistinctTemplates = [
       {
             caption: "distinct with query and sort",
             snippet: 
-`db.inventory.distinct("$2", { $3 })
+`db.inventory.distinct("$2", {$3})
     .sort((a,b)=>compare(b,a))`,
             comment: 'distinct with query and sort.',
             example:
@@ -292,8 +292,8 @@ var mongoMapReduceTemplates = [
       ()=>{emit(this.$2cust_id, this.amount)}, //mapFunction
       (key, values)=>{return Array.sum(values)},//reduceFunction
       {
-          query:{ status: "A" }
-          out: { "order_totals" }
+          query:{status: "A"}
+          out: {"order_totals"}
       })`,
             comment: 'The mapReduce command allows you to run map-reduce aggregation operations over a collection. ',
             example:
@@ -329,6 +329,47 @@ var mongoRemoveTemplates = [
    }
 ]
 
+var mongoCreateIndexTemplates = [      
+      {
+            caption: "createIndex",
+            snippet: 
+`createIndex({$2:1})`,
+            comment: 'Creates indexes on collections.',
+            example:
+`db.collection.createIndex( { orderDate: 1 } )`,
+      score:100
+   },
+   
+      {
+            caption: "createIndexWithTTL",
+            snippet: 
+`createIndex({\${2:dateField}:1}, {expireAfterSeconds: \${3:60*60}})`,
+            comment: 'To create a TTL index, use the db.collection.createIndex() method with the expireAfterSeconds option on a field whose value is either a date or an array that contains date values.',
+            example:
+`db.eventlog.createIndex( { "lastModifiedDate": 1 }, { expireAfterSeconds: 3600 } )`,
+      score:10
+   },
+   
+      {
+            caption: "createIndexWithOptions",
+            snippet: 
+`createIndex(
+             {$1:1}, 
+             {
+              background:false,//Specify true to build in the background.
+              unique:false, //Specify true to create a unique index. A unique index causes MongoDB to reject all documents that contain a duplicate value for the indexed field.
+              sparse:false, //If true, the index only references documents with the specified field. 
+              //expireAfterSeconds:0, //Specifies a value, in seconds, as a TTL to control how long MongoDB retains documents in this collection. 
+              //storageEngine:{WiredTiger: <options> }
+             }
+)`,
+            comment: `Creates indexes on collections. The options document contains a set of options that controls the creation of the index. Different index types can have additional options specific for that type.`,
+            example:
+`db.eventlog.createIndex( { "lastModifiedDate": 1 }, { background:true, unique:false, sparse:true } )`,
+      score:10
+   }
+]
+
 var mongoInsertTemplates = [      
       {
             caption: "insert",
@@ -345,7 +386,7 @@ var mongoInsertTemplates = [
             snippet: 
 `insert(
     [
-      { $2 },
+      {$2},
      ] 
 )`,
             comment: 'insert Multiple Documents',
@@ -360,7 +401,6 @@ var mongoInsertTemplates = [
       score:100
    }
 ]
-
 
 let mongoCodeTemplates=[];
 
@@ -387,6 +427,7 @@ let initMongoCodeTemplates=()=>{
       addMongoCodeTemplates("distinct",mongoDistinctTemplates);
       addMongoCodeTemplates("remove",mongoRemoveTemplates);
       addMongoCodeTemplates("mapReduce",mongoMapReduceTemplates);
+      addMongoCodeTemplates("createIndex",mongoCreateIndexTemplates);
 }
 initMongoCodeTemplates();
 

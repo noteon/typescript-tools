@@ -39,13 +39,18 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
             let score = -100000;
 
             let fields = getFields().map((it) => {
+                let fieldValue= prefix[0]==="$"? "$"+it.fieldName: it.fieldName;
                 return {
-                    caption: it.fieldName,
-                    value: it.fieldName,
+                    caption: fieldValue,
+                    value: fieldValue,
                     meta: it.collection,
                     score
                 }
             });
+            
+            console.log(
+                "fields", fields
+            );
 
             callback(null, fields);
         }

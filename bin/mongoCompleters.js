@@ -30,13 +30,15 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             };
             var score = -100000;
             var fields = getFields().map(function (it) {
+                var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 return {
-                    caption: it.fieldName,
-                    value: it.fieldName,
+                    caption: fieldValue,
+                    value: fieldValue,
                     meta: it.collection,
                     score: score
                 };
             });
+            console.log("fields", fields);
             callback(null, fields);
         }
     };

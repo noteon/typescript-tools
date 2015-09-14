@@ -180,6 +180,8 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
            [
                 getCompletionsByMongoClass([": mongo.ICollection",": ICollection"],"./mongoCollectionSnippets", 'db.getCollection("$1").'),
                 getCompletionsByMongoClass([": mongo.ICursor",": ICursor"],"./mongoCursorSnippets"),   
+                getCompletionsByMongoClass([": mongo.IDatabase",": IDatabase"],"./mongoDatabaseSnippets",'db.'),
+                getCompletionsByMongoClass([": mongo.IBulkFindOp",": IBulkFindOp"],"./mongoBulkFindOpSnippets"),
            ].forEach((it)=>{
                if (it)
                   concatTmpls=concatTmpls.concat(it);

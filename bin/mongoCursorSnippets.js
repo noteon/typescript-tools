@@ -1,12 +1,22 @@
 ///<reference path='typings/node/node.d.ts'/>
-var mongoFindTemplates = [
+var mongoForEachTemplates = [
     {
-        caption: "find",
-        snippet: "find({$2})",
-        comment: 'Selects documents in a collection and returns a cursor to the selected documents.',
-        example: "db.products.find( { qty: { $gte: 25, $lt: 35 } })",
+        caption: "forEach",
+        snippet: "forEach((it)=> { \n      $1\n });",
+        comment: 'Iterates the cursor to apply a JavaScript function to each document from the cursor.',
+        example: "db.users.find().forEach( function(myDoc) { print( \"user: \" + myDoc.name ); } );",
         score: 1000
-    }];
+    }
+];
+var mongoMapTemplates = [
+    {
+        caption: "map",
+        snippet: "map((it)=> { \n      $1\n      return it;\n });",
+        comment: 'Applies function to each document visited by the cursor and collects the return values from successive application into an array.',
+        example: "db.users.find().map( function(u) { return u.name; } );",
+        score: 1000
+    },
+];
 var cursorTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
@@ -18,7 +28,8 @@ var addMongoCodeTemplates = function (mongoMethod, templates) {
     cursorTemplates = cursorTemplates.concat(templates);
 };
 var initMongoCursorTemplates = function () {
-    addMongoCodeTemplates("find", mongoFindTemplates);
+    addMongoCodeTemplates("forEach", mongoForEachTemplates);
+    addMongoCodeTemplates("map", mongoMapTemplates);
 };
 initMongoCursorTemplates();
 module.exports = cursorTemplates;

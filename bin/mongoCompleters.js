@@ -140,6 +140,8 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
             [
                 getCompletionsByMongoClass([": mongo.ICollection", ": ICollection"], "./mongoCollectionSnippets", 'db.getCollection("$1").'),
                 getCompletionsByMongoClass([": mongo.ICursor", ": ICursor"], "./mongoCursorSnippets"),
+                getCompletionsByMongoClass([": mongo.IDatabase", ": IDatabase"], "./mongoDatabaseSnippets", 'db.'),
+                getCompletionsByMongoClass([": mongo.IBulkFindOp", ": IBulkFindOp"], "./mongoBulkFindOpSnippets"),
             ].forEach(function (it) {
                 if (it)
                     concatTmpls = concatTmpls.concat(it);

@@ -21,6 +21,7 @@
 		"mongoShellCommands.ts",
 		"mongoCollectionSnippets.ts",
 		"mongoCursorSnippets.ts",
+		"mongoDatabaseSnippets.ts",
 		"aceTypescript.ts"
 	]
 }

@@ -48,9 +48,9 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                 }
             });
             
-            console.log(
-                "fields", fields
-            );
+            // console.log(
+            //     "fields", fields
+            // );
 
             callback(null, fields);
         }
@@ -132,6 +132,8 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
             
             if (!docUrlAssigned){
                 templates=templates.map((it)=>{
+                    if (it.docUrl) return it;
+                    
                     if (helpUrlFetcher)
                         it.docUrl=helpUrlFetcher(it.methodDotName);
                         

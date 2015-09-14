@@ -38,7 +38,9 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     score: score
                 };
             });
-            console.log("fields", fields);
+            // console.log(
+            //     "fields", fields
+            // );
             callback(null, fields);
         }
     };
@@ -95,6 +97,8 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
             var templates = require('./mongoCodeTemplates');
             if (!docUrlAssigned) {
                 templates = templates.map(function (it) {
+                    if (it.docUrl)
+                        return it;
                     if (helpUrlFetcher)
                         it.docUrl = helpUrlFetcher(it.methodDotName);
                     return it;

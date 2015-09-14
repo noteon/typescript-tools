@@ -272,15 +272,25 @@ var mongoFindAndModifyTemplates = [
 
 var mongoDistinctTemplates = [      
       {
+            caption: "distinct",
+            snippet: 
+`distinct("\${2:field}")`,
+            comment: 'Finds the distinct values for a specified field across a single collection and returns the results in an array.',
+            example:
+`db.inventory.distinct( "item.sku", {dept: "A" })`,
+            score:100
+      },
+      
+      {
             caption: "distinct with query and sort",
             snippet: 
-`db.inventory.distinct("$2", {$3})
+`distinct("\${2:field}", {$3})
     .sort((a,b)=>compare(b,a))`,
             comment: 'distinct with query and sort.',
             example:
 `db.inventory.distinct( "item.sku", {dept: "A" })
     .sort((a,b)=>compare(b,a)) //desc`,
-            score:100
+            score:10
       }
 ]
 
@@ -333,7 +343,7 @@ var mongoCreateIndexTemplates = [
       {
             caption: "createIndex",
             snippet: 
-`createIndex({$2:1})`,
+`createIndex({\${2:fieldName}:1})`,
             comment: 'Creates indexes on collections.',
             example:
 `db.collection.createIndex( { orderDate: 1 } )`,
@@ -354,7 +364,7 @@ var mongoCreateIndexTemplates = [
             caption: "createIndexWithOptions",
             snippet: 
 `createIndex(
-             {$1:1}, 
+             {\${2:fieldName}:1},
              {
               background:false,//Specify true to build in the background.
               unique:false, //Specify true to create a unique index. A unique index causes MongoDB to reject all documents that contain a duplicate value for the indexed field.
@@ -402,6 +412,245 @@ var mongoInsertTemplates = [
    }
 ]
 
+var mongoAggregateTemplates=[
+      {
+            caption: "aggregate",
+            snippet: 
+`aggregate(
+   [
+     { \\$match: { $2 } },
+     { \\$group: { _id: "\\$groupByField", total: { \\$sum: "$amount" } } },
+     { \\$sort: { total: -1 } }
+   ]
+)`,
+            comment: `Aggregation operation: Group by and Calculate a Sum.`,
+            example:
+`db.orders.aggregate([
+                     { $match: { status: "A" } },
+                     { $group: { _id: "$cust_id", total: { $sum: "$amount" } } },
+                     { $sort: { total: -1 } }
+                   ])`,
+      score:100
+   },
+      {
+            caption: "aggregatePreformACount",
+            snippet: 
+`aggregate(
+   [
+      { \\$match: { $2 } },
+      { \\$group: { _id: null, count: { \\$sum: 1 } } }
+   ]
+)`,
+            comment: `compute a count of the documents.On a sharded cluster, db.collection.count() can result in an inaccurate count if orphaned documents exist or if a chunk migration is in progress.
+To avoid these situations, on a sharded cluster, use the $group stage of the db.collection.aggregate() method to $sum the documents.`,
+            example:
+`db.articles.aggregate( [
+                        { $match : { score : { $gt : 70, $lte : 90 } } },
+                        { $group: { _id: null, count: { $sum: 1 } } }
+                       ] );`,
+      score:10
+   },
+   
+      {
+            caption: "SqlToAggregationCount",
+            snippet: 
+`aggregate([
+   {
+     \\$group: {
+        _id: null,
+        count: { \\$sum: 1 }
+     }
+   }
+])`,
+            comment: `SELECT COUNT(*) AS count FROM orders`,
+            example:
+`db.orders.aggregate( [
+   {
+     $group: {
+        _id: null,
+        count: { $sum: 1 }
+     }
+   }
+] )`,
+      score:10,
+      docUrl:"https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
+   },
+   
+      {
+            caption: "SqlToAggregationSum",
+            snippet: 
+`aggregate([
+   {
+     \\$group: {
+        _id: null,
+        total: { \\$sum: "\\$price" }
+     }
+   }
+])`,
+            comment: `SELECT SUM(price) AS total FROM orders`,
+            example:
+`db.orders.aggregate( [
+   {
+     $group: {
+        _id: null,
+        total: { $sum: "$price" }
+     }
+   }
+] )`,
+      score:10,
+      docUrl:"https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
+   },
+   
+      {
+            caption: "SqlToAggregationSumGroupBy",
+            snippet: 
+`aggregate([
+   {
+     \\$group: {
+        _id: "\\$cust_id",
+        total: { \\$sum: "\\$price" }
+     }
+   }
+])`,
+            comment: `SELECT cust_id,
+       SUM(price) AS total
+FROM orders
+GROUP BY cust_id`,
+            example:
+`db.orders.aggregate( [
+   {
+     $group: {
+        _id: "$cust_id",
+        total: { $sum: "$price" }
+     }
+   }
+] )`,
+      score:10,
+      docUrl:"https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
+   },
+   
+      {
+            caption: "SqlToAggregationSumGroupByOrderByTotal",
+            snippet: 
+`aggregate([
+   {
+     \\$group: {
+        _id: "\\$cust_id",
+        total: { \\$sum: "\\$price" }
+     }
+   },
+   { \\$sort: { total: 1 } }
+])`,
+            comment: `SELECT cust_id,
+       SUM(price) AS total
+FROM orders
+GROUP BY cust_id
+ORDER BY total`,
+            example:
+`db.orders.aggregate( [
+   {
+     $group: {
+        _id: "$cust_id",
+        total: { $sum: "$price" }
+     }
+   },
+   { $sort: { total: 1 } }
+] )`,
+      score:10,
+      docUrl:"https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
+   },
+   
+      {
+            caption: "SqlToAggregationSumGroupByOrderByDate",
+            snippet: 
+`aggregate( [
+   {
+     \\$group: {
+        _id: {
+           cust_id: "\\$cust_id",
+           ord_date: {
+               month: { \\$month: "\\$ord_date" },
+               day: { \\$dayOfMonth: "\\$ord_date" },
+               year: { \\$year: "\\$ord_date"}
+           }
+        },
+        total: { \\$sum: "\\$price" }
+     }
+   }
+] )`,
+            comment: `SELECT cust_id,
+       ord_date,
+       SUM(price) AS total
+FROM orders
+GROUP BY cust_id,
+         ord_date`,
+            example:
+`db.orders.aggregate( [
+   {
+     $group: {
+        _id: {
+           cust_id: "$cust_id",
+           ord_date: {
+               month: { $month: "$ord_date" },
+               day: { $dayOfMonth: "$ord_date" },
+               year: { $year: "$ord_date"}
+           }
+        },
+        total: { $sum: "$price" }
+     }
+   }
+] )`,
+       score:10,
+      docUrl:"https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
+   },
+   
+   
+      {
+            caption: "SqlToAggregationGroupByHaving",
+            snippet: 
+`aggregate([
+   {
+     \\$group: {
+        _id: "\\$cust_id",
+        count: { \\$sum: 1 }
+     }
+   },
+   { \\$match: { count: { \\$gt: 1 } } }
+])`,
+            comment: `SELECT cust_id,
+       count(*)
+FROM orders
+GROUP BY cust_id
+HAVING count(*) > 1`,
+            example:
+`db.orders.aggregate( [
+   {
+     $group: {
+        _id: "$cust_id",
+        count: { $sum: 1 }
+     }
+   },
+   { $match: { count: { $gt: 1 } } }
+] )`,
+      score:10,
+      docUrl:"https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
+   },
+   
+]
+
+var mongoStatsTemplates=[
+      {
+            caption: "stats",
+            snippet: 
+`stats(1024)`,
+            comment: `Returns statistics about the collection. Specify a scale value of 1024 to display kilobytes rather than bytes.`,
+            example:
+`db.orders.stats(1024)`,
+      score:100
+   },
+]
+
+
 let mongoCodeTemplates=[];
 
 
@@ -428,6 +677,8 @@ let initMongoCodeTemplates=()=>{
       addMongoCodeTemplates("remove",mongoRemoveTemplates);
       addMongoCodeTemplates("mapReduce",mongoMapReduceTemplates);
       addMongoCodeTemplates("createIndex",mongoCreateIndexTemplates);
+      addMongoCodeTemplates("aggregate",mongoAggregateTemplates);
+      addMongoCodeTemplates("stats",mongoStatsTemplates);
 }
 initMongoCodeTemplates();
 

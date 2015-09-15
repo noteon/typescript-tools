@@ -17,6 +17,15 @@ var mongoMapTemplates = [
         score: 1000
     },
 ];
+var mongoLimitTemplates = [
+    {
+        caption: "limit",
+        snippet: "limit(${2:5})",
+        comment: 'Use the limit() method on a cursor to specify the maximum number of documents the cursor will return. limit() is analogous to the LIMIT statement in a SQL database.',
+        example: "db.orders.find().limit(5)",
+        score: 1000
+    },
+];
 var mongoSortTemplates = [
     {
         caption: "sort",
@@ -75,6 +84,7 @@ var initMongoCursorTemplates = function () {
     addMongoCodeTemplates("forEach", mongoForEachTemplates);
     addMongoCodeTemplates("map", mongoMapTemplates);
     addMongoCodeTemplates("sort", mongoSortTemplates);
+    addMongoCodeTemplates("limit", mongoLimitTemplates);
 };
 initMongoCursorTemplates();
 module.exports = cursorTemplates;

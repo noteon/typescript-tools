@@ -142,6 +142,7 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
                 getCompletionsByMongoClass([": mongo.ICursor", ": ICursor"], "./mongoCursorSnippets"),
                 getCompletionsByMongoClass([": mongo.IDatabase", ": IDatabase"], "./mongoDatabaseSnippets", 'db.'),
                 getCompletionsByMongoClass([": mongo.IBulkFindOp", ": IBulkFindOp"], "./mongoBulkFindOpSnippets"),
+                getCompletionsByMongoClass([": mongo.IReplication", ": IReplication"], "./mongoRsSnippets"),
             ].forEach(function (it) {
                 if (it)
                     concatTmpls = concatTmpls.concat(it);

@@ -17,6 +17,50 @@ var mongoMapTemplates = [
         score: 1000
     },
 ];
+var mongoSortTemplates = [
+    {
+        caption: "sort",
+        snippet: "sort({ ${2:sortField}:${3:-1} })",
+        comment: 'Specifies the order in which the query returns matching documents.',
+        example: "db.orders.find().sort({ amount: -1 })",
+        score: 1000
+    },
+    {
+        caption: "sortById",
+        snippet: "sort({ _id:${2:1} })",
+        comment: 'Sort by Id',
+        example: "db.orders.find().sort({ _id: -1 })",
+        score: 100
+    },
+    {
+        caption: "sortAsInserted",
+        snippet: "sort({ \\$natural:${2:1} })",
+        comment: 'Specifies the order in which the query returns matching documents. Use $natural operator to return documents in the order they exist on disk',
+        example: "db.orders.find().sort({ $natural: 1 })",
+        score: 100
+    },
+    {
+        caption: "sortAsInsertedDesc",
+        snippet: "sort({ \\$natural:${2:-1} })",
+        comment: 'Specifies the order in which the query returns matching documents. Use $natural operator to return documents in the reversed order they exist on disk',
+        example: "db.orders.find().sort({ $natural: -1 })",
+        score: 100
+    },
+    {
+        caption: "first",
+        snippet: "sort({ \\$natural:1 }).limit(${2:1})",
+        comment: 'Return first N records. Use $natural operator to return documents in the order they exist on disk',
+        example: "db.orders.find().sort({ $natural: 1 }).limit(n)",
+        score: 100
+    },
+    {
+        caption: "last",
+        snippet: "sort({ \\$natural:-1 }).limit(${2:1})",
+        comment: 'Return last N records. Use $natural operator to return documents in the reversed order they exist on disk',
+        example: "db.orders.find().sort({ $natural: -1 }).limit(n)",
+        score: 100
+    },
+];
 var cursorTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
@@ -30,6 +74,7 @@ var addMongoCodeTemplates = function (mongoMethod, templates) {
 var initMongoCursorTemplates = function () {
     addMongoCodeTemplates("forEach", mongoForEachTemplates);
     addMongoCodeTemplates("map", mongoMapTemplates);
+    addMongoCodeTemplates("sort", mongoSortTemplates);
 };
 initMongoCursorTemplates();
 module.exports = cursorTemplates;

@@ -22,6 +22,7 @@
 		"mongoCollectionSnippets.ts",
 		"mongoCursorSnippets.ts",
 		"mongoDatabaseSnippets.ts",
+		"mongoBulkFindOpSnippets.ts",
 		"aceTypescript.ts"
 	]
 }

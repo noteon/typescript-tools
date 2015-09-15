@@ -17,6 +17,15 @@ var mongoStatsTemplates = [
         score: 1000
     }
 ];
+var mongoCreateUserTemplates = [
+    {
+        caption: "stats",
+        snippet: "createUser(\n   {\n     user: \"$2\",\n     pwd: \"$3\",\n     roles: [ \"read\" ] //read|readWrite|dbAdmin|dbOwner|userAdmin ...\n   }\n)",
+        comment: 'Creates a new user for the database where the method runs. db.createUser() returns a duplicate user error if the user already exists on the database.',
+        example: "use products\ndb.createUser( { \"user\" : \"accountAdmin01\",\n                 \"pwd\": \"cleartext password\",\n                 \"customData\" : { employeeId: 12345 },\n                 \"roles\" : [ { role: \"clusterAdmin\", db: \"admin\" },\n                             { role: \"readAnyDatabase\", db: \"admin\" },\n                             \"readWrite\"\n                             ] },\n               { w: \"majority\" , wtimeout: 5000 } )",
+        score: 1000
+    }
+];
 var databaseTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {

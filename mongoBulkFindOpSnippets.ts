@@ -4,7 +4,7 @@ var mongoUpdateTemplates = [
       {
             caption: "update",
             snippet: 
-`update( { $set: { $2 } } )`,
+`update({ \\$set: { $2 } })`,
             comment: 'Adds a multi update operation to a bulk operations list. The method updates specific fields in existing documents.',
             example:
 `var bulk = db.items.initializeUnorderedBulkOp();

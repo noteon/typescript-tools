@@ -51,6 +51,100 @@ db.createUser( { "user" : "accountAdmin01",
 ];      
 
 
+var mongoCurrentOpTemplates=[
+      {
+            caption: "currentOpWriteOperationsWaitingLock",
+            snippet: 
+`currentOp(
+   {
+     "waitingForLock" : true,
+     \\$or: [
+        { "op" : { "\\$in" : [ "insert", "update", "remove" ] } },
+        { "query.findandmodify": { \\$exists: true } }
+    ]
+   }
+)`,
+            comment: 'Returns information on all write operations that are waiting for a lock',
+            example:
+`db.currentOp(
+   {
+     "waitingForLock" : true,
+     $or: [
+        { "op" : { "$in" : [ "insert", "update", "remove" ] } },
+        { "query.findandmodify": { $exists: true } }
+    ]
+   }
+)`,
+      },
+      
+      
+      {
+            caption: "currentOpActiveAndNeverYielded",
+            snippet: 
+`currentOp(
+   {
+     "active" : true,
+     "numYields" : 0,
+     "waitingForLock" : false
+   }
+)`,
+            comment: 'returns information on all active running operations that have never yielded',
+            example:
+`db.currentOp(
+   {
+     "active" : true,
+     "numYields" : 0,
+     "waitingForLock" : false
+   }
+)`,
+      },
+      
+      {
+            caption: "currentOpActiveAndRunningLongerThan3Secs",
+            snippet: 
+`currentOp(
+   {
+     "active" : true,
+     "secs_running" : { "\\$gt" : 3 },
+     "ns" : /^db1\\./
+   }
+)`,
+            comment: 'returns information on all active operations for database db1 that have been running longer than 3 seconds',
+            example:
+`db.currentOp(
+   {
+     "active" : true,
+     "secs_running" : { "$gt" : 3 },
+     "ns" : /^db1\\./
+   }
+)`,
+      },    
+          
+      {
+            caption: "currentOpActiveIndexingOperations",
+            snippet: 
+`currentOp(
+    {
+      \\$or: [
+        { op: "query", "query.createIndexes": { \\$exists: true } },
+        { op: "insert", ns: /\\.system\\.indexes\\b/ }
+      ]
+    }
+)`,
+            comment: 'returns information on all active operations for database db1 that have been running longer than 3 seconds',
+            example:
+`db.currentOp(
+    {
+      $or: [
+        { op: "query", "query.createIndexes": { $exists: true } },
+        { op: "insert", ns: /\\.system\\.indexes\\b/ }
+      ]
+    }
+)`,
+      }    
+          
+]
+
 let databaseTemplates=[];
 
 let addMongoCodeTemplates=(mongoMethod,templates:any[])=>{
@@ -68,6 +162,7 @@ let addMongoCodeTemplates=(mongoMethod,templates:any[])=>{
 let initMongoCursorTemplates=()=>{
       addMongoCodeTemplates("createCollection",mongoCreateCollectionTemplates);
       addMongoCodeTemplates("stats",mongoStatsTemplates);
+      addMongoCodeTemplates("currentOp",mongoCurrentOpTemplates);
 }
 initMongoCursorTemplates();
 

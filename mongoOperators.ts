@@ -83,7 +83,21 @@ let queryOperators = [
 	
   //Element
   ['$exists', 'Matches documents that have the specified field.', 'db.inventory.find( { qty: { $exists: true, $nin: [ 5, 15 ] } } )', "${1:true}"],
-  ['$type', 'Selects documents if a field is of the specified type.', 'db.inventory.find( { tags: { $type : 2 } } ); //type 2 is String'],
+  ['$type', `Selects documents if a field is of the specified type.
+Double	1	 
+String	2	 
+Object	3	 
+Array	4	 
+Object id	7	 
+Boolean	8	 
+Date	9	 
+Null	10	 
+32-bit integer	16	 
+Timestamp	17	 
+64-bit integer	18
+Min key	255	Query with -1.
+Max key	127`, 
+    'db.inventory.find( { tags: { $type : 2 } } ); //type 2 is String'],
 	
   //Evaluation
   ['$mod', 'Performs a modulo operation on the value of a field and selects documents with a specified result.', 'db.inventory.find( { qty: { $mod: [ 4, 0 ] } } )', '[$1, $2]'],

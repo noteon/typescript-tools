@@ -52,7 +52,8 @@ var queryOperators = [
         'db.inventory.find( { $nor: [ { price: 1.99 }, { sale: true } ]  } )', '[{$0}]'],
     //Element
     ['$exists', 'Matches documents that have the specified field.', 'db.inventory.find( { qty: { $exists: true, $nin: [ 5, 15 ] } } )', "${1:true}"],
-    ['$type', 'Selects documents if a field is of the specified type.', 'db.inventory.find( { tags: { $type : 2 } } ); //type 2 is String'],
+    ['$type', "Selects documents if a field is of the specified type.\nDouble\t1\t \nString\t2\t \nObject\t3\t \nArray\t4\t \nObject id\t7\t \nBoolean\t8\t \nDate\t9\t \nNull\t10\t \n32-bit integer\t16\t \nTimestamp\t17\t \n64-bit integer\t18\nMin key\t255\tQuery with -1.\nMax key\t127",
+        'db.inventory.find( { tags: { $type : 2 } } ); //type 2 is String'],
     //Evaluation
     ['$mod', 'Performs a modulo operation on the value of a field and selects documents with a specified result.', 'db.inventory.find( { qty: { $mod: [ 4, 0 ] } } )', '[$1, $2]'],
     ['$regex', 'Selects documents where values match a specified regular expression.', 'db.products.find( { sku: { $regex: /^ABC/i } } )', '/$0/'],

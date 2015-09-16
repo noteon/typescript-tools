@@ -26,6 +26,32 @@ var mongoCreateUserTemplates = [
         score: 1000
     }
 ];
+var mongoCurrentOpTemplates = [
+    {
+        caption: "currentOpWriteOperationsWaitingLock",
+        snippet: "currentOp(\n   {\n     \"waitingForLock\" : true,\n     \\$or: [\n        { \"op\" : { \"\\$in\" : [ \"insert\", \"update\", \"remove\" ] } },\n        { \"query.findandmodify\": { \\$exists: true } }\n    ]\n   }\n)",
+        comment: 'Returns information on all write operations that are waiting for a lock',
+        example: "db.currentOp(\n   {\n     \"waitingForLock\" : true,\n     $or: [\n        { \"op\" : { \"$in\" : [ \"insert\", \"update\", \"remove\" ] } },\n        { \"query.findandmodify\": { $exists: true } }\n    ]\n   }\n)",
+    },
+    {
+        caption: "currentOpActiveAndNeverYielded",
+        snippet: "currentOp(\n   {\n     \"active\" : true,\n     \"numYields\" : 0,\n     \"waitingForLock\" : false\n   }\n)",
+        comment: 'returns information on all active running operations that have never yielded',
+        example: "db.currentOp(\n   {\n     \"active\" : true,\n     \"numYields\" : 0,\n     \"waitingForLock\" : false\n   }\n)",
+    },
+    {
+        caption: "currentOpActiveAndRunningLongerThan3Secs",
+        snippet: "currentOp(\n   {\n     \"active\" : true,\n     \"secs_running\" : { \"\\$gt\" : 3 },\n     \"ns\" : /^db1\\./\n   }\n)",
+        comment: 'returns information on all active operations for database db1 that have been running longer than 3 seconds',
+        example: "db.currentOp(\n   {\n     \"active\" : true,\n     \"secs_running\" : { \"$gt\" : 3 },\n     \"ns\" : /^db1\\./\n   }\n)",
+    },
+    {
+        caption: "currentOpActiveIndexingOperations",
+        snippet: "currentOp(\n    {\n      \\$or: [\n        { op: \"query\", \"query.createIndexes\": { \\$exists: true } },\n        { op: \"insert\", ns: /\\.system\\.indexes\\b/ }\n      ]\n    }\n)",
+        comment: 'returns information on all active operations for database db1 that have been running longer than 3 seconds',
+        example: "db.currentOp(\n    {\n      $or: [\n        { op: \"query\", \"query.createIndexes\": { $exists: true } },\n        { op: \"insert\", ns: /\\.system\\.indexes\\b/ }\n      ]\n    }\n)",
+    }
+];
 var databaseTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
@@ -39,6 +65,7 @@ var addMongoCodeTemplates = function (mongoMethod, templates) {
 var initMongoCursorTemplates = function () {
     addMongoCodeTemplates("createCollection", mongoCreateCollectionTemplates);
     addMongoCodeTemplates("stats", mongoStatsTemplates);
+    addMongoCodeTemplates("currentOp", mongoCurrentOpTemplates);
 };
 initMongoCursorTemplates();
 module.exports = databaseTemplates;

@@ -158,3 +158,23 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
     };
     return collectionMethodsCompleter;
 };
+exports.dateRangeCompleter = {
+    getCompletions: function (editor, session, pos, prefix, callback) {
+        if (session["__paramHelpItems"]) {
+            return callback(null, []);
+        }
+        var templates = require("./mongoDateRangeSnippets");
+        // let currentLine = session.getLine(pos.row);
+        // let hasDot = currentLine.indexOf('.') > -1;
+        // if (!hasDot)
+        //     return callback(null, templates);
+        // let prevChar = aceUtils.getPrevChar(session, pos);
+        // if (prevChar === ":" || prevChar === " ")
+        //     return callback(null, templates);
+        return callback(null, templates);
+    },
+    getDocTooltip: function (item) {
+        if (item.isMongoOperator)
+            item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+    }
+};

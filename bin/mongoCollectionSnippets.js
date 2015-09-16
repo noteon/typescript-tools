@@ -16,9 +16,9 @@ var mongoFindTemplates = [
     },
     {
         caption: "find with forEach method",
-        snippet: "find({$2}, {_id: 0, $3: 1})",
+        snippet: "find({$2},{name:1})\n   .sort({name:1})\n   .forEach((it)=>{\n      $4\n      return it;\n})",
         comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
-        example: "db.products.find({$2},{name:1})\n   .sort({name:1})\n   .forEach((it)=>{ \n      $4\n      return it;  \n})",
+        example: "db.products.find({},{fname:1})\n   .sort({name:1})\n   .forEach((it)=>{\n      it.fullName=it.fname+\" \"+it.lname;\n      return it;\n})",
         score: 90
     },
     {
@@ -42,7 +42,7 @@ var mongoFindOneTemplates = [
         snippet: "findOne(\n    {$2},\n    {name:1}\n)",
         comment: 'The projection parameter specifies which fields to return. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
         example: "db.bios.findOne(\n    { },\n    { name: 1, contribs: 1 }\n)",
-        score: 100
+        score: 10
     },
 ];
 var mongoUpdateTemplates = [
@@ -185,7 +185,7 @@ var mongoCreateIndexTemplates = [
     },
     {
         caption: "createIndexWithOptions",
-        snippet: "createIndex(\n             {${2:fieldName}:1},\n             {\n              background:false,//Specify true to build in the background.\n              unique:false, //Specify true to create a unique index. A unique index causes MongoDB to reject all documents that contain a duplicate value for the indexed field.\n              sparse:false, //If true, the index only references documents with the specified field. \n              //expireAfterSeconds:0, //Specifies a value, in seconds, as a TTL to control how long MongoDB retains documents in this collection. \n              //storageEngine:{WiredTiger: <options> }\n             }\n)",
+        snippet: "createIndex(\n             {${2:fieldName}:1},\n             {\n              background:false,//Specify true to build in the background.\n              unique:false, //Specify true to create a unique index. A unique index causes MongoDB to reject all documents that contain a duplicate value for the indexed field.\n              sparse:false, //If true, the index only references documents with the specified field.\n              //expireAfterSeconds:0, //Specifies a value, in seconds, as a TTL to control how long MongoDB retains documents in this collection.\n              //storageEngine:{WiredTiger: <options> }\n             }\n)",
         comment: "Creates indexes on collections. The options document contains a set of options that controls the creation of the index. Different index types can have additional options specific for that type.",
         example: "db.eventlog.createIndex( { \"lastModifiedDate\": 1 }, { background:true, unique:false, sparse:true } )",
         score: 10
@@ -201,7 +201,7 @@ var mongoInsertTemplates = [
     },
     {
         caption: "insert Multiple Documents",
-        snippet: "insert(\n    [\n      {$2},\n     ] \n)",
+        snippet: "insert(\n    [\n      {$2},\n     ]\n)",
         comment: 'insert Multiple Documents',
         example: "db.products.insert(\n   [\n     { _id: 11, item: \"pencil\", qty: 50, type: \"no.2\" },\n     { item: \"pen\", qty: 20 },\n     { item: \"eraser\", qty: 25 }\n   ]\n)",
         score: 100
@@ -290,6 +290,20 @@ var addMongoCodeTemplates = function (mongoMethod, templates) {
     });
     mongoCodeTemplates = mongoCodeTemplates.concat(templates);
 };
+var attachDateRangeToMongoFindTemlates = function () {
+    var dateRangeTemplates = require("./mongoDateRangeSnippets");
+    dateRangeTemplates.filter(function (it) { return it.attachedToFindMethod; }).forEach(function (it) {
+        console.log("attachedToFindMethod", it);
+        mongoFindTemplates.push({
+            caption: "find" + it.caption,
+            snippet: "find({ ${2:dateField}: " + it.snippet + " })",
+            comment: 'Selects documents in a collection and returns a cursor to the selected documents',
+            example: "db.products.find( { at: " + it.example + "} )",
+            score: 100
+        });
+    });
+};
+attachDateRangeToMongoFindTemlates();
 var initMongoCodeTemplates = function () {
     addMongoCodeTemplates("find", mongoFindTemplates);
     addMongoCodeTemplates("findOne", mongoFindOneTemplates);

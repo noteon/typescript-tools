@@ -131,6 +131,7 @@ function setupAceEditor(params) {
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
+        mongoCompleters.dateRangeCompleter,
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),
         mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName, params.helpUrlFetcher),
     ]);

@@ -24,6 +24,7 @@
 		"mongoDatabaseSnippets.ts",
 		"mongoBulkFindOpSnippets.ts",
 		"mongoRsSnippets.ts",
+		"mongoDateRangeSnippets.ts",
 		"aceTypescript.ts"
 	]
 }

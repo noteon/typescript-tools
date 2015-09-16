@@ -197,6 +197,7 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
         
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
+        mongoCompleters.dateRangeCompleter,
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),
         mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName, params.helpUrlFetcher),
     ]);

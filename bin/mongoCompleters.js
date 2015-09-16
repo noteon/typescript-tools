@@ -4,7 +4,7 @@ _ = require("lodash");
 exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
     var fieldsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+            if (session["__paramHelpItems"]) {
                 return callback(null, []);
             }
             var prevChar = aceUtils.getPrevChar(session, pos);
@@ -65,7 +65,7 @@ exports.operatorsCompleter = {
 exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
     var shellCmdCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+            if (session["__paramHelpItems"]) {
                 return callback(null, []);
             }
             var currentLine = session.getLine(pos.row).trim();
@@ -89,7 +89,7 @@ var docUrlAssigned = false;
 exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUrlFetcher) {
     var collectionMethodsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+            if (session["__paramHelpItems"]) {
                 return callback(null, []);
             }
             var currentLine = session.getLine(pos.row);
@@ -99,6 +99,7 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
             if (hasDot) {
                 posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
                 quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
+                console.log(tsServ.ls.getTypeDefinitionAtPosition(scriptFileName, posChar));
             }
             var getCompletionsByMongoClass = function (typeEnds, requireJsPath, helpDotPrefix) {
                 if (helpDotPrefix === void 0) { helpDotPrefix = ""; }
@@ -114,12 +115,12 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
                     docUrlAssigned = true;
                 }
                 if (hasDot) {
-                    var isCollectionType = function (type) {
+                    var isSnippetsType = function (type) {
                         return _.some(typeEnds, function (endStr) {
                             return _.endsWith(quickInfo.type, endStr);
                         });
                     };
-                    if (quickInfo && isCollectionType(quickInfo.type)) {
+                    if (quickInfo && isSnippetsType(quickInfo.type)) {
                         return templates;
                     }
                     else

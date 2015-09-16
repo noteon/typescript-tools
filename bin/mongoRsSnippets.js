@@ -1,5 +1,5 @@
 ///<reference path='typings/node/node.d.ts'/>
-var configSample = "let config = {\n    _id : \"my_replica_set\",\n     members : [\n         {_id : 0, host : \"rs1.example.net:27017\"},\n         {_id : 1, host : \"rs2.example.net:27017\"},\n         {_id : 2, host : \"rs3.example.net\", arbiterOnly: true},\n     ]\n}";
+var configSample = "{\n    _id : \"my_replica_set\",\n     members : [\n         {_id : 0, host : \"rs1.example.net:27017\"},\n         {_id : 1, host : \"rs2.example.net:27017\"},\n         {_id : 2, host : \"rs3.example.net\", arbiterOnly: true},\n     ]\n}";
 var mongoInitializeTemplates = [
     {
         caption: "initiate",
@@ -10,9 +10,9 @@ var mongoInitializeTemplates = [
     },
     {
         caption: "initiateWithSampleConfig",
-        snippet: configSample + "\n\ninitiate();",
+        snippet: "initiate(" + configSample + ");",
         comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
-        example: configSample + "\nrs.initiate()",
+        example: "rs.initiate(" + configSample + ")",
         score: 10
     }
 ];

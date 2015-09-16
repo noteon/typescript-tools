@@ -190,12 +190,15 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     };
 
     langTools.setCompleters([
+        tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),//注，Completer的顺序很重要，getTypeScriptAutoCompleters必须置顶，
+                                                                                          //TypescriptAuto会缓存语言服务的一些值
+                                                                                          
+        tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
+        
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),
         mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName, params.helpUrlFetcher),
-        tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
-        tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
     ]);
     
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);

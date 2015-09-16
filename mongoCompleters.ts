@@ -8,7 +8,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
 
     var fieldsCompleter = {
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+            if (session["__paramHelpItems"]) {
                 return callback(null, [])
             }
 
@@ -85,7 +85,7 @@ export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName:
 
     var shellCmdCompleter = {
         getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
-            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+            if (session["__paramHelpItems"]) {
                 return callback(null, [])
             }
 
@@ -121,7 +121,7 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
 
     var collectionMethodsCompleter = {
         getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
-            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+            if (session["__paramHelpItems"]) {
                 return callback(null, [])
             }
 
@@ -133,6 +133,10 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
             if (hasDot){
                 posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
                 quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
+                
+                console.log(tsServ.ls.getTypeDefinitionAtPosition(scriptFileName,posChar));
+                
+                //console.log(tsServ.getCompletionsInfoByPos(true,scriptFileName,posChar));
             }
 
             var getCompletionsByMongoClass = (typeEnds: string[], requireJsPath, helpDotPrefix=""):any[] => {
@@ -151,13 +155,13 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
                 }
 
                 if (hasDot) {
-                    let isCollectionType = (type) => {
+                    let isSnippetsType = (type) => {
                         return _.some(typeEnds,(endStr)=>{
                            return _.endsWith(quickInfo.type, endStr) 
                         })
                     }
 
-                    if (quickInfo && isCollectionType(quickInfo.type)) {
+                    if (quickInfo && isSnippetsType(quickInfo.type)) {
                         return templates
                     } else
                         return [];

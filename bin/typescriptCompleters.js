@@ -1,55 +1,14 @@
 /// <reference path="./typings/tsd.d.ts" />
 var aceUtils = require('./aceUtils');
-exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
-    var typeScriptParameterCompleter = {
-        getCompletions: function (editor, session, pos, prefix, callback) {
-            var helpItems = aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
-            if (!helpItems)
-                return callback(null, []);
-            var completionsItems = helpItems.items.map(function (it, idx) {
-                var currentParam = undefined;
-                var paramsText = (it.parameters.map(function (param, paramIdx) {
-                    if (paramIdx === helpItems.argumentIndex) {
-                        currentParam = param;
-                        return param.type;
-                    }
-                    else
-                        return param.type;
-                }).join(it.separator));
-                var value = it.prefix + paramsText + it.suffix;
-                return {
-                    caption: value,
-                    value: " ",
-                    meta: "",
-                    toolTip: currentParam && aceUtils.highlightTypeAndComment(currentParam),
-                    isHelpItem: true,
-                    score: (idx === helpItems.selectedItemIndex) ? 1 : 0
-                };
-            });
-            // setTimeout(() => {
-            //     if (editor.completer && editor.completer.completions) {
-            //         console.log("setFilterText",filterText);
-            //         editor.completer.completions.setFilter(filterText)
-            //         editor.completer.openPopup(editor, filterText, true);
-            //     }
-            // }, 0)
-            return callback(null, completionsItems);
-        },
-        getDocTooltip: function (item) {
-            if (item.isHelpItem)
-                item.docHTML = item.toolTip;
-        }
-    };
-    return typeScriptParameterCompleter;
-};
 exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHelpUrlGetter) {
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
             var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
-            if (/^[0-9]$/.test(prefix[0]))
-                return callback(null, []);
-            if (aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos)) {
+            // if (/^[0-9]$/.test(prefix[0]))
+            //   return callback(null,[]);
+            session.__paramHelpItems = aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
+            if (session.__paramHelpItems) {
                 return callback(null, []);
             }
             var completionsInfo = tsServ.getCompletionsInfoByPos(true, scriptFileName, posChar);
@@ -117,4 +76,46 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
         }
     };
     return typescriptAutoCompleter;
+};
+exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
+    var typeScriptParameterCompleter = {
+        getCompletions: function (editor, session, pos, prefix, callback) {
+            var helpItems = (session["__paramHelpItems"]);
+            if (!helpItems)
+                return callback(null, []);
+            var completionsItems = helpItems.items.map(function (it, idx) {
+                var currentParam = undefined;
+                var paramsText = (it.parameters.map(function (param, paramIdx) {
+                    if (paramIdx === helpItems.argumentIndex) {
+                        currentParam = param;
+                        return param.type;
+                    }
+                    else
+                        return param.type;
+                }).join(it.separator));
+                var value = it.prefix + paramsText + it.suffix;
+                return {
+                    caption: value,
+                    value: " ",
+                    meta: "",
+                    toolTip: currentParam && aceUtils.highlightTypeAndComment(currentParam),
+                    isHelpItem: true,
+                    score: (idx === helpItems.selectedItemIndex) ? 1 : 0
+                };
+            });
+            // setTimeout(() => {
+            //     if (editor.completer && editor.completer.completions) {
+            //         console.log("setFilterText",filterText);
+            //         editor.completer.completions.setFilter(filterText)
+            //         editor.completer.openPopup(editor, filterText, true);
+            //     }
+            // }, 0)
+            return callback(null, completionsItems);
+        },
+        getDocTooltip: function (item) {
+            if (item.isHelpItem)
+                item.docHTML = item.toolTip;
+        }
+    };
+    return typeScriptParameterCompleter;
 };

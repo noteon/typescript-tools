@@ -1,6 +1,6 @@
 ///<reference path='typings/node/node.d.ts'/>
 
-let configSample=`let config = {
+let configSample=`{
     _id : "my_replica_set",
      members : [
          {_id : 0, host : "rs1.example.net:27017"},
@@ -22,13 +22,10 @@ var mongoInitializeTemplates = [
       {
             caption: "initiateWithSampleConfig",
             snippet: 
-`${configSample}
-
-initiate();`,
+`initiate(${configSample});`,
             comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
             example:
-`${configSample}
-rs.initiate()`,
+`rs.initiate(${configSample})`,
             score:10
       }
 ];      

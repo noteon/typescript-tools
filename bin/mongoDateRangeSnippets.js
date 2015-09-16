@@ -1,4 +1,5 @@
 ///<reference path='typings/tsd.d.ts'/>
+var moment = require("moment");
 var d = new Date();
 var todayStr = moment().format("YYYY-MM-DD");
 var tomorrowStr = moment().add(1, 'day').format("YYYY-MM-DD");

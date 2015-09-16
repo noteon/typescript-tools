@@ -135,7 +135,7 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
 
                 methodType = session.__firstCompletionEntry && session.__firstCompletionEntry.type;
 
-                console.log("firstEntry methodType", session.__firstCompletionEntry);
+                //console.log("firstEntry methodType", session.__firstCompletionEntry);
             }
 
             var getCompletionsByMongoClass = (typeEnds: string[], requireJsPath, helpDotPrefix = ""): any[]=> {

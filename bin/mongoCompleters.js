@@ -99,7 +99,6 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
             if (hasDot) {
                 posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
                 methodType = session.__firstCompletionEntry && session.__firstCompletionEntry.type;
-                console.log("firstEntry methodType", session.__firstCompletionEntry);
             }
             var getCompletionsByMongoClass = function (typeEnds, requireJsPath, helpDotPrefix) {
                 if (helpDotPrefix === void 0) { helpDotPrefix = ""; }

@@ -1,4 +1,5 @@
 ///<reference path='typings/tsd.d.ts'/>
+let moment=require("moment");
 let d = new Date();
 let todayStr = moment().format("YYYY-MM-DD");
 let tomorrowStr = moment().add(1, 'day').format("YYYY-MM-DD");

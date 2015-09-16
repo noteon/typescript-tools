@@ -95,11 +95,11 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
             var currentLine = session.getLine(pos.row);
             var hasDot = currentLine.indexOf('.') > -1;
             var posChar;
-            var quickInfo;
+            var methodType = "";
             if (hasDot) {
                 posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1 - (prefix ? prefix.length : 0) - 1);
-                quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
-                console.log(tsServ.ls.getTypeDefinitionAtPosition(scriptFileName, posChar));
+                methodType = session.__firstCompletionEntry && session.__firstCompletionEntry.type;
+                console.log("firstEntry methodType", session.__firstCompletionEntry);
             }
             var getCompletionsByMongoClass = function (typeEnds, requireJsPath, helpDotPrefix) {
                 if (helpDotPrefix === void 0) { helpDotPrefix = ""; }
@@ -117,10 +117,10 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
                 if (hasDot) {
                     var isSnippetsType = function (type) {
                         return _.some(typeEnds, function (endStr) {
-                            return _.endsWith(quickInfo.type, endStr);
+                            return type.indexOf(endStr) > -1;
                         });
                     };
-                    if (quickInfo && isSnippetsType(quickInfo.type)) {
+                    if (methodType && isSnippetsType(methodType)) {
                         return templates;
                     }
                     else
@@ -139,11 +139,11 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
             };
             var concatTmpls = [];
             [
-                getCompletionsByMongoClass([": mongo.ICollection", ": ICollection"], "./mongoCollectionSnippets", 'db.getCollection("$1").'),
-                getCompletionsByMongoClass([": mongo.ICursor", ": ICursor"], "./mongoCursorSnippets"),
-                getCompletionsByMongoClass([": mongo.IDatabase", ": IDatabase"], "./mongoDatabaseSnippets", 'db.'),
-                getCompletionsByMongoClass([": mongo.IBulkFindOp", ": IBulkFindOp"], "./mongoBulkFindOpSnippets"),
-                getCompletionsByMongoClass([": mongo.IReplication", ": IReplication"], "./mongoRsSnippets"),
+                getCompletionsByMongoClass([" mongo.ICollection.", " ICollection."], "./mongoCollectionSnippets", 'db.getCollection("$1").'),
+                getCompletionsByMongoClass([" mongo.ICursor.", " ICursor."], "./mongoCursorSnippets"),
+                getCompletionsByMongoClass([" mongo.IDatabase.", " IDatabase."], "./mongoDatabaseSnippets", 'db.'),
+                getCompletionsByMongoClass([" mongo.IBulkFindOp.", " IBulkFindOp."], "./mongoBulkFindOpSnippets"),
+                getCompletionsByMongoClass([" mongo.IReplication.", " IReplication."], "./mongoRsSnippets"),
             ].forEach(function (it) {
                 if (it)
                     concatTmpls = concatTmpls.concat(it);

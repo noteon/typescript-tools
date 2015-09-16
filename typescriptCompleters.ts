@@ -5,6 +5,55 @@ import ts = require('./typescriptService');
 
 export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFileName: string, methodHelpUrlGetter?:(methodDotName:string)=>string) => {
     
+    var getCompletionEntries=(posChar, prefix)=>{
+            let completionsInfo = tsServ.getCompletionsInfoByPos(true, scriptFileName, posChar);
+            if (!completionsInfo) {
+                return [];
+            }
+               
+            //console.log("completionsInfo",completionsInfo.entries);
+            let isMethodOrFunction=(kind)=>{
+                return (kind==="method") || (kind==="function")
+            }
+            
+            let completions = completionsInfo.entries.map((it) => {
+                return {
+                    caption: it.name,
+                    snippet: it.name+(isMethodOrFunction(it.kind)?"($2)":""),
+                    meta: it.kind,
+                    pos: posChar,
+                    srcProps: it,
+                    isAutoComplete: true
+                }
+            });
+
+
+            var matchFunc = function(elm) {
+                return elm.caption.indexOf(prefix) == 0 ? 1 : 0;
+            };
+
+            var matchCompare = function(a, b) {
+                return matchFunc(b) - matchFunc(a);
+            };
+
+            var textCompare = function(a, b) {
+                if (a.caption == b.caption) {
+                    return 0;
+                } else {
+                    return (a.caption > b.caption) ? 1 : -1;
+                }
+            };
+            var compare = function(a, b) {
+                var ret = matchCompare(a, b);
+                return (ret != 0) ? ret : textCompare(a, b);
+            };
+
+            completions = completions.sort(compare);
+            
+            return completions;
+        
+    }
+    
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
         getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
@@ -19,54 +68,20 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
                 return callback(null, [])
             }
 
-            let completionsInfo = tsServ.getCompletionsInfoByPos(true, scriptFileName, posChar);
-            if (!completionsInfo) {
-                return callback(null, [])
+            let completionEntries=getCompletionEntries(posChar,prefix);
+            
+            if (!prefix){
+               session.__firstCompletionEntry=completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, posChar, completionEntries[0].caption); 
             }
-               
-            //console.log("completionsInfo",completionsInfo.entries);
-            let completions = completionsInfo.entries.map((it) => {
-                return {
-                    name: it.name,
-                    value: it.name,
-                    meta: it.kind,
-                    pos: posChar,
-                    srcProps: it,
-                    isAutoComplete: true
-                }
-            });
-
-
-            var matchFunc = function(elm) {
-                return elm.name.indexOf(prefix) == 0 ? 1 : 0;
-            };
-
-            var matchCompare = function(a, b) {
-                return matchFunc(b) - matchFunc(a);
-            };
-
-            var textCompare = function(a, b) {
-                if (a.name == b.name) {
-                    return 0;
-                } else {
-                    return (a.name > b.name) ? 1 : -1;
-                }
-            };
-            var compare = function(a, b) {
-                var ret = matchCompare(a, b);
-                return (ret != 0) ? ret : textCompare(a, b);
-            };
-
-            completions = completions.sort(compare);
             
+           // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
             
-
-            callback(null, completions)
+            callback(null, completionEntries)
         },
 
         getDocTooltip: function(item) {
             if (item.isAutoComplete) {
-                var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(scriptFileName, item.pos, item.name) || { type: "" };
+                var detailInfo: any = tsServ.getCompletionEntryDetailsInfo(scriptFileName, item.pos, item.caption) || { type: "" };
                 if (detailInfo && detailInfo.type) {
                     let helpUrl="";
                     if (methodHelpUrlGetter){

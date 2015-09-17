@@ -64,7 +64,7 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             
             session.__paramHelpItems=aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
 
-            if (session.__paramHelpItems) { //parameter hint
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, [])
             }
 

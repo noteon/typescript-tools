@@ -27,28 +27,28 @@ var dateRangeSnippets = [
     },
     {
         caption: "YesterdayDateRange",
-        snippet: "{\n   \\$gte: moment().substract(1,\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().substract(1,\"day\").endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().subtract(1,\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().subtract(1,\"day\").endOf(\"day\").toDate()\n }",
         comment: 'Yesterday (use momentjs)',
-        example: "{\n   \\$gte: moment().substract(1,\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().substract(1,\"day\").endOf(\"day\").toDate()\n }",
+        example: "{\n   \\$gte: moment().subtract(1,\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().subtract(1,\"day\").endOf(\"day\").toDate()\n }",
     },
     {
         caption: "LastNdaysDateRange",
-        snippet: "{\n   \\$gte: moment().substract(${3:7},\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().subtract(${3:7},\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
         comment: 'Last N days (use momentjs)',
-        example: "{\n   \\$gte: moment().substract(N,\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        example: "{\n   \\$gte: moment().subtract(N,\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
         attachedToFindMethod: true
     },
     {
         caption: "LastNweeksDateRange",
-        snippet: "{\n   \\$gte: moment().substract(${3:1},\"week\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().subtract(${3:1},\"week\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
         comment: 'Last N weeks (use momentjs)',
-        example: "{\n   \\$gte: moment().substract(N,\"week\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        example: "{\n   \\$gte: moment().subtract(N,\"week\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
     },
     {
         caption: "LastNmonthsDateRange",
-        snippet: "{\n   \\$gte: moment().substract(${3:1},\"month\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().subtract(${3:1},\"month\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
         comment: 'Last N months (use momentjs)',
-        example: "{\n   \\$gte: moment().substract(N,\"month\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        example: "{\n   \\$gte: moment().subtract(N,\"month\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
     }
 ];
 dateRangeSnippets = dateRangeSnippets.map(function (it) {

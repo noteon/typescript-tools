@@ -48,7 +48,7 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
             // if (/^[0-9]$/.test(prefix[0]))
             //   return callback(null,[]);
             session.__paramHelpItems = aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
-            if (session.__paramHelpItems) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, []);
             }
             var completionEntries = getCompletionEntries(posChar, prefix);

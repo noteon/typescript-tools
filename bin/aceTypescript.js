@@ -126,13 +126,13 @@ function setupAceEditor(params) {
     }
     ;
     langTools.setCompleters([
+        mongoCompleters.getShellCmdCompleter(tsServ, fileName),
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
         //TypescriptAuto会缓存语言服务的一些值
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
         mongoCompleters.dateRangeCompleter,
-        mongoCompleters.getShellCmdCompleter(tsServ, fileName),
         mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName, params.helpUrlFetcher),
     ]);
     //langTools.setCompleters([typescriptCompleter,typeScriptParameterCompleter]);

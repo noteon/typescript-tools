@@ -190,15 +190,16 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     };
 
     langTools.setCompleters([
+        mongoCompleters.getShellCmdCompleter(tsServ, fileName),//getShellCmdCompleter置顶，它增加了session.__includeShellCmdSpaceChar
+        
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),//注，Completer的顺序很重要，getTypeScriptAutoCompleters必须置顶，
                                                                                           //TypescriptAuto会缓存语言服务的一些值
                                                                                           
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
-        
+
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
         mongoCompleters.operatorsCompleter,
         mongoCompleters.dateRangeCompleter,
-        mongoCompleters.getShellCmdCompleter(tsServ, fileName),
         mongoCompleters.getCollectionMethodsCompleter(tsServ, fileName, params.helpUrlFetcher),
     ]);
     

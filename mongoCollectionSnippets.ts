@@ -14,7 +14,7 @@ var mongoFindTemplates = [
       {
             caption: "find with a projection",
             snippet:
-            `find({$2}, {_id: 0, $3: 1})`,
+            `find({$2}, {_id: 0, name: 1})`,
             comment: 'The projection parameter specifies which fields to return. corresponds to the SELECT statement in SQL. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
             example:
             `db.products.find( { qty: { $gte: 25, $lt: 35 } }, { _id: 0, qty: 1 } )`,

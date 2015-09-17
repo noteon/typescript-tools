@@ -1,10 +1,10 @@
-/// <reference path="./typings/tsd.d.ts" />
+/// <reference path="./typings/app.d.ts" />
 var aceUtils = require("./aceUtils");
 _ = require("lodash");
 exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
     var fieldsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (session["__paramHelpItems"]) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, []);
             }
             var prevChar = aceUtils.getPrevChar(session, pos);
@@ -65,11 +65,17 @@ exports.operatorsCompleter = {
 exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
     var shellCmdCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (session["__paramHelpItems"]) {
+            session.__includeShellCmdSpaceChar = undefined;
+            if (session.__paramHelpItems) {
                 return callback(null, []);
             }
             var currentLine = session.getLine(pos.row).trim();
-            if (currentLine && (!/^\b.*\b$/.test(currentLine)))
+            // if (currentLine && (!/^\b.*\b$/.test(currentLine)))
+            //     return callback(null, []);
+            session.__includeShellCmdSpaceChar = _.any(["show ", "use ", "help "], function (it) {
+                return _.startsWith(currentLine, it);
+            });
+            if (session.__includeShellCmdSpaceChar)
                 return callback(null, []);
             var mongoShellCommands = require('./mongoShellCommands');
             mongoShellCommands.map(function (it) {
@@ -89,7 +95,7 @@ var docUrlAssigned = false;
 exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUrlFetcher) {
     var collectionMethodsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (session["__paramHelpItems"]) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, []);
             }
             var currentLine = session.getLine(pos.row);
@@ -159,7 +165,7 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
 };
 exports.dateRangeCompleter = {
     getCompletions: function (editor, session, pos, prefix, callback) {
-        if (session["__paramHelpItems"]) {
+        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
             return callback(null, []);
         }
         var templates = require("./mongoDateRangeSnippets");

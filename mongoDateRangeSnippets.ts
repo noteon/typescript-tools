@@ -56,14 +56,14 @@ var dateRangeSnippets = [
             caption: "YesterdayDateRange",
             snippet:
             `{
-   \\$gte: moment().substract(1,"day").startOf("day").toDate(),
-   \\$lte: moment().substract(1,"day").endOf("day").toDate()
+   \\$gte: moment().subtract(1,"day").startOf("day").toDate(),
+   \\$lte: moment().subtract(1,"day").endOf("day").toDate()
  }`,
             comment: 'Yesterday (use momentjs)',
             example:
             `{
-   \\$gte: moment().substract(1,"day").startOf("day").toDate(),
-   \\$lte: moment().substract(1,"day").endOf("day").toDate()
+   \\$gte: moment().subtract(1,"day").startOf("day").toDate(),
+   \\$lte: moment().subtract(1,"day").endOf("day").toDate()
  }`,
       },
 
@@ -71,13 +71,13 @@ var dateRangeSnippets = [
             caption: "LastNdaysDateRange",
             snippet:
             `{
-   \\$gte: moment().substract(\${3:7},"day").startOf("day").toDate(),
+   \\$gte: moment().subtract(\${3:7},"day").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
  }`,
             comment: 'Last N days (use momentjs)',
             example:
             `{
-   \\$gte: moment().substract(N,"day").startOf("day").toDate(),
+   \\$gte: moment().subtract(N,"day").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
  }`,
             attachedToFindMethod: true
@@ -87,13 +87,13 @@ var dateRangeSnippets = [
             caption: "LastNweeksDateRange",
             snippet:
             `{
-   \\$gte: moment().substract(\${3:1},"week").startOf("day").toDate(),
+   \\$gte: moment().subtract(\${3:1},"week").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
  }`,
             comment: 'Last N weeks (use momentjs)',
             example:
             `{
-   \\$gte: moment().substract(N,"week").startOf("day").toDate(),
+   \\$gte: moment().subtract(N,"week").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
  }`,
       },
@@ -102,13 +102,13 @@ var dateRangeSnippets = [
             caption: "LastNmonthsDateRange",
             snippet:
             `{
-   \\$gte: moment().substract(\${3:1},"month").startOf("day").toDate(),
+   \\$gte: moment().subtract(\${3:1},"month").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
  }`,
             comment: 'Last N months (use momentjs)',
             example:
             `{
-   \\$gte: moment().substract(N,"month").startOf("day").toDate(),
+   \\$gte: moment().subtract(N,"month").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
  }`,
       }

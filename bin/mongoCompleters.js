@@ -1,6 +1,36 @@
 /// <reference path="./typings/app.d.ts" />
 var aceUtils = require("./aceUtils");
 _ = require("lodash");
+exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
+    var shellCmdCompleter = {
+        getCompletions: function (editor, session, pos, prefix, callback) {
+            session.__includeShellCmdSpaceChar = undefined;
+            if (session.__paramHelpItems || session.__isInStringToken) {
+                return callback(null, []);
+            }
+            var currentLine = session.getLine(pos.row).trim();
+            //console.log("current line", currentLine);
+            session.__includeShellCmdSpaceChar = _.any(["show ", "use ", "help "], function (it) {
+                return _.startsWith(currentLine, it);
+            });
+            if (session.__includeShellCmdSpaceChar)
+                return callback(null, []);
+            if (/\.|\'|\"|\{|\}|\(|\)|\`/.test(currentLine))
+                return callback(null, []);
+            var mongoShellCommands = require('./mongoShellCommands');
+            mongoShellCommands.map(function (it) {
+                it.isMongoShellCommand = true;
+                return it;
+            });
+            return callback(null, mongoShellCommands);
+        },
+        getDocTooltip: function (item) {
+            if (item.isMongoShellCommand)
+                item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+        }
+    };
+    return shellCmdCompleter;
+};
 exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
     var fieldsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
@@ -62,40 +92,12 @@ exports.operatorsCompleter = {
             item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
     }
 };
-exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
-    var shellCmdCompleter = {
-        getCompletions: function (editor, session, pos, prefix, callback) {
-            session.__includeShellCmdSpaceChar = undefined;
-            if (session.__paramHelpItems) {
-                return callback(null, []);
-            }
-            var currentLine = session.getLine(pos.row).trim();
-            // if (currentLine && (!/^\b.*\b$/.test(currentLine)))
-            //     return callback(null, []);
-            session.__includeShellCmdSpaceChar = _.any(["show ", "use ", "help "], function (it) {
-                return _.startsWith(currentLine, it);
-            });
-            if (session.__includeShellCmdSpaceChar)
-                return callback(null, []);
-            var mongoShellCommands = require('./mongoShellCommands');
-            mongoShellCommands.map(function (it) {
-                it.isMongoShellCommand = true;
-                return it;
-            });
-            return callback(null, mongoShellCommands);
-        },
-        getDocTooltip: function (item) {
-            if (item.isMongoShellCommand)
-                item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
-        }
-    };
-    return shellCmdCompleter;
-};
 var docUrlAssigned = false;
 exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUrlFetcher) {
     var collectionMethodsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
+            //console.log("colMethods", session.__isInStringToken);
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
                 return callback(null, []);
             }
             var currentLine = session.getLine(pos.row);
@@ -165,7 +167,7 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
 };
 exports.dateRangeCompleter = {
     getCompletions: function (editor, session, pos, prefix, callback) {
-        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
+        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
             return callback(null, []);
         }
         var templates = require("./mongoDateRangeSnippets");

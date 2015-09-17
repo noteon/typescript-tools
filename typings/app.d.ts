@@ -5,5 +5,6 @@ declare module AceAjax {
 	  __paramHelpItems:any;
 	  __firstCompletionEntry:any;
 	  __includeShellCmdSpaceChar:boolean;
+	  __isInStringToken:boolean;
   } 
 }

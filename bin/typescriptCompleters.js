@@ -44,16 +44,15 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
-            // if (/^[0-9]$/.test(prefix[0]))
-            //   return callback(null,[]);
+            var curPos = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
+            session.__isInStringToken = aceUtils.isStringChar(aceUtils.getCurChar(session, pos));
             session.__paramHelpItems = aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, []);
             }
-            var completionEntries = getCompletionEntries(posChar, prefix);
+            var completionEntries = getCompletionEntries(curPos, prefix);
             if (!prefix) {
-                session.__firstCompletionEntry = completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, posChar, completionEntries[0].caption);
+                session.__firstCompletionEntry = completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption);
             }
             // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
             callback(null, completionEntries);
@@ -91,7 +90,7 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
 exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
     var typeScriptParameterCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            var helpItems = (session["__paramHelpItems"]);
+            var helpItems = (session.__paramHelpItems);
             if (!helpItems)
                 return callback(null, []);
             var completionsItems = helpItems.items.map(function (it, idx) {

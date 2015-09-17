@@ -56,11 +56,10 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
     
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
-        getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
-            var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
+        getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
+            var curPos = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
             
-            // if (/^[0-9]$/.test(prefix[0]))
-            //   return callback(null,[]);
+            session.__isInStringToken= aceUtils.isStringChar(aceUtils.getCurChar(session,pos));
             
             session.__paramHelpItems=aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
 
@@ -68,10 +67,10 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
                 return callback(null, [])
             }
 
-            let completionEntries=getCompletionEntries(posChar,prefix);
+            let completionEntries=getCompletionEntries(curPos,prefix);
             
             if (!prefix){
-               session.__firstCompletionEntry=completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, posChar, completionEntries[0].caption); 
+               session.__firstCompletionEntry=completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption); 
             }
             
            // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
@@ -118,8 +117,8 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
 
 export var getTypescriptParameterCompleter=(tsServ: ts.TypescriptService, scriptFileName: string)=>{
     var typeScriptParameterCompleter = {
-        getCompletions: function(editor, session, pos: { row: number, column: number }, prefix, callback) {
-            var helpItems =(session["__paramHelpItems"]);
+        getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
+            var helpItems =(session.__paramHelpItems);
 
             if (!helpItems) return callback(null, [])
 

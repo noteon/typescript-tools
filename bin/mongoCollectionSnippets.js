@@ -293,7 +293,6 @@ var addMongoCodeTemplates = function (mongoMethod, templates) {
 var attachDateRangeToMongoFindTemlates = function () {
     var dateRangeTemplates = require("./mongoDateRangeSnippets");
     dateRangeTemplates.filter(function (it) { return it.attachedToFindMethod; }).forEach(function (it) {
-        console.log("attachedToFindMethod", it);
         mongoFindTemplates.push({
             caption: "find" + it.caption,
             snippet: "find({ ${2:dateField}: " + it.snippet + " })",

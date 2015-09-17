@@ -10,8 +10,14 @@ exports.getLinesChars = function (lines) {
 exports.getChars = function (docOrSession, pos) {
     return exports.getLinesChars(docOrSession.getLines(0, pos.row - 1)) + pos.column;
 };
+exports.isStringChar = function (char) {
+    return char && ["'", '"', '`'].indexOf(char) > -1;
+};
 exports.getPrevChar = function (docOrSession, pos) {
     return docOrSession.getValue().charAt(exports.getChars(docOrSession, { row: pos.row, column: pos.column - 1 }));
+};
+exports.getCurChar = function (docOrSession, pos) {
+    return docOrSession.getValue().charAt(exports.getChars(docOrSession, { row: pos.row, column: pos.column }));
 };
 exports.getPosition = function (doc, chars) {
     var count, i, line, lines, row;

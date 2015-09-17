@@ -15,10 +15,17 @@ export var getChars = function(docOrSession, pos: AceAjax.Position) {
   return getLinesChars(docOrSession.getLines(0, pos.row - 1)) + pos.column;
 }
 
+export var isStringChar=(char)=>{
+   return char && ["'",'"','`'].indexOf(char)>-1;
+}
+
 export var getPrevChar = function(docOrSession, pos: AceAjax.Position) {
   return docOrSession.getValue().charAt(getChars(docOrSession, { row: pos.row, column: pos.column - 1 }));
 }
 
+export var getCurChar = function(docOrSession, pos: AceAjax.Position) {
+  return docOrSession.getValue().charAt(getChars(docOrSession, { row: pos.row, column: pos.column }));
+}
 
 export var getPosition = function(doc, chars) {
   var count, i, line, lines, row;

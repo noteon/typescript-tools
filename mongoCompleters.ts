@@ -4,6 +4,53 @@ import aceUtils = require("./aceUtils");
 import ts = require("./typescriptService");
 _ = require("lodash");
 
+export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName: string) => {
+
+    var shellCmdCompleter = {
+        getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
+
+            session.__includeShellCmdSpaceChar=undefined;
+            
+            if (session.__paramHelpItems || session.__isInStringToken) {
+                return callback(null, [])
+            }
+
+            let currentLine = session.getLine(pos.row).trim();
+            //console.log("current line", currentLine);
+
+            session.__includeShellCmdSpaceChar=_.any(["show ","use ","help "],(it)=>{
+                return _.startsWith(currentLine,it)
+            })
+            
+            if (session.__includeShellCmdSpaceChar)
+                return callback(null, []);
+
+            if (/\.|\'|\"|\{|\}|\(|\)|\`/.test(currentLine))
+                return callback(null, []);        
+
+
+            let mongoShellCommands = require('./mongoShellCommands');
+
+            mongoShellCommands.map((it) => {
+                it.isMongoShellCommand = true;
+                return it
+            });
+            
+                
+
+            return callback(null, mongoShellCommands)
+        },
+
+        getDocTooltip: function(item) {
+            if (item.isMongoShellCommand)
+                item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
+        }
+    }
+
+    return shellCmdCompleter
+}
+
+
 export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: string, fieldsFetcher: (scriptFileName: string) => { fieldName: string; collection: string }[]) => {
 
     var fieldsCompleter = {
@@ -81,49 +128,6 @@ export var operatorsCompleter = {
 }
 
 
-export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName: string) => {
-
-    var shellCmdCompleter = {
-        getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-            session.__includeShellCmdSpaceChar=undefined;
-            
-            if (session.__paramHelpItems) {
-                return callback(null, [])
-            }
-
-            let currentLine = session.getLine(pos.row).trim();
-
-            // if (currentLine && (!/^\b.*\b$/.test(currentLine)))
-            //     return callback(null, []);
-                
-            session.__includeShellCmdSpaceChar=_.any(["show ","use ","help "],(it)=>{
-                return _.startsWith(currentLine,it)
-            })
-            
-            if (session.__includeShellCmdSpaceChar)
-                return callback(null, []);
-
-
-            let mongoShellCommands = require('./mongoShellCommands');
-
-            mongoShellCommands.map((it) => {
-                it.isMongoShellCommand = true;
-                return it
-            });
-            
-                
-
-            return callback(null, mongoShellCommands)
-        },
-
-        getDocTooltip: function(item) {
-            if (item.isMongoShellCommand)
-                item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
-        }
-    }
-
-    return shellCmdCompleter
-}
 
 let docUrlAssigned: boolean = false;
 
@@ -132,7 +136,9 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
 
     var collectionMethodsCompleter = {
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
+            
+            //console.log("colMethods", session.__isInStringToken);
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar  || session.__isInStringToken) {
                 return callback(null, [])
             }
 
@@ -218,7 +224,7 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
 
 export var dateRangeCompleter = {
     getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
+        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
             return callback(null, [])
         }
         let templates = require("./mongoDateRangeSnippets");

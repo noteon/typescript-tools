@@ -82,7 +82,13 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
                 //console.log("error marker", line, start.row)
                 if (/^(help|use|show) ?$/.test(line) || /^(help|use|show) .*$/.test(line))
                     return;
+
             }
+            //console.log("end.row", end.row, editor.getCursorPosition().row);
+            if (editor.container && (document.activeElement === editor.container.children[0]) && (end.row === editor.getCursorPosition().row)) {
+                return;
+            }    
+            
             
             //console.log("session push marker",start.row,start.column);
             errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));

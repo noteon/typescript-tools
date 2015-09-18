@@ -1,20 +1,14 @@
 /// <reference path="./typings/tsd.d.ts" />
-var aceUtils = require("./aceUtils");
-var ts = require("./typescriptService");
-var tsCompleters = require('./typescriptCompleters');
-var mongoCompleters = require('./mongoCompleters');
-var typescript = require("typescript");
 _ = require("lodash");
-//default theme twilight
-function setupAceEditor(params) {
+function bindTypescriptExtension(editor, params) {
+    var aceUtils = require("./aceUtils");
+    var ts = require("./typescriptService");
+    var tsCompleters = require('./typescriptCompleters');
+    var mongoCompleters = require('./mongoCompleters');
+    var typescript = require("typescript");
+    var fs = require("fs");
     var langTools = ace.require("ace/ext/language_tools");
     var AceRange = ace.require('ace/range').Range;
-    var editor = ace.edit(params.editorElem);
-    editor.setOptions({ enableBasicAutocompletion: false });
-    editor.$blockScrolling = Infinity;
-    var theme = params.editorTheme || 'twilight';
-    editor.setTheme("ace/theme/" + theme);
-    editor.getSession().setMode("ace/mode/typescript");
     var tsServ = new ts.TypescriptService();
     var fileName = params.tsFilePath;
     //console.log(__dirname+"/lodash.d.ts");
@@ -27,15 +21,7 @@ function setupAceEditor(params) {
             tsAndTypingFiles.push({ name: it, content: typescript.sys.readFile(it.path) });
     });
     //target 1= ES5
-    var compilerOptions = { target: 1 /* ES5 */, "module": 1 /* CommonJS */ };
-    tsServ.setup(tsAndTypingFiles, compilerOptions);
-    editor.addEventListener("change", onChangeDocument);
-    //    editor.addEventListener("update", onUpdateDocument);
-    function reloadDocument() {
-        tsServ.updateScript(fileName, editor.getSession().getValue());
-    }
-    ;
-    reloadDocument();
+    var compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
     var errorMarkers = [];
     function updateMarker(e) {
         var addPhase = function (phase) { return function (d) { d.phase = phase; return d; }; };
@@ -174,6 +160,27 @@ function setupAceEditor(params) {
         }
     });
     require("./aceElectronContextMenu")(editor);
+    tsServ.setup(tsAndTypingFiles, compilerOptions);
+    editor.addEventListener("change", onChangeDocument);
+    function reloadDocument() {
+        tsServ.updateScript(fileName, editor.getSession().getValue());
+    }
+    ;
+    reloadDocument();
+}
+//default theme twilight
+function setupAceEditor(params) {
+    var editor = ace.edit(params.editorElem);
+    editor.setOptions({ enableBasicAutocompletion: false });
+    editor.$blockScrolling = Infinity;
+    var theme = params.editorTheme || 'twilight';
+    editor.setTheme("ace/theme/" + theme);
+    editor.getSession().setMode("ace/mode/typescript");
+    _.defer(function () {
+        //var start=Date.now();
+        bindTypescriptExtension(editor, params);
+        //console.log("setup editor elapsed", Date.now() - start);
+    });
     return editor;
 }
 exports.setupAceEditor = setupAceEditor;

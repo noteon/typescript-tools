@@ -1,19 +1,13 @@
 /// <reference path="./typings/tsd.d.ts" />
 
-import aceUtils = require("./aceUtils");
-import ts = require("./typescriptService");
-import tsCompleters = require('./typescriptCompleters');
-import mongoCompleters = require('./mongoCompleters');
-import typescript = require("typescript");
-
-import fs = require("fs");
 _ = require("lodash");
 
-interface AceTs {
-    ts: ts.TypescriptService;
-    transpile: () => string;
-    format: () => string;
-}
+
+// interface AceTs {
+//     ts: ts.TypescriptService;
+//     transpile: () => string;
+//     format: () => string;
+// }
 
 interface AceTsSetupParams {
     tsFilePath: string;
@@ -24,19 +18,17 @@ interface AceTsSetupParams {
     helpUrlFetcher?: (methodDotName: string) => string;//methodDotName like: "mongo.ICollection.find"
 }
 
-//default theme twilight
-export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
+function bindTypescriptExtension(editor: AceAjax.Editor, params) {
+    var aceUtils = require("./aceUtils");
+    var ts = require("./typescriptService");
+    var tsCompleters = require('./typescriptCompleters');
+    var mongoCompleters = require('./mongoCompleters');
+    var typescript = require("typescript");
+
+    var fs = require("fs");
 
     var langTools = ace.require("ace/ext/language_tools");
     var AceRange = ace.require('ace/range').Range;
-
-    var editor = ace.edit(<any>params.editorElem);
-    editor.setOptions({ enableBasicAutocompletion: false });
-    editor.$blockScrolling = Infinity;
-
-    var theme = params.editorTheme || 'twilight';
-    editor.setTheme(`ace/theme/${theme}`);
-    editor.getSession().setMode("ace/mode/typescript");
 
     var tsServ = new ts.TypescriptService();
     var fileName = params.tsFilePath;
@@ -55,17 +47,6 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     
     //target 1= ES5
     let compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
-
-    tsServ.setup(tsAndTypingFiles, compilerOptions);
-
-    editor.addEventListener("change", onChangeDocument);
-    //    editor.addEventListener("update", onUpdateDocument);
-
-    function reloadDocument() {
-        tsServ.updateScript(fileName, editor.getSession().getValue());
-    };
-
-    reloadDocument();
 
     var errorMarkers = [];
     function updateMarker(e: AceAjax.EditorChangeEvent) {
@@ -189,11 +170,12 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
         //console.log('syncTypeScriptServiceContent', start,end,e.lines);
     };
 
+
     langTools.setCompleters([
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),//getShellCmdCompleter置顶，它增加了session.__includeShellCmdSpaceChar
         
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),//注，Completer的顺序很重要，getTypeScriptAutoCompleters必须置顶，
-                                                                                          //TypescriptAuto会缓存语言服务的一些值
+        //TypescriptAuto会缓存语言服务的一些值
                                                                                           
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
 
@@ -216,6 +198,7 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
             editor.execCommand("startAutocomplete")
         }
     })
+
 
 
     require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName);
@@ -255,6 +238,41 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     });
 
     require("./aceElectronContextMenu")(editor);
+
+
+    tsServ.setup(tsAndTypingFiles, compilerOptions);
+
+
+    editor.addEventListener("change", onChangeDocument);
+
+    function reloadDocument() {
+        tsServ.updateScript(fileName, editor.getSession().getValue());
+    };
+
+
+    reloadDocument();
+}
+
+
+//default theme twilight
+export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
+    var editor = ace.edit(<any>params.editorElem);
+
+    editor.setOptions({ enableBasicAutocompletion: false });
+    editor.$blockScrolling = Infinity;
+
+
+    var theme = params.editorTheme || 'twilight';
+    editor.setTheme(`ace/theme/${theme}`);
+    editor.getSession().setMode("ace/mode/typescript");
+
+
+    _.defer(() => {
+        //var start=Date.now();
+        bindTypescriptExtension(editor, params);
+        //console.log("setup editor elapsed", Date.now() - start);
+    });
+
 
     return editor;
 }	

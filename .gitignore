@@ -2,6 +2,7 @@ node_modules
 bower_components
 *.log
 .DS_Store
+.cache-require-paths.json
 Thumbs.db
 /build/
 /releases/

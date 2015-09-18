@@ -106,8 +106,13 @@ export var getCollectionName = (currentLine: string) => {
     return colMatches[1].substring(1, colMatches[1].length - 1);
 
   let dotMatches = currentLine.match(/[^\w]?db\.(.*?)\..*$/)
-  if (dotMatches && dotMatches[1])
-    return dotMatches[1];
+  if (dotMatches && dotMatches[1]){
+    let colName=<any>dotMatches[1]
+    if (colName && [")","}"].indexOf(<any>_.last(colName))>-1) return;
+    
+    return colName
+  }
+    
 
 }
 

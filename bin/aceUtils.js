@@ -85,6 +85,10 @@ exports.getCollectionName = function (currentLine) {
     if (colMatches && colMatches[1])
         return colMatches[1].substring(1, colMatches[1].length - 1);
     var dotMatches = currentLine.match(/[^\w]?db\.(.*?)\..*$/);
-    if (dotMatches && dotMatches[1])
-        return dotMatches[1];
+    if (dotMatches && dotMatches[1]) {
+        var colName = dotMatches[1];
+        if (colName && [")", "}"].indexOf(_.last(colName)) > -1)
+            return;
+        return colName;
+    }
 };

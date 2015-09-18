@@ -58,7 +58,7 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     return fieldsFetcher('');
                 }
             };
-            var score = -100000;
+            var score = 0;
             var fields = getFields().map(function (it) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 return {

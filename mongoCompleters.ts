@@ -83,7 +83,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                 }
             }
 
-            let score = -100000;
+            let score = 0;
 
             let fields = getFields().map((it) => {
                 let fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;

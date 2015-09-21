@@ -23,7 +23,7 @@ function bindTypescriptExtension(editor, params) {
     //target 1= ES5
     var compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
     var errorMarkers = [];
-    function updateMarker(e) {
+    function updateTsErrorMarkers() {
         var addPhase = function (phase) { return function (d) { d.phase = phase; return d; }; };
         var syntactic = tsServ.ls.getSyntacticDiagnostics(fileName);
         var semantic = tsServ.ls.getSemanticDiagnostics(fileName);
@@ -71,7 +71,7 @@ function bindTypescriptExtension(editor, params) {
         });
         session.setAnnotations(annotations);
     }
-    var throttledUpdateMarker = _.throttle(updateMarker, 100);
+    var throttledUpdateMarker = _.throttle(updateTsErrorMarkers, 100);
     var debounceUpdateMarker = _.debounce(throttledUpdateMarker, 500);
     function onChangeDocument(e) {
         //reloadDocument();
@@ -80,10 +80,10 @@ function bindTypescriptExtension(editor, params) {
             var startAt = Date.now();
             var cursorRow = editor.getCursorPosition().row;
             if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
-                debounceUpdateMarker(e);
+                debounceUpdateMarker();
             }
             else
-                throttledUpdateMarker(e);
+                throttledUpdateMarker();
         }
         catch (ex) {
         }
@@ -166,6 +166,9 @@ function bindTypescriptExtension(editor, params) {
     require("./aceElectronContextMenu")(editor);
     tsServ.setup(tsAndTypingFiles, compilerOptions);
     editor.addEventListener("change", onChangeDocument);
+    editor.on("blur", function () {
+        updateTsErrorMarkers();
+    });
     function reloadDocument() {
         tsServ.updateScript(fileName, editor.getSession().getValue());
     }

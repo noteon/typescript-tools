@@ -1037,7 +1037,7 @@ declare module AceAjax {
      * Event sessions dealing with the mouse and keyboard are bubbled up from `Document` to the `Editor`, which decides what to do with them.
     **/
     export interface Editor {
-        
+        on(ev:string, callback:Function);
         addEventListener(ev: 'change', callback: (ev: EditorChangeEvent) => any);
         addEventListener(ev: string, callback: Function);
 

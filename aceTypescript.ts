@@ -75,6 +75,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
             var start = aceUtils.getPosition(doc, error.start);
             var end = aceUtils.getPosition(doc, error.start + error.length);
+            //console.log("range",start,end);
             var range = new AceRange(start.row, start.column, end.row, end.column);
             
             //ignore mongo command like: user db1

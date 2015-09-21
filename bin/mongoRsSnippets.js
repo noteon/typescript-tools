@@ -16,22 +16,6 @@ var mongoInitializeTemplates = [
         score: 10
     }
 ];
-var mongoInitializeTemplates = [
-    {
-        caption: "initiate",
-        snippet: "initiate();",
-        comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
-        example: "rs.initiate()",
-        score: 100
-    },
-    {
-        caption: "initiateWithSampleConfig",
-        snippet: configSample + "\n\ninitiate();",
-        comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
-        example: configSample + "\nrs.initiate()",
-        score: 10
-    }
-];
 var replTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {

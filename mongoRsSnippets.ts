@@ -30,30 +30,6 @@ var mongoInitializeTemplates = [
       }
 ];      
 
-var mongoInitializeTemplates = [
-      {
-            caption: "initiate",
-            snippet: 
-`initiate();`,
-            comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
-            example:
-`rs.initiate()`,
-            score:100
-      },
-      {
-            caption: "initiateWithSampleConfig",
-            snippet: 
-`${configSample}
-
-initiate();`,
-            comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
-            example:
-`${configSample}
-rs.initiate()`,
-            score:10
-      }
-];      
-
       
 let replTemplates=[];
 

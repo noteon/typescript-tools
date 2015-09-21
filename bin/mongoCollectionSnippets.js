@@ -189,7 +189,35 @@ var mongoCreateIndexTemplates = [
         comment: "Creates indexes on collections. The options document contains a set of options that controls the creation of the index. Different index types can have additional options specific for that type.",
         example: "db.eventlog.createIndex( { \"lastModifiedDate\": 1 }, { background:true, unique:false, sparse:true } )",
         score: 10
-    }
+    },
+    {
+        caption: "createIndexWithTextOptions",
+        snippet: "createIndex({ \n    \"\\$**\" : \"text\", //$** to index all fields that contain string content\n    \"name\" : \"text\",\n    \"content\": \"text\"\n}, { \n    \"name\" : \"indexName\", \n    \"default_language\" : \"english\", \n    //\"language_override\" : \"lang\", \n    \"weights\" : {\n        \"name\" : 1,\n        \"content\": 2\n    }\n})",
+        comment: "You can create a text index on the field or fields whose value is a string or an array of string elements. When creating a text index on multiple fields, you can specify the individual fields or you can use wildcard specifier ($**)",
+        example: "createIndex({ \n    \"$**\" : \"text\",  \n    \"name\" : \"text\",\n    \"content\": \"text\"\n}, { \n    \"weights\" : {\n        \"name\" : 1,\n        \"content\": 2\n    }\n    //\"name\" : \"indexName\", \n    //\"default_language\" : \"english\", \n    //\"language_override\" : \"lang\", \n    //\"textIndexVersion\": 2  //In MongoDB 2.6, the default version is 2. MongoDB 2.4 can only support version 1.\n})",
+        score: 10
+    },
+    {
+        caption: "createIndexGeo2dsphere",
+        snippet: "createIndex( \n      { \"${3:locationField}\" : \"2dsphere\" },\n      { \"2dsphereIndexVersion\" : 2 }//In MongoDB 2.6, the default version is 2. MongoDB 2.4 can only support version 1.             \n)",
+        comment: 'To create a geospatial index for GeoJSON-formatted data.specify the location field as the index key and specify the string literal "2dsphere" as the value',
+        example: "db.collection.createIndex( { \"loc\" : \"2dsphere\" } )",
+        score: 10
+    },
+    {
+        caption: "createIndexGeo2dIndex",
+        snippet: "createIndex( \n      { \"${3:locationField}\" : \"2d\" },\n      { bits: 26, min : -180 , max : 180 }\n)",
+        comment: 'o build a geospatial 2d index',
+        example: "db.collection.createIndex( { \"loc\" : \"2d\" } ,\n                           { bits: 26, min : -180 , max : 180 } )",
+        score: 10
+    },
+    {
+        caption: "createIndexGeoHaystack",
+        snippet: "createIndex( \n      { \"${3:locationField}\" : \"geoHaystack\" } ,\n      { bucketSize : 1 } \n)",
+        comment: 'o build a geospatial 2d index',
+        example: "db.collection.createIndex( \n      { pos : \"geoHaystack\", type : 1 } ,\n      { bucketSize : 1 } \n)",
+        score: 10
+    },
 ];
 var mongoInsertTemplates = [
     {

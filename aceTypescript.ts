@@ -109,10 +109,18 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
                 return 'info'
             }
 
+            var getErrorText=(error)=>{
+                if (!error) return ""
+                
+                if (_.isString(error.messageText)) return error.messageText;
+                
+                return error.messageText.messageText;//DiagnosticMessageChain
+            }
+
             annotations.push({
                 row: start.row,
                 column: start.column,
-                text: error.messageText,
+                text: getErrorText(error),
                 type: getMessageType(error),
                 //raw:"test"                
             });

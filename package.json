@@ -1,6 +1,6 @@
 {
   "name": "ace-typescript-mongo",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "TypeScript and mongodb for ace",
   "main": "./bin/aceTypescript.js",
   "repository": {

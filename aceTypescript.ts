@@ -286,12 +286,13 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     editor.setTheme(`ace/theme/${theme}`);
     editor.getSession().setMode("ace/mode/typescript");
 
-
-    _.defer(() => {
-        //var start=Date.now();
-        bindTypescriptExtension(editor, params);
-        //console.log("setup editor elapsed", Date.now() - start);
-    });
+    bindTypescriptExtension(editor, params);
+    
+    // _.defer(() => {
+    //     //var start=Date.now();
+    //     bindTypescriptExtension(editor, params);
+    //     //console.log("setup editor elapsed", Date.now() - start);
+    // });
 
 
     return editor;

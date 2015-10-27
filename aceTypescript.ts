@@ -253,7 +253,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         }
     });
 
-    require("./aceElectronContextMenu")(editor);
+    //require("./aceElectronContextMenu")(editor);
 
 
     tsServ.setup(tsAndTypingFiles, compilerOptions);

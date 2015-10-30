@@ -4,7 +4,7 @@ var mongoFindTemplates = [
       {
             caption: "find",
             snippet:
-            `find({ $2 })`,
+            `find({$2})`,
             comment: 'Selects documents in a collection and returns a cursor to the selected documents.',
             example:
             `db.products.find( { qty: { $gte: 25, $lt: 35 } })`,
@@ -14,7 +14,7 @@ var mongoFindTemplates = [
       {
             caption: "findProjection",
             snippet:
-            `find({ $2 }, { _id: 0, name: 1 })`,
+            `find({ $2 }, { $3_id: 0, name: 1 })`,
             comment: 'The projection parameter specifies which fields to return. corresponds to the SELECT statement in SQL. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
             example:
             `db.products.find( { qty: { $gte: 25, $lt: 35 } }, { _id: 0, qty: 1 } )`,
@@ -24,7 +24,7 @@ var mongoFindTemplates = [
       {
             caption: "findForEach",
             snippet:
-            `find({ $2 },{ name:1 })
+            `find({ $2 },{ $3name:1 })
    .sort({name:1})
    .forEach((it)=>{
       $4
@@ -44,7 +44,7 @@ var mongoFindTemplates = [
       {
             caption: "findSortLimit",
             snippet:
-            `find({ $2 }).sort({ name: 1 }).limit(5)`,
+            `find({ $2 }).sort({ $3name: 1 }).limit(5)`,
             comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
             example:
             `db.bios.find().sort({name:1}).limit(5)`,
@@ -57,7 +57,7 @@ var mongoFindOneTemplates = [
       {
             caption: "findOne",
             snippet:
-            `findOne({ $2 })`,
+            `findOne({$2})`,
             comment: 'Returns one document that satisfies the specified query criteria. ',
             example:
             `db.bios.findOne({name:/name/})`,
@@ -469,7 +469,7 @@ var mongoInsertTemplates = [
       {
             caption: "insert",
             snippet:
-            `insert({ $2 })`,
+            `insert({$2})`,
             comment: 'Inserts a document or documents into a collection.',
             example:
             `db.products.insert( { item: "card", qty: 15 } )`,

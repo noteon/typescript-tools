@@ -7,6 +7,10 @@ exports.getLinesChars = function (lines) {
     });
     return count;
 };
+function isAllNumberStr(n) {
+    return /^\d+$/.test('1');
+}
+exports.isAllNumberStr = isAllNumberStr;
 exports.getChars = function (docOrSession, pos) {
     return exports.getLinesChars(docOrSession.getLines(0, pos.row - 1)) + pos.column;
 };

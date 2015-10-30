@@ -50,6 +50,9 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, []);
             }
+            if (prefix && aceUtils.isAllNumberStr(prefix)) {
+                return callback(null, []);
+            }
             var completionEntries = getCompletionEntries(curPos, prefix);
             if (!prefix) {
                 session.__firstCompletionEntry = completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption);

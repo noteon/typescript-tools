@@ -26,6 +26,8 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
                     isAutoComplete: true
                 }
             });
+            
+            
 
 
             var matchFunc = function(elm) {
@@ -65,6 +67,10 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
 
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, [])
+            }
+            
+            if (prefix && aceUtils.isAllNumberStr(prefix)){
+                return callback(null,[]);
             }
 
             let completionEntries=getCompletionEntries(curPos,prefix);

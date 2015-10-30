@@ -63,10 +63,17 @@ function bindTypescriptExtension(editor, params) {
                     return 'error';
                 return 'info';
             };
+            var getErrorText = function (error) {
+                if (!error)
+                    return "";
+                if (_.isString(error.messageText))
+                    return error.messageText;
+                return error.messageText.messageText; //DiagnosticMessageChain
+            };
             annotations.push({
                 row: start.row,
                 column: start.column,
-                text: error.messageText,
+                text: getErrorText(error),
                 type: getMessageType(error),
             });
         });
@@ -164,7 +171,7 @@ function bindTypescriptExtension(editor, params) {
             editor["typescriptServ"].format();
         }
     });
-    require("./aceElectronContextMenu")(editor);
+    //require("./aceElectronContextMenu")(editor);
     tsServ.setup(tsAndTypingFiles, compilerOptions);
     editor.addEventListener("change", onChangeDocument);
     editor.on("blur", function () {
@@ -184,11 +191,12 @@ function setupAceEditor(params) {
     var theme = params.editorTheme || 'twilight';
     editor.setTheme("ace/theme/" + theme);
     editor.getSession().setMode("ace/mode/typescript");
-    _.defer(function () {
-        //var start=Date.now();
-        bindTypescriptExtension(editor, params);
-        //console.log("setup editor elapsed", Date.now() - start);
-    });
+    bindTypescriptExtension(editor, params);
+    // _.defer(() => {
+    //     //var start=Date.now();
+    //     bindTypescriptExtension(editor, params);
+    //     //console.log("setup editor elapsed", Date.now() - start);
+    // });
     return editor;
 }
 exports.setupAceEditor = setupAceEditor;

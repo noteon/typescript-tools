@@ -11,6 +11,10 @@ export var getLinesChars = function(lines) {
   return count;
 };
 
+export function isAllNumberStr(n) {
+    return /^\d+$/.test('1')
+}
+
 export var getChars = function(docOrSession, pos: AceAjax.Position) {
   return getLinesChars(docOrSession.getLines(0, pos.row - 1)) + pos.column;
 }

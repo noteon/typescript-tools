@@ -37,6 +37,9 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, []);
             }
+            if (prefix && aceUtils.isAllNumberStr(prefix)) {
+                return callback(null, []);
+            }
             var prevChar = aceUtils.getPrevChar(session, pos);
             var getFields = function () {
                 if (prevChar === ".") {
@@ -98,6 +101,9 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
         getCompletions: function (editor, session, pos, prefix, callback) {
             //console.log("colMethods", session.__isInStringToken);
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
+                return callback(null, []);
+            }
+            if (prefix && aceUtils.isAllNumberStr(prefix)) {
                 return callback(null, []);
             }
             var currentLine = session.getLine(pos.row);

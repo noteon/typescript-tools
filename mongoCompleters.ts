@@ -58,6 +58,11 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, [])
             }
+        
+            if (prefix && aceUtils.isAllNumberStr(prefix)){
+                return callback(null,[]);
+            }
+
             
             let prevChar = aceUtils.getPrevChar(session, pos);
 
@@ -141,7 +146,10 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar  || session.__isInStringToken) {
                 return callback(null, [])
             }
-
+            if (prefix && aceUtils.isAllNumberStr(prefix)){
+                return callback(null,[]);
+            }
+            
             let currentLine = session.getLine(pos.row);
             let hasDot = currentLine.indexOf('.') > -1;
 

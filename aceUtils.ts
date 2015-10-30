@@ -12,7 +12,7 @@ export var getLinesChars = function(lines) {
 };
 
 export function isAllNumberStr(n) {
-    return /^\d+$/.test('1')
+    return /^\d+$/.test(n)
 }
 
 export var getChars = function(docOrSession, pos: AceAjax.Position) {

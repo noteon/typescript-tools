@@ -1,8 +1,8 @@
 {
-  "name": "ace-typescript-mongo",
-  "version": "0.28.0",
+  "name": "mb-ace-typescript",
+  "version": "0.29.0",
   "description": "TypeScript and mongodb for ace",
-  "main": "./bin/aceTypescript.js",
+  "main": "./dist/aceTypescript.js",
   "keywords": [
     "TypeScript"
   ],
@@ -10,7 +10,6 @@
   "author": "Claus Reinke, qinghai",
   "license": "Private License, Version 2.0",
   "dependencies": {
-    "browserify-fs": "^1.0.0",
     "keymaster": "^1.6.2",
     "lodash": "^3.10.1",
     "moment": "^2.10.6",

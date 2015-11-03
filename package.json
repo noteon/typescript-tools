@@ -3,13 +3,6 @@
   "version": "0.28.0",
   "description": "TypeScript and mongodb for ace",
   "main": "./bin/aceTypescript.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/noteon/typescript-tools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/noteon/typescript-tools/issues"
-  },
   "keywords": [
     "TypeScript"
   ],

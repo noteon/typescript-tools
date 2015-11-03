@@ -16,7 +16,6 @@
 		"mongoCompleters.ts",
 		"typescriptCompleters.ts",
 		"quickAndDefinitionTooltip.ts",
-		"aceElectronContextMenu.ts",
 		"tsFormatter.ts",
 		"mongoShellCommands.ts",
 		"mongoCollectionSnippets.ts",

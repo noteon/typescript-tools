@@ -4,6 +4,7 @@ import aceUtils = require("./aceUtils");
 import ts = require("./typescriptService");
 _ = require("lodash");
 
+
 export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName: string) => {
 
     var shellCmdCompleter = {
@@ -163,8 +164,7 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
                 //console.log("firstEntry methodType", session.__firstCompletionEntry);
             }
 
-            var getCompletionsByMongoClass = (typeEnds: string[], requireJsPath, helpDotPrefix = ""): any[]=> {
-                let templates = require(requireJsPath);
+            var getCompletionsByMongoClass = (typeEnds: string[], templates,helpDotPrefix = ""): any[]=> {
 
                 if (!docUrlAssigned) {
                     templates = templates.map((it) => {
@@ -205,12 +205,13 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
             }
 
             let concatTmpls = [];
+            
             [  // ICursor.
-                getCompletionsByMongoClass([" mongo.ICollection.", " ICollection."], "./mongoCollectionSnippets", 'db.getCollection("$1").'),
-                getCompletionsByMongoClass([" mongo.ICursor.", " ICursor."], "./mongoCursorSnippets"),
-                getCompletionsByMongoClass([" mongo.IDatabase.", " IDatabase."], "./mongoDatabaseSnippets", 'db.'),
-                getCompletionsByMongoClass([" mongo.IBulkFindOp.", " IBulkFindOp."], "./mongoBulkFindOpSnippets"),
-                getCompletionsByMongoClass([" mongo.IReplication.", " IReplication."], "./mongoRsSnippets"),
+                getCompletionsByMongoClass([" mongo.ICollection.", " ICollection."], require("./mongoCollectionSnippets"), 'db.getCollection("$1").'),
+                getCompletionsByMongoClass([" mongo.ICursor.", " ICursor."], require("./mongoCursorSnippets")),
+                getCompletionsByMongoClass([" mongo.IDatabase.", " IDatabase."], require("./mongoDatabaseSnippets"), 'db.'),
+                getCompletionsByMongoClass([" mongo.IBulkFindOp.", " IBulkFindOp."], require("./mongoBulkFindOpSnippets")),
+                getCompletionsByMongoClass([" mongo.IReplication.", " IReplication."], require("./mongoRsSnippets")),
             ].forEach((it) => {
                 if (it)
                     concatTmpls = concatTmpls.concat(it);

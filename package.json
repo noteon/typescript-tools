@@ -1,6 +1,6 @@
 {
   "name": "ace-typescript-mongo",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "description": "TypeScript and mongodb for ace",
   "main": "./bin/aceTypescript.js",
   "repository": {
@@ -17,13 +17,14 @@
   "author": "Claus Reinke, qinghai",
   "license": "Private License, Version 2.0",
   "dependencies": {
+    "browserify-fs": "^1.0.0",
     "keymaster": "^1.6.2",
     "lodash": "^3.10.1",
     "moment": "^2.10.6",
     "typescript": "^1.5.3"
   },
   "scripts": {
-    "start": "electron ./bin/main.js",
-    "prepublish": "tsc && rm ./*.ts"
+    "start": "tsc  && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && electron ./dist/demo/main.js",
+    "prepublish": "tsc && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && rm ./bin/*.js && rm ./*.ts"
   }
 }

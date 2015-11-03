@@ -1,7 +1,7 @@
     var start=Date.now();
     moment=require("moment");
     
-    var aceTs=require("./aceTypescript");
+    var aceTs=require("../aceTypescript");
     
     
     var lodashTypingFile=__dirname+"/lodash.d.ts";

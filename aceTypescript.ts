@@ -2,6 +2,16 @@
 
 _ = require("lodash");
 
+var aceUtils = require("./aceUtils");
+var ts = require("./typescriptService");
+var tsCompleters = require('./typescriptCompleters');
+var mongoCompleters = require('./mongoCompleters');
+var typescript = require("typescript");
+
+//var fs = require("browserify-fs");
+
+var langTools = ace.require("ace/ext/language_tools");
+var AceRange = ace.require('ace/range').Range;
 
 // interface AceTs {
 //     ts: ts.TypescriptService;
@@ -19,17 +29,6 @@ interface AceTsSetupParams {
 }
 
 function bindTypescriptExtension(editor: AceAjax.Editor, params) {
-    var aceUtils = require("./aceUtils");
-    var ts = require("./typescriptService");
-    var tsCompleters = require('./typescriptCompleters');
-    var mongoCompleters = require('./mongoCompleters');
-    var typescript = require("typescript");
-
-    var fs = require("fs");
-
-    var langTools = ace.require("ace/ext/language_tools");
-    var AceRange = ace.require('ace/range').Range;
-
     var tsServ = new ts.TypescriptService();
     var fileName = params.tsFilePath;
     //console.log(__dirname+"/lodash.d.ts");

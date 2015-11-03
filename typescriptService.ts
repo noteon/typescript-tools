@@ -3,7 +3,7 @@
 // See LICENSE.txt in the project root for complete license information.
 
 ///<reference path='typings/node/node.d.ts'/>
-///<reference path='node_modules/typescript/bin/typescript.d.ts'/>
+///<reference path='node_modules/typescript/lib/typescript.d.ts'/>
 
 import ts = require("typescript");
 import harness = require("./harness");
@@ -430,6 +430,7 @@ export class TypescriptService {
         InsertSpaceAfterCommaDelimiter: true,
         InsertSpaceAfterSemicolonInForStatements: true,
         InsertSpaceBeforeAndAfterBinaryOperators: true,
+        InsertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: false,
         InsertSpaceAfterKeywordsInControlFlowStatements: true,
         InsertSpaceAfterFunctionKeywordForAnonymousFunctions: false,
         InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,

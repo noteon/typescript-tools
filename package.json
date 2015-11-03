@@ -1,6 +1,6 @@
 {
   "name": "mb-ace-typescript",
-  "version": "0.29.0",
+  "version": "0.30.0",
   "description": "TypeScript and mongodb for ace",
   "main": "./dist/aceTypescript.js",
   "keywords": [
@@ -13,7 +13,7 @@
     "keymaster": "^1.6.2",
     "lodash": "^3.10.1",
     "moment": "^2.10.6",
-    "typescript": "^1.5.3"
+    "typescript": "^1.6.2"
   },
   "scripts": {
     "start": "tsc  && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && electron ./dist/demo/main.js",

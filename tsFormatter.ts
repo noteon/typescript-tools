@@ -3,14 +3,24 @@
 // See LICENSE.txt in the project root for complete license information.
 
 ///<reference path='typings/node/node.d.ts'/>
-///<reference path='node_modules/typescript/bin/typescript.d.ts'/>
+///<reference path='node_modules/typescript/lib/typescript.d.ts'/>
 
 import ts = require("typescript");
 
 function createDefaultFormatCodeOptions(): ts.FormatCodeOptions {
     "use strict";
+        // InsertSpaceAfterCommaDelimiter: boolean;
+        // InsertSpaceAfterSemicolonInForStatements: boolean;
+        // InsertSpaceBeforeAndAfterBinaryOperators: boolean;
+        // InsertSpaceAfterKeywordsInControlFlowStatements: boolean;
+        // InsertSpaceAfterFunctionKeywordForAnonymousFunctions: boolean;
+        // InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: boolean;
+        // InsertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: boolean;
+        // PlaceOpenBraceOnNewLineForFunctions: boolean;
+        // PlaceOpenBraceOnNewLineForControlBlocks: boolean;
 
     return {
+        
         IndentSize: 4,
         TabSize: 4,
         NewLineCharacter: '\r\n',
@@ -18,6 +28,7 @@ function createDefaultFormatCodeOptions(): ts.FormatCodeOptions {
         InsertSpaceAfterCommaDelimiter: true,
         InsertSpaceAfterSemicolonInForStatements: true,
         InsertSpaceBeforeAndAfterBinaryOperators: true,
+        InsertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: false,
         InsertSpaceAfterKeywordsInControlFlowStatements: true,
         InsertSpaceAfterFunctionKeywordForAnonymousFunctions: false,
         InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,

@@ -238,7 +238,8 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
         appendScriptContent: (scriptFile, lines: string[]) => {
             return tsServ.appendScriptContent(scriptFile, lines);
-        }
+        },
+        reloadDocument,
     }
 
     editor["typescriptServ"] = rst;

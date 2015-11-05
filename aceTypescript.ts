@@ -26,6 +26,7 @@ interface AceTsSetupParams {
     editorElem: string|HTMLElement, editorTheme?: string;
     dbFieldsFetcher?: (collectionName?: string) => { fieldName: string; collection: string }[];
     helpUrlFetcher?: (methodDotName: string) => string;//methodDotName like: "mongo.ICollection.find"
+    handleF1MethodHelp?:(docUrl:string)=>string;//
 }
 
 function bindTypescriptExtension(editor: AceAjax.Editor, params) {
@@ -216,7 +217,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
 
 
-    require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName);
+    require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName,params.helpUrlFetcher);
 
     var rst = {
         //editor,
@@ -250,6 +251,36 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         exec: function(editor) {
             //console.log("bindKey executed format Code");
             editor["typescriptServ"].format();
+        }
+    });
+    
+    
+   editor.commands.addCommand({
+        name: 'View Mongo Online Help if available',
+        bindKey: { win: 'F1', mac: 'F1' },
+        exec: function(editor) {
+            
+            if (!params.handleF1MethodHelp) return;
+            
+            var posChar = tsServ.fileCache.lineColToPosition(fileName, editor.getCursorPosition().row + 1, editor.getCursorPosition().column + 1);
+
+            var quickInfo = tsServ.getQuickInfoByPos(fileName, posChar);
+            //console.log({quickInfo});
+            //"(property) mongo.ICollection.find: () => void"
+            //"(method) mongo.IDatabase.getCollection(name:string): mongo.ICollection"
+
+            if (quickInfo && quickInfo.type && quickInfo.type !== "any") {//any is invalid tooltip
+                if (params.helpUrlFetcher){
+                    let methodDotName=aceUtils.getMethodDotName(quickInfo.type);
+                    let docUrl=methodDotName && params.helpUrlFetcher(methodDotName); 
+                    
+                    params.handleF1MethodHelp(docUrl);
+                    // if (docUrl){
+                    //     require("shell").openExternal(docUrl);
+                    //     //console.log({docUrl});
+                    // }
+                }
+            }
         }
     });
 

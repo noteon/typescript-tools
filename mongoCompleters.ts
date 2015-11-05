@@ -138,7 +138,7 @@ export var operatorsCompleter = {
 let docUrlAssigned: boolean = false;
 
 export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, scriptFileName: string, helpUrlFetcher?: (methodDotName: string) => string) => {
-
+     
 
     var collectionMethodsCompleter = {
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
@@ -170,8 +170,11 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
                     templates = templates.map((it) => {
                         if (it.docUrl) return it;
 
-                        if (helpUrlFetcher)
+                        if (helpUrlFetcher){
+                            //console.log("methodDotName",it.methodDotName);
                             it.docUrl = helpUrlFetcher(it.methodDotName);
+                        }
+                            
 
                         return it;
                     });
@@ -216,7 +219,6 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
                 if (it)
                     concatTmpls = concatTmpls.concat(it);
             })     
-            //console.log("concat", concatTmpls);
                 
             callback(null, concatTmpls)
         },

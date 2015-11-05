@@ -259,7 +259,7 @@ function bindTypescriptExtension(editor, params) {
             editor.execCommand("startAutocomplete");
         }
     });
-    require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName);
+    require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName, params.helpUrlFetcher);
     var rst = {
         //editor,
         ts: tsServ,
@@ -277,7 +277,8 @@ function bindTypescriptExtension(editor, params) {
         },
         appendScriptContent: function (scriptFile, lines) {
             return tsServ.appendScriptContent(scriptFile, lines);
-        }
+        },
+        reloadDocument: reloadDocument,
     };
     editor["typescriptServ"] = rst;
     editor.commands.addCommand({
@@ -286,6 +287,26 @@ function bindTypescriptExtension(editor, params) {
         exec: function (editor) {
             //console.log("bindKey executed format Code");
             editor["typescriptServ"].format();
+        }
+    });
+    editor.commands.addCommand({
+        name: 'View Mongo Online Help if available',
+        bindKey: { win: 'F1', mac: 'F1' },
+        exec: function (editor) {
+            if (!params.handleF1MethodHelp)
+                return;
+            var posChar = tsServ.fileCache.lineColToPosition(fileName, editor.getCursorPosition().row + 1, editor.getCursorPosition().column + 1);
+            var quickInfo = tsServ.getQuickInfoByPos(fileName, posChar);
+            //console.log({quickInfo});
+            //"(property) mongo.ICollection.find: () => void"
+            //"(method) mongo.IDatabase.getCollection(name:string): mongo.ICollection"
+            if (quickInfo && quickInfo.type && quickInfo.type !== "any") {
+                if (params.helpUrlFetcher) {
+                    var methodDotName = aceUtils.getMethodDotName(quickInfo.type);
+                    var docUrl = methodDotName && params.helpUrlFetcher(methodDotName);
+                    params.handleF1MethodHelp(docUrl);
+                }
+            }
         }
     });
     //require("./aceElectronContextMenu")(editor);
@@ -328,6 +349,23 @@ exports.getLinesChars = function (lines) {
     });
     return count;
 };
+function getMethodDotName(quickInfoType) {
+    if (!quickInfoType)
+        return;
+    if (quickInfoType.indexOf('.') < 0)
+        return;
+    var strs = quickInfoType.split(' ');
+    if (strs.length < 2)
+        return;
+    var theMethodStr = strs[1];
+    strs = theMethodStr.split('(');
+    if (strs.length >= 2)
+        return strs[0];
+    strs = theMethodStr.split(':');
+    if (strs.length >= 2)
+        return strs[0];
+}
+exports.getMethodDotName = getMethodDotName;
 function isAllNumberStr(n) {
     return /^\d+$/.test(n);
 }
@@ -1157,8 +1195,10 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
                     templates = templates.map(function (it) {
                         if (it.docUrl)
                             return it;
-                        if (helpUrlFetcher)
+                        if (helpUrlFetcher) {
+                            //console.log("methodDotName",it.methodDotName);
                             it.docUrl = helpUrlFetcher(it.methodDotName);
+                        }
                         return it;
                     });
                     docUrlAssigned = true;
@@ -1197,7 +1237,6 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
                 if (it)
                     concatTmpls = concatTmpls.concat(it);
             });
-            //console.log("concat", concatTmpls);
             callback(null, concatTmpls);
         },
         getDocTooltip: function (item) {
@@ -1897,7 +1936,7 @@ module.exports = mongoShellCommand;
 /// <reference path="./typings/tsd.d.ts" />
 var aceUtils = require("./aceUtils");
 var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
-exports.setupTooltip = function (aceEditor, tsServ, scriptFileName) {
+exports.setupTooltip = function (aceEditor, tsServ, scriptFileName, helpUrlFetcher) {
     aceEditor["tokenTooltip"] = new TokenTooltip(aceEditor, function (editor, token, pos) {
         var isModKeyPressed = function () {
             var commandKey = 91;
@@ -1910,13 +1949,22 @@ exports.setupTooltip = function (aceEditor, tsServ, scriptFileName) {
         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
         if (!isModKeyPressed()) {
             var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
+            //"(property) mongo.ICollection.find: () => void"
+            //"(method) mongo.IDatabase.getCollection(name:string): mongo.ICollection"
             if (quickInfo && quickInfo.type && quickInfo.type !== "any") {
+                if (helpUrlFetcher) {
+                    var methodDotName = aceUtils.getMethodDotName(quickInfo.type);
+                    var docUrl = methodDotName && helpUrlFetcher(methodDotName);
+                    if (docUrl) {
+                        return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment + "\n<<Press F1 to view online help>>");
+                    }
+                }
                 return aceUtils.highlightTypeAndComment(quickInfo);
             }
         }
         else {
             var definitionInfo = tsServ.getDefinitionInfoByPos(scriptFileName, posChar);
-            //console.log('definitionInfo',definitionInfo);
+            console.log('definitionInfo', definitionInfo);
             if (definitionInfo && definitionInfo.content)
                 return aceUtils.highLightCode(definitionInfo.content);
         }

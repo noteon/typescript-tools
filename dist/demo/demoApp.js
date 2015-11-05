@@ -61,7 +61,13 @@
       
      helpUrlFetcher: function(methodDotName){
        return "https://www.haosou.com/s?ie=utf-8&shb=1&src=360sou_newhome&q="+methodDotName;
-     } 
+     },
+     handleF1MethodHelp:function(url){
+         if (url)
+             require('shell').openExternal(url);
+         else
+           alert("Mongo online document is not available for this method.");
+     }
     });
     
      var jsEditor = ace.edit("js-editor");

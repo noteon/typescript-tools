@@ -11,6 +11,22 @@ export var getLinesChars = function(lines) {
   return count;
 };
 
+
+export function getMethodDotName(quickInfoType:string){
+    if (!quickInfoType) return;
+    if (quickInfoType.indexOf('.')<0) return;
+    
+    let strs=quickInfoType.split(' ');
+    if (strs.length<2) return;
+    
+    let theMethodStr=strs[1];
+    strs=theMethodStr.split('(');
+    if (strs.length>=2) return strs[0];
+    
+    strs=theMethodStr.split(':');
+    if (strs.length>=2) return strs[0];
+}
+
 export function isAllNumberStr(n) {
     return /^\d+$/.test(n)
 }

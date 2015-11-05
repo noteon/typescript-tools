@@ -6,7 +6,8 @@ import ts = require("./typescriptService");
 
 var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
 
-export var setupTooltip = (aceEditor, tsServ: ts.TypescriptService, scriptFileName: string) => {
+
+export var setupTooltip = (aceEditor, tsServ: ts.TypescriptService, scriptFileName: string,helpUrlFetcher?: (methodDotName: string) => string) => {
     aceEditor["tokenTooltip"] = new TokenTooltip(aceEditor, (editor, token, pos) => {
         var isModKeyPressed = () => {
             const commandKey = 91;
@@ -21,8 +22,19 @@ export var setupTooltip = (aceEditor, tsServ: ts.TypescriptService, scriptFileNa
 
         if (!isModKeyPressed()) {
             var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar);
+            //"(property) mongo.ICollection.find: () => void"
+            //"(method) mongo.IDatabase.getCollection(name:string): mongo.ICollection"
 
-            if (quickInfo && quickInfo.type && quickInfo.type !== "any") {//any is invalid tooltip                
+            if (quickInfo && quickInfo.type && quickInfo.type !== "any") {//any is invalid tooltip
+                if (helpUrlFetcher){
+                    let methodDotName=aceUtils.getMethodDotName(quickInfo.type);
+                    let docUrl=methodDotName && helpUrlFetcher(methodDotName); 
+                    
+                    if (docUrl){
+                        return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment+"\nPress F1 to view online help")
+                    }
+                }
+                
                 return aceUtils.highlightTypeAndComment(quickInfo)
             }
         } else {

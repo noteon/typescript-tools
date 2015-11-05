@@ -14,7 +14,7 @@ export var getLinesChars = function(lines) {
 
 export function getMethodDotName(quickInfoType:string){
     if (!quickInfoType) return;
-    if (quickInfoType.indexOf('.')<0) return;
+    if ((quickInfoType.indexOf('(property)')<0) && (quickInfoType.indexOf('(method)')<0)) return;
     
     let strs=quickInfoType.split(' ');
     if (strs.length<2) return;

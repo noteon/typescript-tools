@@ -25,7 +25,7 @@ interface AceTsSetupParams {
     editorElem: string|HTMLElement, editorTheme?: string;
     dbFieldsFetcher?: (collectionName?: string) => { fieldName: string; collection: string }[];
     helpUrlFetcher?: (methodDotName: string) => string;//methodDotName like: "mongo.ICollection.find"
-    handleF1MethodHelp?:(docUrl:string)=>string;//
+    handleF1MethodHelp?:(docUrl:string,methodDotName:string)=>string;//
 }
 
 function bindTypescriptExtension(editor: AceAjax.Editor, params) {
@@ -274,9 +274,10 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
             if (quickInfo && quickInfo.type && quickInfo.type !== "any") {//any is invalid tooltip
                 if (params.helpUrlFetcher){
                     let methodDotName=aceUtils.getMethodDotName(quickInfo.type);
-                    let docUrl=methodDotName && params.helpUrlFetcher(methodDotName); 
-                    
-                    params.handleF1MethodHelp(docUrl);
+                    if (methodDotName){
+                      let docUrl=params.helpUrlFetcher(methodDotName); 
+                       params.handleF1MethodHelp(docUrl,methodDotName);
+                    }
                     // if (docUrl){
                     //     require("shell").openExternal(docUrl);
                     //     //console.log({docUrl});

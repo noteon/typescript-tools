@@ -1,7 +1,7 @@
     var start=Date.now();
     moment=require("moment");
     
-    var aceTs=require("../aceTypescript");
+    var aceTs=require("../../bin/aceTypescript");
     
     
     var lodashTypingFile=__dirname+"/lodash.d.ts";
@@ -66,7 +66,7 @@
          if (url)
              require('shell').openExternal(url);
          else
-           alert("Mongo online document is not available for this method.");
+           alert("Mongo online document  is not available for this method.");
      }
     });
     

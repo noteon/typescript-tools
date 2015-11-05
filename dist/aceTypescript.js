@@ -1956,7 +1956,7 @@ exports.setupTooltip = function (aceEditor, tsServ, scriptFileName, helpUrlFetch
                     var methodDotName = aceUtils.getMethodDotName(quickInfo.type);
                     var docUrl = methodDotName && helpUrlFetcher(methodDotName);
                     if (docUrl) {
-                        return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment + "\n<<Press F1 to view online help>>");
+                        return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment + "<p class='hljs-name'>Press <span class='hljs-string'><b>F1</b></span> to view online help</p>");
                     }
                 }
                 return aceUtils.highlightTypeAndComment(quickInfo);
@@ -1964,7 +1964,7 @@ exports.setupTooltip = function (aceEditor, tsServ, scriptFileName, helpUrlFetch
         }
         else {
             var definitionInfo = tsServ.getDefinitionInfoByPos(scriptFileName, posChar);
-            console.log('definitionInfo', definitionInfo);
+            //console.log('definitionInfo',definitionInfo);
             if (definitionInfo && definitionInfo.content)
                 return aceUtils.highLightCode(definitionInfo.content);
         }

@@ -9,7 +9,6 @@ var mongoCompleters = require('./mongoCompleters');
 var typescript = require("typescript");
 
 //var fs = require("browserify-fs");
-
 var langTools = ace.require("ace/ext/language_tools");
 var AceRange = ace.require('ace/range').Range;
 

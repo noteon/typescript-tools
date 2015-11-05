@@ -31,7 +31,7 @@ export var setupTooltip = (aceEditor, tsServ: ts.TypescriptService, scriptFileNa
                     let docUrl=methodDotName && helpUrlFetcher(methodDotName); 
                     
                     if (docUrl){
-                        return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment+"\nPress F1 to view online help")
+                        return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment+"<p class='hljs-name'>Press <span class='hljs-string'><b>F1</b></span> to view online help</p>")
                     }
                 }
                 

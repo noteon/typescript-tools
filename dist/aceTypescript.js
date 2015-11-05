@@ -295,6 +295,9 @@ function bindTypescriptExtension(editor, params) {
         exec: function (editor) {
             if (!params.handleF1MethodHelp)
                 return;
+            if (editor.tokenTooltip && editor.tokenTooltip.isOpen && editor.tokenTooltip.__currentDocUrl) {
+                return params.handleF1MethodHelp(editor.tokenTooltip.__currentDocUrl);
+            }
             var posChar = tsServ.fileCache.lineColToPosition(fileName, editor.getCursorPosition().row + 1, editor.getCursorPosition().column + 1);
             var quickInfo = tsServ.getQuickInfoByPos(fileName, posChar);
             //console.log({quickInfo});
@@ -1938,6 +1941,7 @@ var aceUtils = require("./aceUtils");
 var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
 exports.setupTooltip = function (aceEditor, tsServ, scriptFileName, helpUrlFetcher) {
     aceEditor["tokenTooltip"] = new TokenTooltip(aceEditor, function (editor, token, pos) {
+        aceEditor["tokenTooltip"].__currentDocUrl = "";
         var isModKeyPressed = function () {
             var commandKey = 91;
             var ctrlKey = 17;
@@ -1956,6 +1960,7 @@ exports.setupTooltip = function (aceEditor, tsServ, scriptFileName, helpUrlFetch
                     var methodDotName = aceUtils.getMethodDotName(quickInfo.type);
                     var docUrl = methodDotName && helpUrlFetcher(methodDotName);
                     if (docUrl) {
+                        aceEditor["tokenTooltip"].__currentDocUrl = docUrl;
                         return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment + "<p class='hljs-name'>Press <span class='hljs-string'><b>F1</b></span> to view online help</p>");
                     }
                 }

@@ -258,8 +258,11 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         name: 'View Mongo Online Help if available',
         bindKey: { win: 'F1', mac: 'F1' },
         exec: function(editor) {
-            
             if (!params.handleF1MethodHelp) return;
+            if (editor.tokenTooltip && editor.tokenTooltip.isOpen && editor.tokenTooltip.__currentDocUrl){
+                return params.handleF1MethodHelp(editor.tokenTooltip.__currentDocUrl);
+            }
+            
             
             var posChar = tsServ.fileCache.lineColToPosition(fileName, editor.getCursorPosition().row + 1, editor.getCursorPosition().column + 1);
 

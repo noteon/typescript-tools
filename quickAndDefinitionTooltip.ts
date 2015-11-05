@@ -9,6 +9,7 @@ var TokenTooltip = require("./aceTokenTooltip").TokenTooltip;
 
 export var setupTooltip = (aceEditor, tsServ: ts.TypescriptService, scriptFileName: string,helpUrlFetcher?: (methodDotName: string) => string) => {
     aceEditor["tokenTooltip"] = new TokenTooltip(aceEditor, (editor, token, pos) => {
+        aceEditor["tokenTooltip"].__currentDocUrl="";
         var isModKeyPressed = () => {
             const commandKey = 91;
             const ctrlKey = 17;
@@ -31,6 +32,7 @@ export var setupTooltip = (aceEditor, tsServ: ts.TypescriptService, scriptFileNa
                     let docUrl=methodDotName && helpUrlFetcher(methodDotName); 
                     
                     if (docUrl){
+                        aceEditor["tokenTooltip"].__currentDocUrl=docUrl;
                         return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment+"<p class='hljs-name'>Press <span class='hljs-string'><b>F1</b></span> to view online help</p>")
                     }
                 }

@@ -83,7 +83,7 @@ export var getParameterHelpItems = (tsServ, fileName, session, pos) => {
 
 export var highLightCode = (code) => {
   if (hljs) {
-    return hljs.highlight('typescript', code, true).value;
+    return "<span class='mb_example_code'>"+hljs.highlight('typescript', code, true).value+"</span>";
   } else
     return code;
 };
@@ -128,7 +128,7 @@ export var highlightTypeCommentAndHelp = (type, docComment, docUrl?: string) => 
 }
 
 export var highlightTypeCommentAndTip = (type, docComment, tipHtml: string) => {
-    return highlightTypeAndComment({ type: type, docComment: docComment }, false) + tipHtml;
+    return highlightTypeAndComment({ type: type, docComment: docComment }, true) + tipHtml;
 }
 
 export var getCollectionName = (currentLine: string) => {

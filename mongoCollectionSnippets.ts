@@ -95,7 +95,7 @@ var mongoUpdateTemplates = [
             example:
             `db.products.update(
    { _id: 100 },
-   { \\$set: { quantity: 500 } }
+   { $set: { quantity: 500 } }
 )`,
             score: 1000
       },
@@ -129,7 +129,7 @@ var mongoUpdateTemplates = [
             example:
             `db.products.update(
    { sku: "abc123" },
-   { \\$inc: { quantity: -2, "metrics.orders": 1 } }
+   { $inc: { quantity: -2, "metrics.orders": 1 } }
 )`,
             meta: "template",
             score: 90,
@@ -147,7 +147,7 @@ var mongoUpdateTemplates = [
             example:
             `db.students.update(
    { _id: 1 },
-   { \\$push: { scores: 89 } }
+   { $push: { scores: 89 } }
 )`,
             meta: "template",
             score: 90,

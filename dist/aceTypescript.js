@@ -418,7 +418,7 @@ exports.getParameterHelpItems = function (tsServ, fileName, session, pos) {
 };
 exports.highLightCode = function (code) {
     if (hljs) {
-        return hljs.highlight('typescript', code, true).value;
+        return "<span class='mb_example_code'>" + hljs.highlight('typescript', code, true).value + "</span>";
     }
     else
         return code;
@@ -432,7 +432,7 @@ exports.highlightTypeAndComment = function (info, typeFirst) {
             docComment = "<p class='hljs-comment'>" + info.docComment + "</p>";
         }
         else {
-            docComment = "<p class='hljs-comment'>" + docCommentParts[0] + "</p><p>" + exports.highLightCode(docCommentParts[1]) + "</p>";
+            docComment = "<p><span class='hljs-comment'>" + docCommentParts[0] + "</span>" + exports.highLightCode(docCommentParts[1]) + "</p>";
         }
     }
     var type = "";
@@ -455,7 +455,7 @@ exports.highlightTypeCommentAndHelp = function (type, docComment, docUrl) {
         return exports.highlightTypeAndComment({ type: type, docComment: docComment }, false) + ("<p><a href='#' onmousedown=\"require('shell').openExternal('" + docUrl + "')\">view online help</a></p>");
 };
 exports.highlightTypeCommentAndTip = function (type, docComment, tipHtml) {
-    return exports.highlightTypeAndComment({ type: type, docComment: docComment }, false) + tipHtml;
+    return exports.highlightTypeAndComment({ type: type, docComment: docComment }, true) + tipHtml;
 };
 exports.getCollectionName = function (currentLine) {
     var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);

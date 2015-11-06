@@ -82,8 +82,13 @@ export var getParameterHelpItems = (tsServ, fileName, session, pos) => {
 
 
 export var highLightCode = (code) => {
+   if (!code) return code;
+   
   if (hljs) {
-    return "<span class='mb_example_code'>"+hljs.highlight('typescript', code, true).value+"</span>";
+    if (code.split('\n').length>1)
+        return "<span class='mb_example_code'>"+hljs.highlight('typescript', code, true).value+"</span>";
+    else
+       return hljs.highlight('typescript', code, true).value
   } else
     return code;
 };

@@ -17,6 +17,7 @@
   },
   "scripts": {
     "start": "tsc  && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && electron ./dist/demo/main.js",
-    "prepublish": "tsc && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && rm ./bin/*.js && rm ./*.ts"
+    "prepublish": "tsc && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && rm ./bin/*.js && rm ./*.ts",
+    "postpublish":"git reset --hard"
   }
 }

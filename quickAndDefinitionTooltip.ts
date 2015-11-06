@@ -33,7 +33,7 @@ export var setupTooltip = (aceEditor, tsServ: ts.TypescriptService, scriptFileNa
                     
                     if (docUrl){
                         aceEditor["tokenTooltip"].__currentDocUrl=docUrl;
-                        return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment+"<p class='hljs-name'>Press <span class='hljs-string'><b>F1</b></span> to view online help</p>")
+                        return aceUtils.highlightTypeCommentAndTip(quickInfo.type, quickInfo.docComment,"<p class='hljs-name'>Press <span class='hljs-string'><b>F1</b></span> to view online help</p>")
                     }
                 }
                 

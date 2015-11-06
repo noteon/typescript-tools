@@ -92,7 +92,14 @@ export var highLightCode = (code) => {
 export var highlightTypeAndComment = (info, typeFirst: boolean = true) => {
   var docComment = "";
   if (info.docComment) {
-    docComment = `<p class='hljs-comment'>${info.docComment}</p>`
+    let docCommentParts=info.docComment.split('e.g.');
+    
+    if (docCommentParts.length!==2){
+      docComment = `<p class='hljs-comment'>${info.docComment}</p>`
+    }else{
+      
+      docComment = `<p><span class='hljs-comment'>${docCommentParts[0]}</span>${highLightCode(docCommentParts[1])}</p>`
+    }
   }
 
   var type = "";
@@ -110,7 +117,7 @@ export var highlightTypeAndComment = (info, typeFirst: boolean = true) => {
   }
 
 
-  return typeFirst ? type + docComment : docComment + type;
+  return "<pre class='mb_ace_doc_tooltip'>"+(typeFirst ? type + docComment : docComment + type)+"</pre>";
 };
 
 export var highlightTypeCommentAndHelp = (type, docComment, docUrl?: string) => {
@@ -118,6 +125,10 @@ export var highlightTypeCommentAndHelp = (type, docComment, docUrl?: string) => 
     return highlightTypeAndComment({ type: type, docComment: docComment }, true)
   else
     return highlightTypeAndComment({ type: type, docComment: docComment }, false) + `<p><a href='#' onmousedown="require('shell').openExternal('${docUrl}')">view online help</a></p>`;
+}
+
+export var highlightTypeCommentAndTip = (type, docComment, tipHtml: string) => {
+    return highlightTypeAndComment({ type: type, docComment: docComment }, false) + tipHtml;
 }
 
 export var getCollectionName = (currentLine: string) => {

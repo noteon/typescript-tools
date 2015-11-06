@@ -306,8 +306,10 @@ function bindTypescriptExtension(editor, params) {
             if (quickInfo && quickInfo.type && quickInfo.type !== "any") {
                 if (params.helpUrlFetcher) {
                     var methodDotName = aceUtils.getMethodDotName(quickInfo.type);
-                    var docUrl = methodDotName && params.helpUrlFetcher(methodDotName);
-                    params.handleF1MethodHelp(docUrl);
+                    if (methodDotName) {
+                        var docUrl = params.helpUrlFetcher(methodDotName);
+                        params.handleF1MethodHelp(docUrl, methodDotName);
+                    }
                 }
             }
         }
@@ -355,7 +357,7 @@ exports.getLinesChars = function (lines) {
 function getMethodDotName(quickInfoType) {
     if (!quickInfoType)
         return;
-    if (quickInfoType.indexOf('.') < 0)
+    if ((quickInfoType.indexOf('(property)') < 0) && (quickInfoType.indexOf('(method)') < 0))
         return;
     var strs = quickInfoType.split(' ');
     if (strs.length < 2)
@@ -425,7 +427,13 @@ exports.highlightTypeAndComment = function (info, typeFirst) {
     if (typeFirst === void 0) { typeFirst = true; }
     var docComment = "";
     if (info.docComment) {
-        docComment = "<p class='hljs-comment'>" + info.docComment + "</p>";
+        var docCommentParts = info.docComment.split('e.g.');
+        if (docCommentParts.length !== 2) {
+            docComment = "<p class='hljs-comment'>" + info.docComment + "</p>";
+        }
+        else {
+            docComment = "<p class='hljs-comment'>" + docCommentParts[0] + "</p><p>" + exports.highLightCode(docCommentParts[1]) + "</p>";
+        }
     }
     var type = "";
     if (info.type) {
@@ -438,13 +446,16 @@ exports.highlightTypeAndComment = function (info, typeFirst) {
         }
         type = prefix + exports.highLightCode(content);
     }
-    return typeFirst ? type + docComment : docComment + type;
+    return "<pre class='mb_ace_doc_tooltip'>" + (typeFirst ? type + docComment : docComment + type) + "</pre>";
 };
 exports.highlightTypeCommentAndHelp = function (type, docComment, docUrl) {
     if (!docUrl)
         return exports.highlightTypeAndComment({ type: type, docComment: docComment }, true);
     else
         return exports.highlightTypeAndComment({ type: type, docComment: docComment }, false) + ("<p><a href='#' onmousedown=\"require('shell').openExternal('" + docUrl + "')\">view online help</a></p>");
+};
+exports.highlightTypeCommentAndTip = function (type, docComment, tipHtml) {
+    return exports.highlightTypeAndComment({ type: type, docComment: docComment }, false) + tipHtml;
 };
 exports.getCollectionName = function (currentLine) {
     var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);
@@ -1961,7 +1972,7 @@ exports.setupTooltip = function (aceEditor, tsServ, scriptFileName, helpUrlFetch
                     var docUrl = methodDotName && helpUrlFetcher(methodDotName);
                     if (docUrl) {
                         aceEditor["tokenTooltip"].__currentDocUrl = docUrl;
-                        return aceUtils.highlightTypeCommentAndHelp(quickInfo.type, quickInfo.docComment + "<p class='hljs-name'>Press <span class='hljs-string'><b>F1</b></span> to view online help</p>");
+                        return aceUtils.highlightTypeCommentAndTip(quickInfo.type, quickInfo.docComment, "<p class='hljs-name'>Press <span class='hljs-string'><b>F1</b></span> to view online help</p>");
                     }
                 }
                 return aceUtils.highlightTypeAndComment(quickInfo);

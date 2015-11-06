@@ -238,6 +238,13 @@ export var dateRangeCompleter = {
         if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
             return callback(null, [])
         }
+        let currentLine = session.getLine(pos.row);
+        let hasDot = currentLine.indexOf('.') > -1;
+        if (hasDot){
+            return callback(null, [])
+        }
+
+        
         let templates = require("./mongoDateRangeSnippets").map((it)=>{
             let item=_.clone(it)
             item.isDateRangeCompleter=true;

@@ -56,9 +56,10 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
 
     var fieldsCompleter = {
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__firstCompletionEntry) {
                 return callback(null, [])
             }
+            
         
             if (prefix && aceUtils.isAllNumberStr(prefix)){
                 return callback(null,[]);

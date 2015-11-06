@@ -238,23 +238,17 @@ export var dateRangeCompleter = {
         if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
             return callback(null, [])
         }
-        let templates = require("./mongoDateRangeSnippets");
-
-        // let currentLine = session.getLine(pos.row);
-        // let hasDot = currentLine.indexOf('.') > -1;
-        // if (!hasDot)
-        //     return callback(null, templates);
-
-        // let prevChar = aceUtils.getPrevChar(session, pos);
-        // if (prevChar === ":" || prevChar === " ")
-        //     return callback(null, templates);
-
+        let templates = require("./mongoDateRangeSnippets").map((it)=>{
+            let item=_.clone(it)
+            item.isDateRangeCompleter=true;
+            return item;
+        });
 
         return callback(null, templates);
     },
 
     getDocTooltip: function(item) {
-        if (item.isMongoOperator)
+        if (item.isDateRangeCompleter)
             item.docHTML = aceUtils.highlightTypeCommentAndHelp(item.example, item.comment, item.docUrl);
     }
 }

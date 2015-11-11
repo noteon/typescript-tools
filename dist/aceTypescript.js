@@ -756,7 +756,7 @@ var mongoFindTemplates = [
     },
     {
         caption: "findProjection",
-        snippet: "find({ $2 }, { $3_id: 0, name: 1 })",
+        snippet: "find({$2}, { $3: 0, name: 1 })",
         comment: 'The projection parameter specifies which fields to return. corresponds to the SELECT statement in SQL. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
         example: "db.products.find( { qty: { $gte: 25, $lt: 35 } }, { _id: 0, qty: 1 } )",
         score: 100
@@ -770,7 +770,7 @@ var mongoFindTemplates = [
     },
     {
         caption: "findSortLimit",
-        snippet: "find({ $2 }).sort({ $3name: 1 }).limit(5)",
+        snippet: "find({$2}).sort({ $3name: 1 }).limit(5)",
         comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
         example: "db.bios.find().sort({name:1}).limit(5)",
         score: 90
@@ -786,7 +786,7 @@ var mongoFindOneTemplates = [
     },
     {
         caption: "findOneProjection",
-        snippet: "findOne(\n    { $2 },\n    { name:1 }\n)",
+        snippet: "findOne({$2},{name:1})",
         comment: 'The projection parameter specifies which fields to return. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
         example: "db.bios.findOne(\n    { },\n    { name: 1, contribs: 1 }\n)",
         score: 10
@@ -796,14 +796,14 @@ var mongoUpdateTemplates = [
     //update$modifier
     {
         caption: "update",
-        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } }\n)",
+        snippet: "update({ $2 },{ \\$set: { $3 } })",
         comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } }\n)",
         score: 1000
     },
     {
         caption: "update$set",
-        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } }\n)",
+        snippet: "update({ $2 },{ \\$set: { $3 } })",
         comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } }\n)",
         meta: "template",
@@ -811,7 +811,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "update$inc",
-        snippet: "update(\n   { $2 },\n   { \\$inc: { $3 } }\n)",
+        snippet: "update({ $2 }, { \\$inc: { $3 } })",
         comment: 'Modifies an existing document or documents in a collection. The $inc operator increments a field by a specified value.',
         example: "db.products.update(\n   { sku: \"abc123\" },\n   { $inc: { quantity: -2, \"metrics.orders\": 1 } }\n)",
         meta: "template",
@@ -819,7 +819,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "update$push",
-        snippet: "update(\n   { $2 },\n   { \\$push: { $3 } }\n)",
+        snippet: "update({ $2 }, { \\$push: { $3 } })",
         comment: 'Modifies an existing document or documents in a collection. $push adds the array field with the value as its element.',
         example: "db.students.update(\n   { _id: 1 },\n   { $push: { scores: 89 } }\n)",
         meta: "template",
@@ -827,7 +827,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "update$addToSet",
-        snippet: "update(\n   { $2 },\n   { \\$addToSet: { $3 } }\n)",
+        snippet: "update({ $2 },{ \\$addToSet: { $3 } })",
         comment: 'Modifies an existing document or documents in a collection. The $addToSet operator adds a value to an array unless the value is already present, in which case $addToSet does nothing to that array.',
         example: "db.test.update(\n   { _id: 1 },\n   { $addToSet: {letters: [ \"c\", \"d\" ] } }\n)",
         meta: "template",
@@ -835,7 +835,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "upsert",
-        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } },\n   { upsert: true }\n)",
+        snippet: "update({ $2 },{ \\$set: { $3 } }, { upsert: true })",
         comment: ' An upsert updates the documentif found or inserts it if not. ',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } },\n   { upsert: true}\n)",
         meta: "template",
@@ -843,7 +843,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "updateWithMultiOption",
-        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } },\n   { multi: true }\n)",
+        snippet: "update({ $2 },{ \\$set: { $3 } }, { multi: true })",
         comment: 'update with multi option',
         example: "db.products.update(\n   {_id: 100},\n   {$set: {quantity: 500}},\n   {multi: true}\n)",
         meta: "template",
@@ -851,7 +851,7 @@ var mongoUpdateTemplates = [
     },
     {
         caption: "updateWithUpsertMulti",
-        snippet: "update(\n   { $2 },\n   { \\$set: { $3 } },\n   { upsert:true, multi:true }\n)",
+        snippet: "update({ $2 },{ \\$set: { $3 } }, { upsert:true, multi:true })",
         comment: 'Combine the upsert and multi Options',
         example: "db.books.update(\n   { item: \"EFG222\" },\n   { $set: { reorder: false, tags: [ \"literature\", \"translated\" ] } },\n   { upsert: true, multi: true }\n)",
         meta: "template",
@@ -861,14 +861,14 @@ var mongoUpdateTemplates = [
 var mongoFindAndModifyTemplates = [
     {
         caption: "findAndModify",
-        snippet: "findAndModify({\n    query: { $2 },\n    sort: { $3 },\n    update: { $4 },\n    new: true\n})",
+        snippet: "findAndModify({query: { $2 },sort: { $3 }, update: { $4 }, new: true})",
         comment: 'Modifies and returns a single document. By default, the returned document does not include the modifications made on the update. To return the document with the modifications made on the update, use the new option.',
         example: "db.people.findAndModify({\n    query: { name: \"Andy\" },\n    sort: { rating: 1 },\n    update: { $inc: { score: 1 } },\n    new: true\n})",
         score: 100
     },
     {
         caption: "findAndModifySortRemove",
-        snippet: "findAndModify({\n     query: { $2 },\n     sort: { $3 },\n     remove: true\n})",
+        snippet: "findAndModify({ query: { $2 }, sort: { $3 }, remove: true})",
         comment: 'Modifies and returns a single document. By default, the returned document does not include the modifications made on the update. To return the document with the modifications made on the update, use the new option.',
         example: "db.people.findAndModify(\n   {\n     query: { state: \"active\" },\n     sort: { rating: 1 },\n     remove: true\n   }\n)",
         score: 90
@@ -884,7 +884,7 @@ var mongoDistinctTemplates = [
     },
     {
         caption: "distinctWithQuerySort",
-        snippet: "distinct(\" ${2:field} \", { $3 })\n    .sort((a,b)=>compare(b,a))",
+        snippet: "distinct(\" ${2:field} \", { $3 }).sort((a,b)=>compare(b,a))",
         comment: 'distinct with query and sort.',
         example: "db.inventory.distinct( \"item.sku\", {dept: \"A\" })\n    .sort((a,b)=>compare(b,a)) //desc",
         score: 10
@@ -969,14 +969,14 @@ var mongoCreateIndexTemplates = [
 var mongoInsertTemplates = [
     {
         caption: "insert",
-        snippet: "insert({$2})",
+        snippet: "insert([{ $2 }])",
         comment: 'Inserts a document or documents into a collection.',
         example: "db.products.insert( { item: \"card\", qty: 15 } )",
         score: 100
     },
     {
         caption: "insertMultipleDocuments",
-        snippet: "insert(\n    [\n      { $2 },\n     ]\n)",
+        snippet: "insert([{ $2 }])",
         comment: 'insert Multiple Documents',
         example: "db.products.insert(\n   [\n     { _id: 11, item: \"pencil\", qty: 50, type: \"no.2\" },\n     { item: \"pen\", qty: 20 },\n     { item: \"eraser\", qty: 25 }\n   ]\n)",
         score: 100
@@ -985,14 +985,14 @@ var mongoInsertTemplates = [
 var mongoAggregateTemplates = [
     {
         caption: "aggregate",
-        snippet: "aggregate(\n   [\n     { \\$match: { $2 } },\n     { \\$group: { _id: \"\\$groupByField\", total: { \\$sum: \"$amount\" } } },\n     { \\$sort: { total: -1 } }\n   ]\n)",
+        snippet: "aggregate(\n   [\n     { \\$match: { \"$2\" } },\n     { \\$group: { _id: \"\\$groupByField\", total: { \\$sum: \"$amount\" } } },\n     { \\$sort: { total: -1 } }\n   ]\n)",
         comment: "Aggregation operation: Group by and Calculate a Sum.",
         example: "db.orders.aggregate([\n      { $match: { status: \"A\" } },\n      { $group: { _id: \"$cust_id\", total: { $sum: \"$amount\" } } },\n      { $sort: { total: -1 } }\n])",
         score: 100
     },
     {
         caption: "aggregatePreformACount",
-        snippet: "aggregate(\n   [\n      { \\$match: { $2 } },\n      { \\$group: { _id: null, count: { \\$sum: 1 } } }\n   ]\n)",
+        snippet: "aggregate(\n   [\n      { \\$match: { \"$2\" } },\n      { \\$group: { _id: null, count: { \\$sum: 1 } } }\n   ]\n)",
         comment: "compute a count of the documents.On a sharded cluster, db.collection.count() can result in an inaccurate count if orphaned documents exist or if a chunk migration is in progress.\nTo avoid these situations, on a sharded cluster, use the $group stage of the db.collection.aggregate() method to $sum the documents.",
         example: "db.articles.aggregate([\n      { $match : { score : { $gt : 70, $lte : 90 } } },\n      { $group: { _id: null, count: { $sum: 1 } } }\n]);",
         score: 10
@@ -1276,7 +1276,9 @@ exports.dateRangeCompleter = {
         var currentLine = session.getLine(pos.row);
         var hasDot = currentLine.indexOf('.') > -1;
         if (hasDot) {
-            return callback(null, []);
+            var prevChar = aceUtils.getPrevChar(session, { row: pos.row, column: pos.column - ((prefix || "").length) });
+            if (["\n", "\t", " ", ":"].indexOf(prevChar) < 0)
+                return callback(null, []);
         }
         var templates = require("./mongoDateRangeSnippets").map(function (it) {
             var item = _.clone(it);

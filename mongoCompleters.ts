@@ -244,6 +244,8 @@ export var dateRangeCompleter = {
         if (hasDot){
             var prevChar = aceUtils.getPrevChar(session, {row:pos.row, column:pos.column- ((prefix||"").length) });
             if (["\n","\t"," ",":"].indexOf(prevChar)<0)
+            return callback(null, []);
+        }
            
         
         let templates = require("./mongoDateRangeSnippets").map((it)=>{

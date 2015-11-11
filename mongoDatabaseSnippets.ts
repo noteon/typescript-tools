@@ -38,14 +38,16 @@ var mongoCreateUserTemplates = [
             comment: 'Creates a new user for the database where the method runs. db.createUser() returns a duplicate user error if the user already exists on the database.',
             example:
 `use products
-db.createUser( { "user" : "accountAdmin01",
-                 "pwd": "cleartext password",
-                 "customData" : { employeeId: 12345 },
-                 "roles" : [ { role: "clusterAdmin", db: "admin" },
-                             { role: "readAnyDatabase", db: "admin" },
-                             "readWrite"
-                             ] },
-               { w: "majority" , wtimeout: 5000 } )`,
+db.createUser({
+        "user" : "accountAdmin01",
+        "pwd": "cleartext password",
+        "customData" : { employeeId: 12345 },
+        "roles" : [ { role: "clusterAdmin", db: "admin" },
+                    { role: "readAnyDatabase", db: "admin" },
+                    "readWrite"
+                  ] 
+      },
+      { w: "majority" , wtimeout: 5000 } )`,
             score:1000
       }
 ];      

@@ -511,10 +511,10 @@ var mongoAggregateTemplates = [
             comment: `Aggregation operation: Group by and Calculate a Sum.`,
             example:
             `db.orders.aggregate([
-                     { $match: { status: "A" } },
-                     { $group: { _id: "$cust_id", total: { $sum: "$amount" } } },
-                     { $sort: { total: -1 } }
-                   ])`,
+      { $match: { status: "A" } },
+      { $group: { _id: "$cust_id", total: { $sum: "$amount" } } },
+      { $sort: { total: -1 } }
+])`,
             score: 100
       },
       {
@@ -529,10 +529,10 @@ var mongoAggregateTemplates = [
             comment: `compute a count of the documents.On a sharded cluster, db.collection.count() can result in an inaccurate count if orphaned documents exist or if a chunk migration is in progress.
 To avoid these situations, on a sharded cluster, use the $group stage of the db.collection.aggregate() method to $sum the documents.`,
             example:
-            `db.articles.aggregate( [
-                        { $match : { score : { $gt : 70, $lte : 90 } } },
-                        { $group: { _id: null, count: { $sum: 1 } } }
-                       ] );`,
+            `db.articles.aggregate([
+      { $match : { score : { $gt : 70, $lte : 90 } } },
+      { $group: { _id: null, count: { $sum: 1 } } }
+]);`,
             score: 10
       },
 

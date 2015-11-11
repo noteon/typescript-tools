@@ -417,8 +417,13 @@ exports.getParameterHelpItems = function (tsServ, fileName, session, pos) {
     return tsServ.getSignatureInfoByPos(fileName, posChar);
 };
 exports.highLightCode = function (code) {
+    if (!code)
+        return code;
     if (hljs) {
-        return "<span class='mb_example_code'>" + hljs.highlight('typescript', code, true).value + "</span>";
+        if (code.split('\n').length > 1)
+            return "<span class='mb_example_code'>" + hljs.highlight('typescript', code, true).value + "</span>";
+        else
+            return hljs.highlight('typescript', code, true).value;
     }
     else
         return code;
@@ -1123,10 +1128,13 @@ exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
 exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
     var fieldsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__firstCompletionEntry) {
                 return callback(null, []);
             }
             if (prefix && aceUtils.isAllNumberStr(prefix)) {
+                return callback(null, []);
+            }
+            if (prefix && (prefix[0] === "$") && (session.getValue().indexOf('.aggregate') < 0)) {
                 return callback(null, []);
             }
             var prevChar = aceUtils.getPrevChar(session, pos);
@@ -1160,9 +1168,6 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     score: score
                 };
             });
-            // console.log(
-            //     "fields", fields
-            // );
             callback(null, fields);
         }
     };

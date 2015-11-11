@@ -151,13 +151,6 @@ export var getTypescriptParameterCompleter=(tsServ: ts.TypescriptService, script
                 }
             });
                 
-            // setTimeout(() => {
-            //     if (editor.completer && editor.completer.completions) {
-            //         console.log("setFilterText",filterText);
-            //         editor.completer.completions.setFilter(filterText)
-            //         editor.completer.openPopup(editor, filterText, true);
-            //     }
-            // }, 0)
 
             return callback(null, completionsItems)
         },

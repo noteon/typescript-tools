@@ -64,6 +64,10 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
             if (prefix && aceUtils.isAllNumberStr(prefix)){
                 return callback(null,[]);
             }
+            
+            if (prefix && (prefix[0] === "$") && (session.getValue().indexOf('.aggregate')<0)){
+                return callback(null,[]);
+            }
 
             
             let prevChar = aceUtils.getPrevChar(session, pos);
@@ -102,10 +106,6 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                 }
             });
             
-            // console.log(
-            //     "fields", fields
-            // );
-
             callback(null, fields);
         }
     }

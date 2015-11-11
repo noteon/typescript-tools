@@ -209,6 +209,10 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
 
     editor.commands.on("afterExec", function(e) {
+        if (e.command.name === "Tab" || e.command.name === "Return") {
+            editor.execCommand("startAutocomplete");
+        }
+            
         if (e.command.name == "insertstring" && /^[\w.\(\,\$\'\"]$/.test(e.args)) {
             editor.execCommand("startAutocomplete")
         }

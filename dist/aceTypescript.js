@@ -255,6 +255,9 @@ function bindTypescriptExtension(editor, params) {
         enableBasicAutocompletion: true,
     });
     editor.commands.on("afterExec", function (e) {
+        if (e.command.name === "Tab" || e.command.name === "Return") {
+            editor.execCommand("startAutocomplete");
+        }
         if (e.command.name == "insertstring" && /^[\w.\(\,\$\'\"]$/.test(e.args)) {
             editor.execCommand("startAutocomplete");
         }
@@ -984,14 +987,14 @@ var mongoAggregateTemplates = [
         caption: "aggregate",
         snippet: "aggregate(\n   [\n     { \\$match: { $2 } },\n     { \\$group: { _id: \"\\$groupByField\", total: { \\$sum: \"$amount\" } } },\n     { \\$sort: { total: -1 } }\n   ]\n)",
         comment: "Aggregation operation: Group by and Calculate a Sum.",
-        example: "db.orders.aggregate([\n                     { $match: { status: \"A\" } },\n                     { $group: { _id: \"$cust_id\", total: { $sum: \"$amount\" } } },\n                     { $sort: { total: -1 } }\n                   ])",
+        example: "db.orders.aggregate([\n      { $match: { status: \"A\" } },\n      { $group: { _id: \"$cust_id\", total: { $sum: \"$amount\" } } },\n      { $sort: { total: -1 } }\n])",
         score: 100
     },
     {
         caption: "aggregatePreformACount",
         snippet: "aggregate(\n   [\n      { \\$match: { $2 } },\n      { \\$group: { _id: null, count: { \\$sum: 1 } } }\n   ]\n)",
         comment: "compute a count of the documents.On a sharded cluster, db.collection.count() can result in an inaccurate count if orphaned documents exist or if a chunk migration is in progress.\nTo avoid these situations, on a sharded cluster, use the $group stage of the db.collection.aggregate() method to $sum the documents.",
-        example: "db.articles.aggregate( [\n                        { $match : { score : { $gt : 70, $lte : 90 } } },\n                        { $group: { _id: null, count: { $sum: 1 } } }\n                       ] );",
+        example: "db.articles.aggregate([\n      { $match : { score : { $gt : 70, $lte : 90 } } },\n      { $group: { _id: null, count: { $sum: 1 } } }\n]);",
         score: 10
     },
     {
@@ -1405,7 +1408,7 @@ var mongoCreateUserTemplates = [
         caption: "stats",
         snippet: "createUser(\n   {\n     user: \"$2\",\n     pwd: \"$3\",\n     roles: [ \"read\" ] //read|readWrite|dbAdmin|dbOwner|userAdmin ...\n   }\n)",
         comment: 'Creates a new user for the database where the method runs. db.createUser() returns a duplicate user error if the user already exists on the database.',
-        example: "use products\ndb.createUser( { \"user\" : \"accountAdmin01\",\n                 \"pwd\": \"cleartext password\",\n                 \"customData\" : { employeeId: 12345 },\n                 \"roles\" : [ { role: \"clusterAdmin\", db: \"admin\" },\n                             { role: \"readAnyDatabase\", db: \"admin\" },\n                             \"readWrite\"\n                             ] },\n               { w: \"majority\" , wtimeout: 5000 } )",
+        example: "use products\ndb.createUser({\n        \"user\" : \"accountAdmin01\",\n        \"pwd\": \"cleartext password\",\n        \"customData\" : { employeeId: 12345 },\n        \"roles\" : [ { role: \"clusterAdmin\", db: \"admin\" },\n                    { role: \"readAnyDatabase\", db: \"admin\" },\n                    \"readWrite\"\n                  ] \n      },\n      { w: \"majority\" , wtimeout: 5000 } )",
         score: 1000
     }
 ];
@@ -2207,13 +2210,6 @@ exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
                     score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                 };
             });
-            // setTimeout(() => {
-            //     if (editor.completer && editor.completer.completions) {
-            //         console.log("setFilterText",filterText);
-            //         editor.completer.completions.setFilter(filterText)
-            //         editor.completer.openPopup(editor, filterText, true);
-            //     }
-            // }, 0)
             return callback(null, completionsItems);
         },
         getDocTooltip: function (item) {

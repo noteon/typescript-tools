@@ -312,8 +312,17 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 }
 
 
+let aceInjected=false;
+
 //default theme twilight
 export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
+    
+    if (!aceInjected){
+        aceInjected=true;
+        aceUtils.appendTooltipToBody();
+        aceUtils.injectCompleterToAdjustMethodParamWidth();
+    }
+    
     var editor = ace.edit(<any>params.editorElem);
 
     editor.setOptions({ enableBasicAutocompletion: false });

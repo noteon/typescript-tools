@@ -148,7 +148,64 @@ export var getCollectionName = (currentLine: string) => {
     
     return colName
   }
-    
+}
 
+
+export function calcTextWidth(text:string, font) {
+  var f = font || '12px',
+      o = $('<div>' + text + '</div>')
+            .css({'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden', 'font': f})
+            .appendTo($('body')),
+      w = o.width();
+
+  o.remove();
+
+  return w;
+}
+
+export function appendTooltipToBody(){
+   let oldP=ace.require('ace/tooltip').Tooltip.prototype;
+   
+   ace.require('ace/tooltip').Tooltip=function(parentNode) {
+      this.isOpen = false;
+      this.$element = null;
+      this.$parentNode = document.body;//parentNode;
+   }
+   
+   ace.require('ace/tooltip').Tooltip.prototype=oldP;
+}
+
+export function injectCompleterToAdjustMethodParamWidth(){
+    let proto=ace.require("ace/autocomplete").Autocomplete.prototype.showPopup;
+    
+    let widthChanged;
+    let oldWidth;
+    
+     ace.require("ace/autocomplete").Autocomplete.prototype.showPopup = function(editor) {
+        let rst= proto.apply(this, arguments);
+        
+        if (!oldWidth) //only set once
+             oldWidth=$('.ace_editor.ace_autocomplete').width();
+        
+        if (widthChanged){
+             $('.ace_editor.ace_autocomplete').width(oldWidth);
+             widthChanged=false;
+        }
+           
+        let completions=editor && editor.completer && editor.completer.completions;
+        if (!completions) return rst;
+        if (_.isEmpty(completions.filtered)) return rst;
+        
+        let methodParamItem=completions.filtered[0];
+        if (!methodParamItem.isHelpItem){
+            return rst;
+        } 
+          
+        let width=calcTextWidth(methodParamItem.caption, $(editor.container).attr('font'));
+        $('.ace_editor.ace_autocomplete').width(width+12);
+        widthChanged=true;;
+        
+        return rst;
+    }       
 }
 

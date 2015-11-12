@@ -208,7 +208,7 @@ export function injectCompleterToAdjustMethodParamWidth(){
         $('.ace_editor.ace_autocomplete').width(width+10);
         
         widthChanged=true;
-        console.log(maxLengthItem.caption);
+        //console.log(maxLengthItem.caption);
         //console.log(maxLengthItem.caption, width,$('.ace_editor.ace_autocomplete .ace_line.ace_selected').css('font'));
         
         if (methodParamItem.currentParam){

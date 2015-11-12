@@ -152,7 +152,7 @@ export var getCollectionName = (currentLine: string) => {
 
 
 export function calcTextWidth(text:string, font) {
-  var f = font || '12px',
+  let f = font || '12px',
       o = $('<div>' + text + '</div>')
             .css({'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden', 'font': f})
             .appendTo($('body')),
@@ -200,10 +200,30 @@ export function injectCompleterToAdjustMethodParamWidth(){
         if (!methodParamItem.isHelpItem){
             return rst;
         } 
-          
-        let width=calcTextWidth(methodParamItem.caption, $(editor.container).attr('font'));
-        $('.ace_editor.ace_autocomplete').width(width+12);
-        widthChanged=true;;
+        
+        let maxLengthItem=_.max(completions.filtered,(it:any)=>it.caption.length);
+         
+        let width=calcTextWidth(maxLengthItem.caption, $('.ace_editor.ace_autocomplete .ace_line.ace_selected').css('font'));
+        
+        $('.ace_editor.ace_autocomplete').width(width+10);
+        
+        widthChanged=true;
+        console.log(maxLengthItem.caption);
+        //console.log(maxLengthItem.caption, width,$('.ace_editor.ace_autocomplete .ace_line.ace_selected').css('font'));
+        
+        if (methodParamItem.currentParam){
+          _.delay(()=>{
+            let $line=$('.ace_editor.ace_autocomplete').find('.ace_line.ace_selected');
+            let start=methodParamItem.caption.indexOf(methodParamItem.currentParam);
+            if (start>-1){
+              let newHtml=(methodParamItem.caption.slice(0,start)||"")+ 
+                  `<span class='ace_completion-highlight'>${methodParamItem.currentParam}</span>`+ 
+                  (methodParamItem.caption.slice(start+methodParamItem.currentParam.length)||"");
+                  
+              $line.html(newHtml);      
+            }
+          },25)
+        }
         
         return rst;
     }       

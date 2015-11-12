@@ -127,25 +127,38 @@ export var getTypescriptParameterCompleter=(tsServ: ts.TypescriptService, script
             var helpItems =(session.__paramHelpItems);
 
             if (!helpItems) return callback(null, [])
-
+            
+            let trimType=(type)=>{
+                if (!type) return type;
+                
+                let rst=type.replace(/: any$/,'');
+                
+                return rst.replace(/ /g,'');
+            }
+            //console.log({helpItems});
+            
             var completionsItems = helpItems.items.map((it, idx) => {
                 var currentParam = undefined;
                 var paramsText = (it.parameters.map((param, paramIdx) => {
                     if (paramIdx === helpItems.argumentIndex) {
                         currentParam = param;
-                        return param.type
+                        return trimType(param.type)
                     }
                     else
-                        return param.type;
+                        return trimType(param.type);
                 }
-                    ).join(it.separator));
+                    ).join(it.separator.trim()));
 
-                var value = it.prefix + paramsText + it.suffix;
+                var value = (it.prefix + paramsText + it.suffix).replace(/ |\t|\n/g,'');
+                
+                var curParamType=currentParam && trimType(currentParam.type);
+                
                 return {
                     caption: value,
                     value: " ",
                     meta: "",
-                    toolTip: currentParam && aceUtils.highlightTypeAndComment(currentParam),
+                    toolTip: currentParam && currentParam.docComment &&  aceUtils.highlightTypeAndComment(currentParam),
+                    currentParam:curParamType,
                     isHelpItem: true,
                     score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                 }

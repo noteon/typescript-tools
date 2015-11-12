@@ -256,7 +256,17 @@ function bindTypescriptExtension(editor, params) {
     });
     editor.commands.on("afterExec", function (e) {
         if (e.command.name === "Tab" || e.command.name === "Return") {
-            editor.execCommand("startAutocomplete");
+            var canStartAuto = (function () {
+                var curChar = aceUtils.getCurChar(editor.getSession(), editor.getCursorPosition());
+                if (curChar && curChar.trim() !== "")
+                    return true;
+                var prevChar = aceUtils.getPrevChar(editor.getSession(), editor.getCursorPosition());
+                if ([".", "(", "'", '"', "{"].indexOf(prevChar) > -1)
+                    return true;
+                return false;
+            })();
+            if (canStartAuto)
+                editor.execCommand("startAutocomplete");
         }
         if (e.command.name == "insertstring" && /^[\w.\(\,\$\'\"]$/.test(e.args)) {
             editor.execCommand("startAutocomplete");
@@ -523,9 +533,21 @@ function injectCompleterToAdjustMethodParamWidth() {
             return rst;
         }
         var width = calcTextWidth(methodParamItem.caption, $(editor.container).attr('font'));
-        $('.ace_editor.ace_autocomplete').width(width + 12);
+        $('.ace_editor.ace_autocomplete').width(width + 50);
         widthChanged = true;
-        ;
+        console.log(methodParamItem.caption, width);
+        if (methodParamItem.currentParam) {
+            _.delay(function () {
+                var $line = $('.ace_editor.ace_autocomplete').find('.ace_line.ace_selected');
+                var start = methodParamItem.caption.indexOf(methodParamItem.currentParam);
+                if (start > -1) {
+                    var newHtml = (methodParamItem.caption.slice(0, start) || "") +
+                        ("<span class='ace_completion-highlight'>" + methodParamItem.currentParam + "</span>") +
+                        (methodParamItem.caption.slice(start + methodParamItem.currentParam.length) || "");
+                    $line.html(newHtml);
+                }
+            }, 10);
+        }
         return rst;
     };
 }
@@ -1452,7 +1474,8 @@ var mongoCreateCollectionTemplates = [
 var mongoStatsTemplates = [
     {
         caption: "stats",
-        snippet: "stats(1024)",
+        snippet: "stats(${2:1024});",
+        //`stats(1024);`,
         comment: 'Returns statistics that reflect the use state of a single database.',
         example: "db.stats(1024)",
         score: 1000
@@ -2245,22 +2268,31 @@ exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
             var helpItems = (session.__paramHelpItems);
             if (!helpItems)
                 return callback(null, []);
+            var trimType = function (type) {
+                if (!type)
+                    return type;
+                var trimSpace = type.split(' ').join();
+                var rst = trimSpace.replace(':any', '');
+                return rst.trim();
+            };
             var completionsItems = helpItems.items.map(function (it, idx) {
                 var currentParam = undefined;
                 var paramsText = (it.parameters.map(function (param, paramIdx) {
                     if (paramIdx === helpItems.argumentIndex) {
                         currentParam = param;
-                        return param.type;
+                        return trimType(param.type);
                     }
                     else
-                        return param.type;
+                        return trimType(param.type);
                 }).join(it.separator));
                 var value = it.prefix + paramsText + it.suffix;
+                var curParamType = currentParam && trimType(currentParam.type);
                 return {
                     caption: value,
                     value: " ",
                     meta: "",
                     toolTip: currentParam && aceUtils.highlightTypeAndComment(currentParam),
+                    currentParam: curParamType,
                     isHelpItem: true,
                     score: (idx === helpItems.selectedItemIndex) ? 1 : 0
                 };

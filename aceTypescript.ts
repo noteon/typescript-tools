@@ -210,7 +210,19 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
     editor.commands.on("afterExec", function(e) {
         if (e.command.name === "Tab" || e.command.name === "Return") {
-            editor.execCommand("startAutocomplete");
+            
+            let canStartAuto=(()=>{
+                let curChar=aceUtils.getCurChar(editor.getSession(), editor.getCursorPosition());
+                if (curChar && curChar.trim()!=="") return true;
+                
+                let prevChar=aceUtils.getPrevChar(editor.getSession(), editor.getCursorPosition());
+                if ([".","(","'",'"',"{"].indexOf(prevChar)>-1) return true;
+                
+                return false;
+            })();
+            
+            if (canStartAuto)
+               editor.execCommand("startAutocomplete");
         }
             
         if (e.command.name == "insertstring" && /^[\w.\(\,\$\'\"]$/.test(e.args)) {

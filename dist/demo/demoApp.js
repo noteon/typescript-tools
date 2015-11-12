@@ -4,12 +4,11 @@
     var aceTs=require("../../bin/aceTypescript");
     
     
-    var lodashTypingFile=__dirname+"/lodash.d.ts";
     var appendedMethod=false
 
     var tsEditor=aceTs.setupAceEditor({
         tsFilePath:"/tmp/guid.ts",
-        tsTypings:[lodashTypingFile],
+        tsTypings:[__dirname+"/lodash.d.ts",__dirname+"/mongo-shell.d.ts"],
         editorTheme:"monokai",
         editorElem:'ts-editor',
         dbFieldsFetcher: function (collectionName){

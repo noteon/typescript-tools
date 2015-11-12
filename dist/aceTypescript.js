@@ -329,8 +329,14 @@ function bindTypescriptExtension(editor, params) {
     ;
     reloadDocument();
 }
+var aceInjected = false;
 //default theme twilight
 function setupAceEditor(params) {
+    if (!aceInjected) {
+        aceInjected = true;
+        aceUtils.appendTooltipToBody();
+        aceUtils.injectCompleterToAdjustMethodParamWidth();
+    }
     var editor = ace.edit(params.editorElem);
     editor.setOptions({ enableBasicAutocompletion: false });
     editor.$blockScrolling = Infinity;
@@ -477,6 +483,53 @@ exports.getCollectionName = function (currentLine) {
         return colName;
     }
 };
+function calcTextWidth(text, font) {
+    var f = font || '12px', o = $('<div>' + text + '</div>')
+        .css({ 'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden', 'font': f })
+        .appendTo($('body')), w = o.width();
+    o.remove();
+    return w;
+}
+exports.calcTextWidth = calcTextWidth;
+function appendTooltipToBody() {
+    var oldP = ace.require('ace/tooltip').Tooltip.prototype;
+    ace.require('ace/tooltip').Tooltip = function (parentNode) {
+        this.isOpen = false;
+        this.$element = null;
+        this.$parentNode = document.body; //parentNode;
+    };
+    ace.require('ace/tooltip').Tooltip.prototype = oldP;
+}
+exports.appendTooltipToBody = appendTooltipToBody;
+function injectCompleterToAdjustMethodParamWidth() {
+    var proto = ace.require("ace/autocomplete").Autocomplete.prototype.showPopup;
+    var widthChanged;
+    var oldWidth;
+    ace.require("ace/autocomplete").Autocomplete.prototype.showPopup = function (editor) {
+        var rst = proto.apply(this, arguments);
+        if (!oldWidth)
+            oldWidth = $('.ace_editor.ace_autocomplete').width();
+        if (widthChanged) {
+            $('.ace_editor.ace_autocomplete').width(oldWidth);
+            widthChanged = false;
+        }
+        var completions = editor && editor.completer && editor.completer.completions;
+        if (!completions)
+            return rst;
+        if (_.isEmpty(completions.filtered))
+            return rst;
+        var methodParamItem = completions.filtered[0];
+        if (!methodParamItem.isHelpItem) {
+            return rst;
+        }
+        var width = calcTextWidth(methodParamItem.caption, $(editor.container).attr('font'));
+        $('.ace_editor.ace_autocomplete').width(width + 12);
+        widthChanged = true;
+        ;
+        return rst;
+    };
+}
+exports.injectCompleterToAdjustMethodParamWidth = injectCompleterToAdjustMethodParamWidth;
 
 },{"os":undefined}],4:[function(require,module,exports){
 // Copyright (c) Claus Reinke. All rights reserved.

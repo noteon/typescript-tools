@@ -141,7 +141,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
     let triggerCheckTsErrorHandler=()=>{
         checkTsErrorHandler=setInterval(()=>{
             let now=Date.now();
-            if ((now-lastChangedTime)<500) return ;
+            if ((now-lastChangedTime)<250) return ;
     
             updateTsErrorMarkers();
             

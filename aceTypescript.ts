@@ -49,7 +49,13 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
     var errorMarkers = [];
     
+    let lastChangedTime=Date.now();
+    
     function updateTsErrorMarkers() {
+        var session = editor.getSession();
+        
+        if ($(".ace_editor.ace_autocomplete").is(":visible") && _.isEmpty(session.getAnnotations())) return;
+        
         var addPhase = phase => d => { d.phase = phase; return d };
 
         var syntactic = tsServ.ls.getSyntacticDiagnostics(fileName);
@@ -59,7 +65,6 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
             , semantic.map(addPhase("Semantics")));
 
 
-        var session = editor.getSession();
 
 
         errorMarkers.forEach((id) => {
@@ -67,6 +72,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         });
 
         var annotations: AceAjax.Annotation[] = [];
+        
 
         errors.forEach((error) => {
             //var getpos = aceEditorPosition.getAcePositionFromChars;
@@ -85,10 +91,11 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
                     return;
 
             }
-            //console.log("end.row", end.row, editor.getCursorPosition().row);
-            if (editor.container && (document.activeElement === editor.container.children[0]) && (end.row === editor.getCursorPosition().row)) {
-                return;
-            }    
+            
+            
+            // if (editor.container && (document.activeElement === editor.container.children[0]) && (end.row === editor.getCursorPosition().row)) {
+            //     return;
+            // }    
             
             
             //console.log("session push marker",start.row,start.column);
@@ -127,24 +134,44 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
         session.setAnnotations(annotations);
     }
+    
+   
 
-
-    var throttledUpdateMarker = _.throttle(updateTsErrorMarkers, 100);
-    var debounceUpdateMarker = _.debounce(throttledUpdateMarker, 500);
+    let checkTsErrorHandler;
+    let triggerCheckTsErrorHandler=()=>{
+        checkTsErrorHandler=setInterval(()=>{
+            let now=Date.now();
+            if ((now-lastChangedTime)<500) return ;
+    
+            updateTsErrorMarkers();
+            
+            clearInterval(checkTsErrorHandler);   
+            checkTsErrorHandler=undefined;      
+        },100);
+    }
+    
+    //var throttledUpdateMarker = _.throttle(updateTsErrorMarkers, 100);
+    //var debounceUpdateMarker = _.debounce(updateTsErrorMarkers, 500);
 
     function onChangeDocument(e: AceAjax.EditorChangeEvent) {
         //reloadDocument();
+        lastChangedTime=Date.now();
         try {
+            if (!checkTsErrorHandler){
+                triggerCheckTsErrorHandler();
+            }
+            
             syncTypeScriptServiceContent(fileName, e);
 
-            var startAt = Date.now();
+            //var startAt = Date.now();
 
-            var cursorRow = editor.getCursorPosition().row;
+            //var cursorRow = editor.getCursorPosition().row;
 
-            if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
-                debounceUpdateMarker()
-            } else
-                throttledUpdateMarker()
+            // if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
+            //     debounceUpdateMarker()
+            // } else
+            //updateTsErrorMarkers();
+            //debounceUpdateMarker()
                 
             //console.log("update Error Markers", Date.now()-startAt);        
                 

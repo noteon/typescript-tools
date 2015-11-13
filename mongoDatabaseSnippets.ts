@@ -27,7 +27,7 @@ var mongoStatsTemplates = [
 
 var mongoCreateUserTemplates = [
       {
-            caption: "stats",
+            caption: "createUser",
             snippet: 
 `createUser(
    {
@@ -51,7 +51,8 @@ db.createUser({
       { w: "majority" , wtimeout: 5000 } )`,
             score:1000
       }
-];      
+];
+      
 
 
 var mongoCurrentOpTemplates=[
@@ -165,6 +166,7 @@ let addMongoCodeTemplates=(mongoMethod,templates:any[])=>{
 let initMongoCursorTemplates=()=>{
       addMongoCodeTemplates("createCollection",mongoCreateCollectionTemplates);
       addMongoCodeTemplates("stats",mongoStatsTemplates);
+      addMongoCodeTemplates("createUser",mongoCreateUserTemplates);
       addMongoCodeTemplates("currentOp",mongoCurrentOpTemplates);
 }
 initMongoCursorTemplates();

@@ -91,20 +91,9 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
                     return;
 
             }
-            
-            
-            // if (editor.container && (document.activeElement === editor.container.children[0]) && (end.row === editor.getCursorPosition().row)) {
-            //     return;
-            // }    
-            
-            
-            //console.log("session push marker",start.row,start.column);
             errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
             
             
-            //errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, false));
-            
-            //console.log("add annotation", start.row, start.column, error.messageText);
             var getMessageType = (error) => {
                 if (error.category === 0)
                     return 'warning'
@@ -150,9 +139,6 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         },100);
     }
     
-    //var throttledUpdateMarker = _.throttle(updateTsErrorMarkers, 100);
-    //var debounceUpdateMarker = _.debounce(updateTsErrorMarkers, 500);
-
     function onChangeDocument(e: AceAjax.EditorChangeEvent) {
         //reloadDocument();
         lastChangedTime=Date.now();
@@ -162,19 +148,6 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
             }
             
             syncTypeScriptServiceContent(fileName, e);
-
-            //var startAt = Date.now();
-
-            //var cursorRow = editor.getCursorPosition().row;
-
-            // if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
-            //     debounceUpdateMarker()
-            // } else
-            //updateTsErrorMarkers();
-            //debounceUpdateMarker()
-                
-            //console.log("update Error Markers", Date.now()-startAt);        
-                
         } catch (ex) {
 
         }

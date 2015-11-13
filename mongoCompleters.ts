@@ -152,6 +152,11 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
                 return callback(null,[]);
             }
             
+            var prevChar = aceUtils.getPrevChar(session, {row:pos.row, column:pos.column- ((prefix||"").length) });
+            if ([",","}",")"].indexOf(prevChar)>0)
+                return callback(null, []);
+
+            
             let currentLine = session.getLine(pos.row);
             let hasDot = currentLine.indexOf('.') > -1;
 

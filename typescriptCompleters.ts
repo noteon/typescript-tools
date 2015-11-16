@@ -59,31 +59,6 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
                 }
             });
             
-            
-
-
-            var matchFunc = function(elm) {
-                return elm.caption.indexOf(prefix) == 0 ? 1 : 0;
-            };
-
-            var matchCompare = function(a, b) {
-                return matchFunc(b) - matchFunc(a);
-            };
-
-            var textCompare = function(a, b) {
-                if (a.caption == b.caption) {
-                    return 0;
-                } else {
-                    return (a.caption > b.caption) ? 1 : -1;
-                }
-            };
-            var compare = function(a, b) {
-                var ret = matchCompare(a, b);
-                return (ret != 0) ? ret : textCompare(a, b);
-            };
-
-            completions = completions.sort(compare);
-            
             return completions;
         
     }

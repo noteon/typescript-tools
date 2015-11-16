@@ -243,6 +243,7 @@ function bindTypescriptExtension(editor, params) {
     }
     ;
     langTools.setCompleters([
+        tsCompleters.fetchParamsPlaceHolderCompleter(tsServ, fileName),
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
         //TypescriptAuto会缓存语言服务的一些值
@@ -514,10 +515,14 @@ function appendTooltipToBody() {
 }
 exports.appendTooltipToBody = appendTooltipToBody;
 function injectCompleterToAdjustMethodParamWidth() {
-    var proto = ace.require("ace/autocomplete").Autocomplete.prototype.showPopup;
+    var proto = ace.require("ace/autocomplete").Autocomplete.prototype.openPopup;
     var widthChanged;
     var oldWidth;
-    ace.require("ace/autocomplete").Autocomplete.prototype.showPopup = function (editor) {
+    ace.require("ace/autocomplete").Autocomplete.prototype.openPopup = function (editor, prefix, keepPopupPosition) {
+        var completions = editor && editor.completer && editor.completer.completions;
+        if (completions && completions.filtered) {
+            completions.filtered.sort(function (a, b) { return compareCompletionItem(prefix, a, b); });
+        }
         var rst = proto.apply(this, arguments);
         if (!oldWidth)
             oldWidth = $('.ace_editor.ace_autocomplete').width();
@@ -525,7 +530,6 @@ function injectCompleterToAdjustMethodParamWidth() {
             $('.ace_editor.ace_autocomplete').width(oldWidth);
             widthChanged = false;
         }
-        var completions = editor && editor.completer && editor.completer.completions;
         if (!completions)
             return rst;
         if (_.isEmpty(completions.filtered))
@@ -556,6 +560,35 @@ function injectCompleterToAdjustMethodParamWidth() {
     };
 }
 exports.injectCompleterToAdjustMethodParamWidth = injectCompleterToAdjustMethodParamWidth;
+function compareCompletionItem(filterText, a, b) {
+    var matchFunc = function (elm) {
+        return elm.caption.indexOf(filterText) === 0 ? 1 : 0;
+    };
+    var matchCompare = function (a, b) {
+        return matchFunc(b) - matchFunc(a);
+    };
+    var textCompare = function compare(a, b) {
+        var aScore = -1000;
+        var bScore = -1000;
+        if (_.isNumber(a.score))
+            aScore = a.score;
+        if (_.isNumber(b.score))
+            bScore = b.score;
+        if (aScore !== bScore) {
+            return (aScore - bScore) > 0 ? 1 : -1;
+        }
+        if (_.isString(a) && _.isString(b)) {
+            return a.toLowerCase().localeCompare(b.toLowerCase());
+        }
+        return (a > b) ? 1 : -1;
+    };
+    var compare = function (a, b) {
+        var ret = matchCompare(a, b);
+        return (ret != 0) ? ret : textCompare(a.caption, b.caption);
+    };
+    return compare(a, b);
+}
+exports.compareCompletionItem = compareCompletionItem;
 
 },{"os":undefined}],4:[function(require,module,exports){
 // Copyright (c) Claus Reinke. All rights reserved.
@@ -1177,20 +1210,18 @@ module.exports = mongoCodeTemplates;
 /// <reference path="./typings/app.d.ts" />
 var aceUtils = require("./aceUtils");
 _ = require("lodash");
+function nonMongoCompletePrevChar(prevChar) {
+    return ([",", "}", ")"].indexOf(prevChar) > -1);
+}
 exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
     var shellCmdCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            session.__includeShellCmdSpaceChar = undefined;
-            if (session.__paramHelpItems || session.__isInStringToken) {
+            if (session.__paramHelpItems || session.__isInStringToken || nonMongoCompletePrevChar(session.__prevChar)) {
                 return callback(null, []);
             }
-            var currentLine = session.getLine(pos.row).trim();
-            //console.log("current line", currentLine);
-            session.__includeShellCmdSpaceChar = _.any(["show ", "use ", "help "], function (it) {
-                return _.startsWith(currentLine, it);
-            });
             if (session.__includeShellCmdSpaceChar)
                 return callback(null, []);
+            var currentLine = session.getLine(pos.row).trim();
             if (/\.|\'|\"|\{|\}|\(|\)|\`/.test(currentLine))
                 return callback(null, []);
             var mongoShellCommands = require('./mongoShellCommands');
@@ -1210,7 +1241,7 @@ exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
 exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
     var fieldsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__firstCompletionEntry) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__firstCompletionEntry || nonMongoCompletePrevChar(session.__prevChar)) {
                 return callback(null, []);
             }
             if (prefix && aceUtils.isAllNumberStr(prefix)) {
@@ -1276,15 +1307,12 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
     var collectionMethodsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
             //console.log("colMethods", session.__isInStringToken);
-            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken || nonMongoCompletePrevChar(session.__prevChar)) {
                 return callback(null, []);
             }
             if (prefix && aceUtils.isAllNumberStr(prefix)) {
                 return callback(null, []);
             }
-            var prevChar = aceUtils.getPrevChar(session, { row: pos.row, column: pos.column - ((prefix || "").length) });
-            if ([",", "}", ")"].indexOf(prevChar) > 0)
-                return callback(null, []);
             var currentLine = session.getLine(pos.row);
             var hasDot = currentLine.indexOf('.') > -1;
             var posChar;
@@ -1352,14 +1380,13 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
 };
 exports.dateRangeCompleter = {
     getCompletions: function (editor, session, pos, prefix, callback) {
-        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
+        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken || nonMongoCompletePrevChar(session.__prevChar)) {
             return callback(null, []);
         }
         var currentLine = session.getLine(pos.row);
         var hasDot = currentLine.indexOf('.') > -1;
         if (hasDot) {
-            var prevChar = aceUtils.getPrevChar(session, { row: pos.row, column: pos.column - ((prefix || "").length) });
-            if (["\n", "\t", " ", ":"].indexOf(prevChar) < 0)
+            if (["\n", "\t", " ", ":"].indexOf(session.__prevChar) < 0)
                 return callback(null, []);
         }
         var templates = require("./mongoDateRangeSnippets").map(function (it) {
@@ -2180,6 +2207,27 @@ module.exports = format;
 },{"typescript":22}],17:[function(require,module,exports){
 /// <reference path="./typings/tsd.d.ts" />
 var aceUtils = require('./aceUtils');
+//置顶，仅用于获取前置的参数
+exports.fetchParamsPlaceHolderCompleter = function (tsServ, scriptFileName) {
+    // uses http://rhymebrain.com/api.html
+    var placeHolderAutoCompleter = {
+        getCompletions: function (editor, session, pos, prefix, callback) {
+            session.__isInStringToken = aceUtils.isStringChar(aceUtils.getCurChar(session, pos));
+            session.__paramHelpItems = aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
+            session.__prevChar = aceUtils.getPrevChar(session, { row: pos.row, column: pos.column - ((prefix || "").length) });
+            session.__includeShellCmdSpaceChar = undefined;
+            if (session.__paramHelpItems || session.__isInStringToken) {
+                return callback(null, []);
+            }
+            var currentLine = session.getLine(pos.row).trim();
+            session.__includeShellCmdSpaceChar = _.any(["show ", "use ", "help "], function (it) {
+                return _.startsWith(currentLine, it);
+            });
+            return callback(null, []);
+        }
+    };
+    return placeHolderAutoCompleter;
+};
 exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHelpUrlGetter) {
     var getCompletionEntries = function (posChar, prefix) {
         var completionsInfo = tsServ.getCompletionsInfoByPos(true, scriptFileName, posChar);
@@ -2200,36 +2248,15 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
                 isAutoComplete: true
             };
         });
-        var matchFunc = function (elm) {
-            return elm.caption.indexOf(prefix) == 0 ? 1 : 0;
-        };
-        var matchCompare = function (a, b) {
-            return matchFunc(b) - matchFunc(a);
-        };
-        var textCompare = function (a, b) {
-            if (a.caption == b.caption) {
-                return 0;
-            }
-            else {
-                return (a.caption > b.caption) ? 1 : -1;
-            }
-        };
-        var compare = function (a, b) {
-            var ret = matchCompare(a, b);
-            return (ret != 0) ? ret : textCompare(a, b);
-        };
-        completions = completions.sort(compare);
         return completions;
     };
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
-            var curPos = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
-            session.__isInStringToken = aceUtils.isStringChar(aceUtils.getCurChar(session, pos));
-            session.__paramHelpItems = aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, []);
             }
+            var curPos = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
             if (prefix && aceUtils.isAllNumberStr(prefix)) {
                 return callback(null, []);
             }

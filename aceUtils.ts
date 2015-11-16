@@ -176,12 +176,17 @@ export function appendTooltipToBody(){
 }
 
 export function injectCompleterToAdjustMethodParamWidth(){
-    let proto=ace.require("ace/autocomplete").Autocomplete.prototype.showPopup;
+    let proto=ace.require("ace/autocomplete").Autocomplete.prototype.openPopup;
     
     let widthChanged;
     let oldWidth;
     
-     ace.require("ace/autocomplete").Autocomplete.prototype.showPopup = function(editor) {
+     ace.require("ace/autocomplete").Autocomplete.prototype.openPopup = function(editor, prefix, keepPopupPosition) {
+        let completions=editor && editor.completer && editor.completer.completions;
+        if (completions && completions.filtered){
+             completions.filtered.sort((a,b)=>compareCompletionItem(prefix,a,b));
+        }
+        
         let rst= proto.apply(this, arguments);
         
         if (!oldWidth) //only set once
@@ -192,9 +197,9 @@ export function injectCompleterToAdjustMethodParamWidth(){
              widthChanged=false;
         }
            
-        let completions=editor && editor.completer && editor.completer.completions;
         if (!completions) return rst;
         if (_.isEmpty(completions.filtered)) return rst;
+        
         
         let methodParamItem=completions.filtered[0];
         if (!methodParamItem.isHelpItem){
@@ -229,3 +234,37 @@ export function injectCompleterToAdjustMethodParamWidth(){
     }       
 }
 
+export function compareCompletionItem(filterText, a,b){
+      var matchFunc = function(elm) {
+          return elm.caption.indexOf(filterText) === 0 ? 1 : 0;
+      };
+
+      var matchCompare = function(a, b) {
+          return matchFunc(b) - matchFunc(a);
+      };
+      
+      var textCompare = function compare(a,b){
+            let aScore=-1000;
+            let bScore=-1000;
+            if (_.isNumber(a.score)) aScore=a.score;
+            if (_.isNumber(b.score)) bScore=b.score;
+            
+            
+          if (aScore!== bScore){
+            return (aScore-bScore)>0?1:-1;
+          }
+          
+          if (_.isString(a) && _.isString(b)){
+              return a.toLowerCase().localeCompare(b.toLowerCase());
+          }
+          
+          return (a>b)?1:-1;
+      }
+      
+      var compare = function(a, b) {
+          var ret = matchCompare(a, b);
+          return (ret != 0) ? ret : textCompare(a.caption, b.caption);
+      };
+
+     return compare(a,b)
+}

@@ -187,6 +187,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
 
     langTools.setCompleters([
+        tsCompleters.fetchParamsPlaceHolderCompleter(tsServ,fileName),
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),//getShellCmdCompleter置顶，它增加了session.__includeShellCmdSpaceChar
         
         tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),//注，Completer的顺序很重要，getTypeScriptAutoCompleters必须置顶，

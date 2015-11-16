@@ -5,27 +5,28 @@ import ts = require("./typescriptService");
 _ = require("lodash");
 
 
+
+
+function nonMongoCompletePrevChar(prevChar){
+    return ([",","}",")"].indexOf(prevChar)>-1)
+}
+
+
+
 export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName: string) => {
 
     var shellCmdCompleter = {
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
 
-            session.__includeShellCmdSpaceChar=undefined;
-            
-            if (session.__paramHelpItems || session.__isInStringToken) {
+            if (session.__paramHelpItems || session.__isInStringToken || nonMongoCompletePrevChar(session.__prevChar)) {
                 return callback(null, [])
             }
 
-            let currentLine = session.getLine(pos.row).trim();
-            //console.log("current line", currentLine);
 
-            session.__includeShellCmdSpaceChar=_.any(["show ","use ","help "],(it)=>{
-                return _.startsWith(currentLine,it)
-            })
-            
             if (session.__includeShellCmdSpaceChar)
                 return callback(null, []);
 
+            let currentLine = session.getLine(pos.row).trim();
             if (/\.|\'|\"|\{|\}|\(|\)|\`/.test(currentLine))
                 return callback(null, []);        
 
@@ -56,7 +57,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
 
     var fieldsCompleter = {
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__firstCompletionEntry) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__firstCompletionEntry || nonMongoCompletePrevChar(session.__prevChar)) {
                 return callback(null, [])
             }
             
@@ -145,17 +146,13 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
             
             //console.log("colMethods", session.__isInStringToken);
-            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar  || session.__isInStringToken) {
+            if (session.__paramHelpItems || session.__includeShellCmdSpaceChar  || session.__isInStringToken || nonMongoCompletePrevChar(session.__prevChar)) {
                 return callback(null, [])
             }
             if (prefix && aceUtils.isAllNumberStr(prefix)){
                 return callback(null,[]);
             }
             
-            var prevChar = aceUtils.getPrevChar(session, {row:pos.row, column:pos.column- ((prefix||"").length) });
-            if ([",","}",")"].indexOf(prevChar)>0)
-                return callback(null, []);
-
             
             let currentLine = session.getLine(pos.row);
             let hasDot = currentLine.indexOf('.') > -1;
@@ -241,15 +238,14 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
 
 export var dateRangeCompleter = {
     getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken) {
+        if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__isInStringToken || nonMongoCompletePrevChar(session.__prevChar)) {
             return callback(null, [])
         }
         let currentLine = session.getLine(pos.row);
         let hasDot = currentLine.indexOf('.') > -1;
-        if (hasDot){
-            var prevChar = aceUtils.getPrevChar(session, {row:pos.row, column:pos.column- ((prefix||"").length) });
-            if (["\n","\t"," ",":"].indexOf(prevChar)<0)
-            return callback(null, []);
+        if (hasDot) {
+            if (["\n","\t"," ",":"].indexOf(session.__prevChar)<0)
+                return callback(null, []);
         }
            
         

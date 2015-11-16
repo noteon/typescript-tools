@@ -140,13 +140,16 @@ function bindTypescriptExtension(editor, params) {
     //target 1= ES5
     var compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
     var errorMarkers = [];
+    var lastChangedTime = Date.now();
     function updateTsErrorMarkers() {
+        var session = editor.getSession();
+        if ($(".ace_editor.ace_autocomplete").is(":visible") && _.isEmpty(session.getAnnotations()))
+            return;
         var addPhase = function (phase) { return function (d) { d.phase = phase; return d; }; };
         var syntactic = tsServ.ls.getSyntacticDiagnostics(fileName);
         var semantic = tsServ.ls.getSemanticDiagnostics(fileName);
         // this.ls.languageService.getEmitOutput(file).diagnostics;
         var errors = [].concat(syntactic.map(addPhase("Syntax")), semantic.map(addPhase("Semantics")));
-        var session = editor.getSession();
         errorMarkers.forEach(function (id) {
             session.removeMarker(id);
         });
@@ -165,14 +168,7 @@ function bindTypescriptExtension(editor, params) {
                 if (/^(help|use|show) ?$/.test(line) || /^(help|use|show) .*$/.test(line))
                     return;
             }
-            //console.log("end.row", end.row, editor.getCursorPosition().row);
-            if (editor.container && (document.activeElement === editor.container.children[0]) && (end.row === editor.getCursorPosition().row)) {
-                return;
-            }
-            //console.log("session push marker",start.row,start.column);
             errorMarkers.push(session.addMarker(range, "typescript-error", "text", true));
-            //errorMarkers.push(session.addMarker(range, "typescript-error", error.messageText, false));
-            //console.log("add annotation", start.row, start.column, error.messageText);
             var getMessageType = function (error) {
                 if (error.category === 0)
                     return 'warning';
@@ -196,19 +192,25 @@ function bindTypescriptExtension(editor, params) {
         });
         session.setAnnotations(annotations);
     }
-    var throttledUpdateMarker = _.throttle(updateTsErrorMarkers, 100);
-    var debounceUpdateMarker = _.debounce(throttledUpdateMarker, 500);
+    var checkTsErrorHandler;
+    var triggerCheckTsErrorHandler = function () {
+        checkTsErrorHandler = setInterval(function () {
+            var now = Date.now();
+            if ((now - lastChangedTime) < 250)
+                return;
+            updateTsErrorMarkers();
+            clearInterval(checkTsErrorHandler);
+            checkTsErrorHandler = undefined;
+        }, 100);
+    };
     function onChangeDocument(e) {
         //reloadDocument();
+        lastChangedTime = Date.now();
         try {
-            syncTypeScriptServiceContent(fileName, e);
-            var startAt = Date.now();
-            var cursorRow = editor.getCursorPosition().row;
-            if (e.start.row === cursorRow && e.end.row === cursorRow && e.lines && e.lines.join(aceUtils.EOL).length === 1) {
-                debounceUpdateMarker();
+            if (!checkTsErrorHandler) {
+                triggerCheckTsErrorHandler();
             }
-            else
-                throttledUpdateMarker();
+            syncTypeScriptServiceContent(fileName, e);
         }
         catch (ex) {
         }
@@ -1280,6 +1282,9 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
             if (prefix && aceUtils.isAllNumberStr(prefix)) {
                 return callback(null, []);
             }
+            var prevChar = aceUtils.getPrevChar(session, { row: pos.row, column: pos.column - ((prefix || "").length) });
+            if ([",", "}", ")"].indexOf(prevChar) > 0)
+                return callback(null, []);
             var currentLine = session.getLine(pos.row);
             var hasDot = currentLine.indexOf('.') > -1;
             var posChar;

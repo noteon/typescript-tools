@@ -3,6 +3,38 @@
 import aceUtils = require('./aceUtils');
 import ts = require('./typescriptService');
 
+//置顶，仅用于获取前置的参数
+export var fetchParamsPlaceHolderCompleter=(tsServ: ts.TypescriptService, scriptFileName: string) => {
+    // uses http://rhymebrain.com/api.html
+    
+    var placeHolderAutoCompleter = {
+        getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
+            session.__isInStringToken= aceUtils.isStringChar(aceUtils.getCurChar(session,pos));
+            session.__paramHelpItems=aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
+            session.__prevChar= aceUtils.getPrevChar(session, {row:pos.row, column:pos.column- ((prefix||"").length) });
+            
+            session.__includeShellCmdSpaceChar=undefined;
+
+            if (session.__paramHelpItems || session.__isInStringToken) {
+                return callback(null, [])
+            }
+
+
+            let currentLine = session.getLine(pos.row).trim();
+
+            session.__includeShellCmdSpaceChar=_.any(["show ","use ","help "],(it)=>{
+                return _.startsWith(currentLine,it)
+            })
+            
+
+            return callback(null,[]);
+        }
+    }
+
+    
+    return placeHolderAutoCompleter;
+}
+
 export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFileName: string, methodHelpUrlGetter?:(methodDotName:string)=>string) => {
     
     var getCompletionEntries=(posChar, prefix)=>{
@@ -59,15 +91,11 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-            var curPos = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
-            
-            session.__isInStringToken= aceUtils.isStringChar(aceUtils.getCurChar(session,pos));
-            
-            session.__paramHelpItems=aceUtils.getParameterHelpItems(tsServ, scriptFileName, session, pos);
-
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, [])
             }
+            
+            var curPos = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
             
             if (prefix && aceUtils.isAllNumberStr(prefix)){
                 return callback(null,[]);

@@ -76,7 +76,7 @@
 
     setInterval(function(){
       jsEditor.getSession().setValue(tsEditor.typescriptServ.transpile(function(src){
-        src="//// transpiled from typescript\n"+src;
+        src=src+"\n//// transpiled from typescript";
         return src
         
       }));

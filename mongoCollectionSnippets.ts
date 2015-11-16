@@ -264,7 +264,7 @@ var mongoMapReduceTemplates = [
             caption: "mapReduce with Options",
             snippet:
             `mapReduce(
-      ()=>{emit(this.$2cust_id, this.amount)}, //mapFunction
+      function () {emit(this.$2cust_id, this.amount)}, //mapFunction
       (key, values)=>{return Array.sum(values)},//reduceFunction
       {
           query:{ status: "A" },
@@ -273,7 +273,7 @@ var mongoMapReduceTemplates = [
             comment: 'The mapReduce command allows you to run map-reduce aggregation operations over a collection. ',
             example:
             `db.orders.mapReduce(
-      ()=>{emit(this.cust_id, this.amount)}, //mapFunction
+      function() {emit(this.cust_id, this.amount)}, //mapFunction
       (key, values)=>{return Array.sum(values)},//reduceFunction
       {
           query:{ status: "A" },

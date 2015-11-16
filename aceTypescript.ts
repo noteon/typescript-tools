@@ -267,7 +267,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         getOriginPos({row,column}){//0-based
             let result=rst["sourceMap"].originalPositionFor({line:row+1,column});
             if (result && result.line){
-                return {row:result.line-2, column:result.column}
+                return {row:result.line-1, column:result.column}
             }else return;
         }
     }

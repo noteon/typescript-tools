@@ -6,6 +6,7 @@ var aceUtils = require("./aceUtils");
 var ts = require("./typescriptService");
 var tsCompleters = require('./typescriptCompleters');
 var mongoCompleters = require('./mongoCompleters');
+var sourceMap=require("source-map");
 var typescript = require("typescript");
 
 //var fs = require("browserify-fs");
@@ -45,7 +46,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
     })
     
     //target 1= ES5
-    let compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
+    let compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS, sourceMap:true };
 
     var errorMarkers = [];
     
@@ -244,7 +245,12 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
             if (transferFunc)
                 src = transferFunc(src);
 
-            return typescript.transpile(src, <any>compilerOptions)
+            let transRst= typescript.transpileModule(src, {compilerOptions});
+           // console.log(transRst.sourceMapText);
+            rst["sourceMap"]=new sourceMap.SourceMapConsumer(transRst.sourceMapText);
+            
+            
+            return transRst.outputText;
         },
         format: () => {
             var newText = tsServ.format(fileName);
@@ -257,6 +263,13 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
             return tsServ.appendScriptContent(scriptFile, lines);
         },
         reloadDocument,
+        
+        getOriginPos({row,column}){//0-based
+            let result=rst["sourceMap"].originalPositionFor({line:row+1,column});
+            if (result && result.line){
+                return {row:result.line-2, column:result.column}
+            }else return;
+        }
     }
 
     editor["typescriptServ"] = rst;

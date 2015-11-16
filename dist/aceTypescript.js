@@ -138,7 +138,7 @@ function bindTypescriptExtension(editor, params) {
             tsAndTypingFiles.push({ name: it, content: typescript.sys.readFile(it.path) });
     });
     //target 1= ES5
-    var compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS };
+    var compilerOptions = { target: typescript.ScriptTarget.ES5, "module": typescript.ModuleKind.CommonJS, sourceMap: true };
     var errorMarkers = [];
     var lastChangedTime = Date.now();
     function updateTsErrorMarkers() {
@@ -284,7 +284,10 @@ function bindTypescriptExtension(editor, params) {
             var src = selectedText ? selectedText : editor.getValue();
             if (transferFunc)
                 src = transferFunc(src);
-            return typescript.transpile(src, compilerOptions);
+            var transRst = typescript.transpileModule(src, { compilerOptions: compilerOptions });
+            console.log(transRst);
+            rst["sourceMapText"] = transRst.sourceMapText;
+            return transRst.outputText;
         },
         format: function () {
             var newText = tsServ.format(fileName);

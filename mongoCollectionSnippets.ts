@@ -453,6 +453,17 @@ var mongoInsertTemplates = [
       }
 ]
 
+var mongoSaveTemplates = [
+      {
+            caption: "save",
+            snippet:
+            `save({$2})`,
+            comment: 'Updates an existing document or inserts a new document, depending on its document parameter.',
+            example:
+            `db.products.save( { item: "book", qty: 40 } )`,
+            score: 100
+      }]
+
 var mongoAggregateTemplates = [
       {
             caption: "aggregate",
@@ -731,6 +742,7 @@ let initMongoCodeTemplates = () => {
       addMongoCodeTemplates("findOne", mongoFindOneTemplates);
       addMongoCodeTemplates("findAndModify", mongoFindAndModifyTemplates);
       addMongoCodeTemplates("insert", mongoInsertTemplates);
+      addMongoCodeTemplates("save", mongoSaveTemplates);
       addMongoCodeTemplates("update", mongoUpdateTemplates);
       addMongoCodeTemplates("distinct", mongoDistinctTemplates);
       addMongoCodeTemplates("remove", mongoRemoveTemplates);

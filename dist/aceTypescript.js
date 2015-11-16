@@ -303,7 +303,7 @@ function bindTypescriptExtension(editor, params) {
             var row = _a.row, column = _a.column;
             var result = rst["sourceMap"].originalPositionFor({ line: row + 1, column: column });
             if (result && result.line) {
-                return { row: result.line - 2, column: result.column };
+                return { row: result.line - 1, column: result.column };
             }
             else
                 return;
@@ -1018,9 +1018,9 @@ var mongoDistinctTemplates = [
 var mongoMapReduceTemplates = [
     {
         caption: "mapReduce with Options",
-        snippet: "mapReduce(\n      ()=>{emit(this.$2cust_id, this.amount)}, //mapFunction\n      (key, values)=>{return Array.sum(values)},//reduceFunction\n      {\n          query:{ status: \"A\" },\n          out: { \"inline\":1 }\n      })",
+        snippet: "mapReduce(\n      function () {emit(this.$2cust_id, this.amount)}, //mapFunction\n      (key, values)=>{return Array.sum(values)},//reduceFunction\n      {\n          query:{ status: \"A\" },\n          out: { \"inline\":1 }\n      })",
         comment: 'The mapReduce command allows you to run map-reduce aggregation operations over a collection. ',
-        example: "db.orders.mapReduce(\n      ()=>{emit(this.cust_id, this.amount)}, //mapFunction\n      (key, values)=>{return Array.sum(values)},//reduceFunction\n      {\n          query:{ status: \"A\" },\n           out: { \"inline\":1 }\n      })",
+        example: "db.orders.mapReduce(\n      function() {emit(this.cust_id, this.amount)}, //mapFunction\n      (key, values)=>{return Array.sum(values)},//reduceFunction\n      {\n          query:{ status: \"A\" },\n           out: { \"inline\":1 }\n      })",
         score: 100
     }
 ];

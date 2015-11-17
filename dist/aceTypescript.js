@@ -386,6 +386,7 @@ exports.setupAceEditor = setupAceEditor;
 
 },{"./aceUtils":3,"./mongoCompleters":8,"./quickAndDefinitionTooltip":15,"./typescriptCompleters":17,"./typescriptService":18,"lodash":20,"source-map":32,"typescript":33}],3:[function(require,module,exports){
 /// <reference path="./typings/tsd.d.ts" />
+var AceRange = ace.require('ace/range').Range;
 exports.EOL = require("os").EOL;
 exports.getLinesChars = function (lines) {
     var count = 0;
@@ -421,6 +422,11 @@ exports.getChars = function (docOrSession, pos) {
 exports.isStringChar = function (char) {
     return char && ["'", '"', '`'].indexOf(char) > -1;
 };
+function getLineTextBeforePos(session, pos) {
+    var range = new AceRange(pos.row, 0, pos.row, pos.column);
+    return session.getTextRange(range);
+}
+exports.getLineTextBeforePos = getLineTextBeforePos;
 exports.getPrevChar = function (docOrSession, pos) {
     return docOrSession.getValue().charAt(exports.getChars(docOrSession, { row: pos.row, column: pos.column - 1 }));
 };
@@ -504,22 +510,22 @@ exports.highlightTypeCommentAndTip = function (type, docComment, tipHtml) {
 };
 var collectionMethods = "aggregate\ncount\ncopyTo\ncreateIndex\ndataSize\ndistinct\ndrop\ndropIndex\ndropIndexes\nensureIndex\nexplain\nfind\nfindAndModify\nfindOne\ngetIndexes\ngetShardDistribution\ngetShardVersion\ngroup\ninsert\nisCapped\nmapReduce\nreIndex\nremove\nrenameCollection\nsave\nstats\nstorageSize\ntotalSize\ntotalIndexSize\nupdate\nvalidate";
 //"db.db.test.test1.insert(".match(/\bdb\.(.+)\.(find|insert)\(/)
-function getDBDotCollectionNamesFromText(text) {
-    var REG = "\\bdb.([^\\(\\)]+)\\.(" + collectionMethods.split("\n").join("|") + ")(\\()*";
-    var gReg = new RegExp(REG, 'g');
-    var matches = text.match(gReg);
-    var cols = [];
-    if (!_.isEmpty(matches)) {
-        matches.forEach(function (it) {
-            var colsMatches = it.match(new RegExp(REG));
-            if (colsMatches && colsMatches[1]) {
-                cols.push(colsMatches[1].replace(/\s|\n/g, ""));
-            }
-        });
-    }
-    return _.compact(cols);
-    //"db.db.\ntest.test1.insert()db.db.test.test1.insert()db.db.test.test1.insert()".match(/\bdb\.([^\(\)]+)\.(find|insert)\(/g)
-}
+// function getDBDotCollectionNamesFromText(text:string){
+//   const REG=`\\bdb\.([^\\(\\)]+)\\.(${collectionMethods.split("\n").join("|")})(\\()*`;
+//   let gReg=new RegExp(REG,'g');
+//   let matches=text.match(gReg);
+//   let cols=[];
+//   if (!_.isEmpty(matches)){
+//     matches.forEach((it)=>{
+//       let colsMatches=it.match(new RegExp(REG));
+//       if (colsMatches && colsMatches[1]){
+//         cols.push(colsMatches[1].replace(/\s|\n/g,""));
+//       }
+//     })
+//   }
+//   return _.compact(cols);
+//   //"db.db.\ntest.test1.insert()db.db.test.test1.insert()db.db.test.test1.insert()".match(/\bdb\.([^\(\)]+)\.(find|insert)\(/g)
+// }
 exports.getCollectionName = function (currentLine) {
     var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);
     if (colMatches && colMatches[1])
@@ -1279,10 +1285,25 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             if (prefix && (prefix[0] === "$") && (session.getValue().indexOf('.aggregate') < 0)) {
                 return callback(null, []);
             }
-            var prevChar = aceUtils.getPrevChar(session, pos);
+            var currentLine = (aceUtils.getLineTextBeforePos(session, pos) || "").trim();
+            if (currentLine.indexOf("db.getCollection(") > -1) {
+                var matches = currentLine.match(/\./g);
+                if (matches && (matches.length === 1)) {
+                    var cols = session.__collectionNames && session.__collectionNames.map(function (it) {
+                        return {
+                            caption: it,
+                            value: it,
+                            meta: 'collection',
+                            score: 1,
+                        };
+                    });
+                    //console.log("getCollection",cols);
+                    return callback(null, cols || []);
+                }
+            }
+            var prevChar = currentLine[currentLine.length - 1];
             var getFields = function () {
                 if (prevChar === ".") {
-                    var currentLine = session.getLine(pos.row);
                     var colName = aceUtils.getCollectionName(currentLine);
                     if (colName)
                         fieldsFetcher(aceUtils.getCollectionName(currentLine));
@@ -1300,11 +1321,17 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     return fieldsFetcher('');
                 }
             };
+            var noQuotaStr = (function () {
+                var theLine = currentLine.slice(0, currentLine.length - (prefix || "").length - 1).trim();
+                if (_.isEmpty(theLine))
+                    return true;
+                return ["'", '"', '`'].indexOf(theLine[theLine.length - 1]) < 0;
+            })();
             var fields = getFields().map(function (it) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 return {
                     caption: fieldValue,
-                    value: fieldValue,
+                    value: noQuotaStr ? "\"" + fieldValue + "\"" : fieldValue,
                     meta: it.collection,
                     score: it["score"] || 1,
                 };
@@ -2292,16 +2319,20 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
                 return session.__firstCompletionEntry.type.indexOf("(method) mongo.IDatabase.") === 0;
             })();
             if (isMongoDatabaseMethod) {
+                var cols = [];
                 completionEntries = completionEntries.map(function (it) {
                     if (it.meta === "property") {
                         it.score = 10;
                         it.meta = "collection";
+                        cols.push(it.caption);
                     }
                     else {
                         it.score = 1;
                     }
                     return it;
                 });
+                if (!_.isEmpty(cols))
+                    session.__collectionNames = cols;
             }
             //console.log(session.__firstCompletionEntry);
             // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);

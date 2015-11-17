@@ -71,7 +71,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                 return callback(null,[]);
             }
             
-            let currentLine =aceUtils.getLineTextBeforePos(session,pos); 
+            let currentLine =(aceUtils.getLineTextBeforePos(session,pos)||"").trim(); 
             if (currentLine.indexOf("db.getCollection(")>-1){//db.getCollection(
                 let matches=currentLine.match(/\./g);
                 if (matches && (matches.length===1)){
@@ -89,7 +89,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
             }
 
             
-            let prevChar = aceUtils.getPrevChar(session, pos);
+            let prevChar = currentLine[currentLine.length-1];
 
             var getFields = () => {
                 if (prevChar === ".") {
@@ -111,12 +111,22 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                     return fieldsFetcher('');
                 }
             }
+            
+            let noQuotaStr=(()=>{
+               let theLine=currentLine.slice(0,currentLine.length-(prefix||"").length).trim();
+               //console.log(currentLine,"theLine",theLine,"prefix",prefix);
+               if (_.isEmpty(theLine)) return true;
+               
+               return ["'",'"','`'].indexOf(theLine[theLine.length-1])<0 
+            })();
 
             let fields = getFields().map((it) => {
                 let fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
+                let hasDot=fieldValue.indexOf('.')>-1;
+                
                 return {
                     caption: fieldValue,
-                    value: fieldValue,
+                    value: (hasDot&&noQuotaStr)?`"${fieldValue}"`:fieldValue,
                     meta: it.collection,
                     score: it["score"]||1,
                 }

@@ -10,7 +10,6 @@ var mongoForEachTemplates = [
             comment: 'Iterates the cursor to apply a JavaScript function to each document from the cursor.',
             example:
 `db.users.find().forEach( function(myDoc) { print( "user: " + myDoc.name ); } );`,
-            score:1000
       }
 ];      
       
@@ -25,7 +24,6 @@ var mongoMapTemplates = [
             comment: 'Applies function to each document visited by the cursor and collects the return values from successive application into an array.',
             example:
 `db.users.find().map( function(u) { return u.name; } );`,
-            score:1000
       },
 ]
 
@@ -37,7 +35,6 @@ var mongoLimitTemplates = [
             comment: 'Use the limit() method on a cursor to specify the maximum number of documents the cursor will return. limit() is analogous to the LIMIT statement in a SQL database.',
             example:
 `db.orders.find().limit(5)`,
-            score:1000
       },
 ]
 
@@ -50,7 +47,6 @@ var mongoSortTemplates = [
             comment: 'Specifies the order in which the query returns matching documents.',
             example:
 `db.orders.find().sort({ amount: -1 })`,
-            score:1000
       },
 
       {
@@ -60,7 +56,6 @@ var mongoSortTemplates = [
             comment: 'Sort by Id',
             example:
 `db.orders.find().sort({ _id: -1 })`,
-            score:100
       },
       
       {
@@ -70,7 +65,6 @@ var mongoSortTemplates = [
             comment: 'Specifies the order in which the query returns matching documents. Use $natural operator to return documents in the order they exist on disk',
             example:
 `db.orders.find().sort({ $natural: 1 })`,
-            score:100
       },
       
       {
@@ -80,7 +74,6 @@ var mongoSortTemplates = [
             comment: 'Specifies the order in which the query returns matching documents. Use $natural operator to return documents in the reversed order they exist on disk',
             example:
 `db.orders.find().sort({ $natural: -1 })`,
-            score:100
       },
       
       {
@@ -90,7 +83,6 @@ var mongoSortTemplates = [
             comment: 'Return first N records. Use $natural operator to return documents in the order they exist on disk',
             example:
 `db.orders.find().sort({ $natural: 1 }).limit(n)`,
-            score:100
       },
       
       {
@@ -100,7 +92,6 @@ var mongoSortTemplates = [
             comment: 'Return last N records. Use $natural operator to return documents in the reversed order they exist on disk',
             example:
 `db.orders.find().sort({ $natural: -1 }).limit(n)`,
-            score:100
       },
 ]
 

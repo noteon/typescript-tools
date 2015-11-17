@@ -563,6 +563,9 @@ declare module mongo{
 		* @param query Optional. A standard query document that limits the documents copied as part of the db.cloneCollection() operation. All query selectors available to the find() are available here.
 		**/
 		cloneCollection(fromSvr:string, collection:string, query?):void;
+		
+		faq:ICollection;
+		
 		/**
 		* Copies a remote database to the current database. The command assumes that the remote database has the same name as the current database.
 		* New databases are implicitly created, so the current host does not need to have a database named "importdb" for this command to succeed.

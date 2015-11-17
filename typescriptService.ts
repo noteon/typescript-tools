@@ -276,8 +276,8 @@ export class TypescriptService {
   
   public getCompletionsInfoByPos(brief:boolean, file, pos){
          var startTime=Date.now();
-         //console.log("getCompletionsInfoByPos", pos);
          var info:any = this.ls.getCompletionsAtPosition(file, pos) || null;
+         //console.log("getCompletionsInfoByPos", info);
          
           if (info) {
             // fill in completion entry details, unless briefness requested

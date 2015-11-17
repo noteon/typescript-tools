@@ -10,8 +10,7 @@ var mongoUpdateTemplates = [
 `var bulk = db.items.initializeUnorderedBulkOp();
 bulk.find( { status: "D" } ).update( { $set: { status: "I", points: "0" } } );
 bulk.find( { item: null } ).update( { $set: { item: "TBD" } } );
-bulk.execute();`,
-            score:1000
+bulk.execute();`
       }
 ];      
       

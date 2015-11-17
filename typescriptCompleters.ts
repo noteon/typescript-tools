@@ -49,6 +49,8 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             }
             
             let completions = completionsInfo.entries.map((it) => {
+               //console.log("completionsInfo",it); 
+                    
                 return {
                     caption: it.name,
                     snippet: it.name+(isMethodOrFunction(it.kind)?"($2)":""),
@@ -65,6 +67,7 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
     
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
+        
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar) {
                 return callback(null, [])
@@ -79,8 +82,27 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             let completionEntries=getCompletionEntries(curPos,prefix);
             
             if (!prefix){
-               session.__firstCompletionEntry=completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption); 
-            }
+                session.__firstCompletionEntry=completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption); 
+            };
+            
+            let isMongoDatabaseMethod=(()=>{//mongoDatabase 需要将属性（collection）置顶
+                if (!session.__firstCompletionEntry) return;
+                
+                return session.__firstCompletionEntry.type.indexOf("(method) mongo.IDatabase.")===0;
+            })();
+            
+            if (isMongoDatabaseMethod){
+                completionEntries=completionEntries.map((it)=>{
+                    if (it.meta==="property"){
+                        it.score=1;
+                        it.meta="collection";
+                        //console.log("set top", it);
+                    }
+                    return it;
+                });
+            }            
+            
+            //console.log(session.__firstCompletionEntry);
             
            // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
             

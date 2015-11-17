@@ -17,7 +17,6 @@ var mongoInitializeTemplates = [
             comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
             example:
 `rs.initiate()`,
-            score:100
       },
       {
             caption: "initiateWithSampleConfig",
@@ -26,7 +25,6 @@ var mongoInitializeTemplates = [
             comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
             example:
 `rs.initiate(${configSample})`,
-            score:10
       }
 ];      
 

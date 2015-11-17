@@ -8,7 +8,6 @@ var mongoCreateCollectionTemplates = [
             comment: 'Creates a new collection explicitly. set capped option is true',
             example:
 `db.createCollection("log", { capped : true, size : 5242880, max : 5000 } )`,
-            score:1000
       }
 ];      
       
@@ -21,7 +20,6 @@ var mongoStatsTemplates = [
             comment: 'Returns statistics that reflect the use state of a single database.',
             example:
 `db.stats(1024)`,
-            score:1000
       }
 ];      
 
@@ -49,7 +47,6 @@ db.createUser({
                   ] 
       },
       { w: "majority" , wtimeout: 5000 } )`,
-            score:1000
       }
 ];
       

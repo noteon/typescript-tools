@@ -244,27 +244,51 @@ export function compareCompletionItem(filterText, a,b){
           return matchFunc(b) - matchFunc(a);
       };
       
+      var scoreCompare=function(a,b){
+          let aScore=-1000;
+          let bScore=-1000;
+          if (_.isNumber(a.score)) aScore=a.score;
+          if (_.isNumber(b.score)) bScore=b.score;
+          
+          
+        if (aScore!== bScore){
+          return (aScore-bScore)>0?-1:1;
+        }else return 0;
+        
+      }
+      
       var textCompare = function compare(a,b){
-            let aScore=-1000;
-            let bScore=-1000;
-            if (_.isNumber(a.score)) aScore=a.score;
-            if (_.isNumber(b.score)) bScore=b.score;
-            
-            
-          if (aScore!== bScore){
-            return (aScore-bScore)>0?1:-1;
+          let aCaption=a.caption;
+          let bCaption=b.caption;
+          
+          if (_.isString(aCaption) && _.isString(bCaption)){
+              return aCaption.toLowerCase().localeCompare(bCaption.toLowerCase());
           }
           
-          if (_.isString(a) && _.isString(b)){
-              return a.toLowerCase().localeCompare(b.toLowerCase());
-          }
+          if (aCaption===bCaption) return 0;
           
-          return (a>b)?1:-1;
+          return (aCaption>bCaption)?1:-1;
+      }
+      
+      var metaCompare=function(a,b){
+        const defaultWeight=0;
+        let metaWeight={
+          "code template":1,
+        }
+        let aWeight=metaWeight[a.meta]|| defaultWeight;
+        let bWeight=metaWeight[b.meta]|| defaultWeight;
+        return (aWeight-bWeight)?1:-1;
       }
       
       var compare = function(a, b) {
           var ret = matchCompare(a, b);
-          return (ret != 0) ? ret : textCompare(a.caption, b.caption);
+          if (ret===0)
+              ret=scoreCompare(a,b)
+              
+          if (ret===0)
+              ret=textCompare(a,b)
+           
+          return (ret != 0) ? ret : metaCompare(a, b);
       };
 
      return compare(a,b)

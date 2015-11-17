@@ -293,10 +293,15 @@ function bindTypescriptExtension(editor, params) {
         format: function () {
             var newText = tsServ.format(fileName);
             editor.setValue(newText);
+            editor.selection.clearSelection();
+            editor.gotoLine(1);
             return newText;
         },
         appendScriptContent: function (scriptFile, lines) {
             return tsServ.appendScriptContent(scriptFile, lines);
+        },
+        updateScript: function (scriptFile, content) {
+            return tsServ.updateScript(scriptFile, content);
         },
         reloadDocument: reloadDocument,
         getOriginPos: function (_a) {
@@ -497,6 +502,24 @@ exports.highlightTypeCommentAndHelp = function (type, docComment, docUrl) {
 exports.highlightTypeCommentAndTip = function (type, docComment, tipHtml) {
     return exports.highlightTypeAndComment({ type: type, docComment: docComment }, true) + tipHtml;
 };
+var collectionMethods = "aggregate\ncount\ncopyTo\ncreateIndex\ndataSize\ndistinct\ndrop\ndropIndex\ndropIndexes\nensureIndex\nexplain\nfind\nfindAndModify\nfindOne\ngetIndexes\ngetShardDistribution\ngetShardVersion\ngroup\ninsert\nisCapped\nmapReduce\nreIndex\nremove\nrenameCollection\nsave\nstats\nstorageSize\ntotalSize\ntotalIndexSize\nupdate\nvalidate";
+//"db.db.test.test1.insert(".match(/\bdb\.(.+)\.(find|insert)\(/)
+function getDBDotCollectionNamesFromText(text) {
+    var REG = "\\bdb.([^\\(\\)]+)\\.(" + collectionMethods.split("\n").join("|") + ")(\\()*";
+    var gReg = new RegExp(REG, 'g');
+    var matches = text.match(gReg);
+    var cols = [];
+    if (!_.isEmpty(matches)) {
+        matches.forEach(function (it) {
+            var colsMatches = it.match(new RegExp(REG));
+            if (colsMatches && colsMatches[1]) {
+                cols.push(colsMatches[1].replace(/\s|\n/g, ""));
+            }
+        });
+    }
+    return _.compact(cols);
+    //"db.db.\ntest.test1.insert()db.db.test.test1.insert()db.db.test.test1.insert()".match(/\bdb\.([^\(\)]+)\.(find|insert)\(/g)
+}
 exports.getCollectionName = function (currentLine) {
     var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);
     if (colMatches && colMatches[1])
@@ -575,12 +598,16 @@ function injectCompleterToAdjustMethodParamWidth() {
 exports.injectCompleterToAdjustMethodParamWidth = injectCompleterToAdjustMethodParamWidth;
 function compareCompletionItem(filterText, a, b) {
     var matchFunc = function (elm) {
+        if (elm.caption === filterText)
+            return 3;
+        if (elm.caption.toLowerCase() === filterText.toLowerCase())
+            return 2;
         return elm.caption.indexOf(filterText) === 0 ? 1 : 0;
     };
     var matchCompare = function (a, b) {
         return matchFunc(b) - matchFunc(a);
     };
-    var textCompare = function compare(a, b) {
+    var scoreCompare = function (a, b) {
         var aScore = -1000;
         var bScore = -1000;
         if (_.isNumber(a.score))
@@ -588,16 +615,37 @@ function compareCompletionItem(filterText, a, b) {
         if (_.isNumber(b.score))
             bScore = b.score;
         if (aScore !== bScore) {
-            return (aScore - bScore) > 0 ? 1 : -1;
+            return (aScore - bScore) > 0 ? -1 : 1;
         }
-        if (_.isString(a) && _.isString(b)) {
-            return a.toLowerCase().localeCompare(b.toLowerCase());
+        else
+            return 0;
+    };
+    var textCompare = function compare(a, b) {
+        var aCaption = a.caption;
+        var bCaption = b.caption;
+        if (_.isString(aCaption) && _.isString(bCaption)) {
+            return aCaption.toLowerCase().localeCompare(bCaption.toLowerCase());
         }
-        return (a > b) ? 1 : -1;
+        if (aCaption === bCaption)
+            return 0;
+        return (aCaption > bCaption) ? 1 : -1;
+    };
+    var metaCompare = function (a, b) {
+        var defaultWeight = 0;
+        var metaWeight = {
+            "code template": 1,
+        };
+        var aWeight = metaWeight[a.meta] || defaultWeight;
+        var bWeight = metaWeight[b.meta] || defaultWeight;
+        return (aWeight - bWeight) ? 1 : -1;
     };
     var compare = function (a, b) {
         var ret = matchCompare(a, b);
-        return (ret != 0) ? ret : textCompare(a.caption, b.caption);
+        if (ret === 0)
+            ret = scoreCompare(a, b);
+        if (ret === 0)
+            ret = textCompare(a, b);
+        return (ret != 0) ? ret : metaCompare(a, b);
     };
     return compare(a, b);
 }
@@ -849,8 +897,7 @@ var mongoUpdateTemplates = [
         caption: "update",
         snippet: "update({ \\$set: { $2 } })",
         comment: 'Adds a multi update operation to a bulk operations list. The method updates specific fields in existing documents.',
-        example: "var bulk = db.items.initializeUnorderedBulkOp();\nbulk.find( { status: \"D\" } ).update( { $set: { status: \"I\", points: \"0\" } } );\nbulk.find( { item: null } ).update( { $set: { item: \"TBD\" } } );\nbulk.execute();",
-        score: 1000
+        example: "var bulk = db.items.initializeUnorderedBulkOp();\nbulk.find( { status: \"D\" } ).update( { $set: { status: \"I\", points: \"0\" } } );\nbulk.find( { item: null } ).update( { $set: { item: \"TBD\" } } );\nbulk.execute();"
     }
 ];
 var bulkFindOpTemplates = [];
@@ -877,28 +924,24 @@ var mongoFindTemplates = [
         snippet: "find({$2})",
         comment: 'Selects documents in a collection and returns a cursor to the selected documents.',
         example: "db.products.find( { qty: { $gte: 25, $lt: 35 } })",
-        score: 1000
     },
     {
         caption: "findProjection",
         snippet: "find({$2}, {$3: 0, name: 1})",
         comment: 'The projection parameter specifies which fields to return. corresponds to the SELECT statement in SQL. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
         example: "db.products.find( { qty: { $gte: 25, $lt: 35 } }, { _id: 0, qty: 1 } )",
-        score: 100
     },
     {
         caption: "findForEach",
         snippet: "find({$2},{$3name:1})\n   .sort({name:1})\n   .forEach((it)=>{\n      $4\n      return it;\n})",
         comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
         example: "db.products.find({},{fname:1})\n   .sort({name:1})\n   .forEach((it)=>{\n      it.fullName=it.fname+\" \"+it.lname;\n      return it;\n})",
-        score: 90
     },
     {
         caption: "findSortLimit",
         snippet: "find({$2}).sort({ $3name: 1 }).limit(5)",
         comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
         example: "db.bios.find().sort({name:1}).limit(5)",
-        score: 90
     },
 ];
 var mongoFindOneTemplates = [
@@ -907,14 +950,12 @@ var mongoFindOneTemplates = [
         snippet: "findOne({$2})",
         comment: 'Returns one document that satisfies the specified query criteria. ',
         example: "db.bios.findOne({name:/name/})",
-        score: 100
     },
     {
         caption: "findOneProjection",
         snippet: "findOne({$2},{name:1})",
         comment: 'The projection parameter specifies which fields to return. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
         example: "db.bios.findOne(\n    { },\n    { name: 1, contribs: 1 }\n)",
-        score: 10
     },
 ];
 var mongoUpdateTemplates = [
@@ -924,7 +965,6 @@ var mongoUpdateTemplates = [
         snippet: "update({$2},{\\$set:{$3}})",
         comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } }\n)",
-        score: 1000
     },
     {
         caption: "update$set",
@@ -932,7 +972,6 @@ var mongoUpdateTemplates = [
         comment: 'Modifies an existing document or documents in a collection. The $set operator replaces the value of a field with the specified value.',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } }\n)",
         meta: "template",
-        score: 100,
     },
     {
         caption: "update$inc",
@@ -940,7 +979,6 @@ var mongoUpdateTemplates = [
         comment: 'Modifies an existing document or documents in a collection. The $inc operator increments a field by a specified value.',
         example: "db.products.update(\n   { sku: \"abc123\" },\n   { $inc: { quantity: -2, \"metrics.orders\": 1 } }\n)",
         meta: "template",
-        score: 90,
     },
     {
         caption: "update$push",
@@ -948,7 +986,6 @@ var mongoUpdateTemplates = [
         comment: 'Modifies an existing document or documents in a collection. $push adds the array field with the value as its element.',
         example: "db.students.update(\n   { _id: 1 },\n   { $push: { scores: 89 } }\n)",
         meta: "template",
-        score: 90,
     },
     {
         caption: "update$addToSet",
@@ -956,7 +993,6 @@ var mongoUpdateTemplates = [
         comment: 'Modifies an existing document or documents in a collection. The $addToSet operator adds a value to an array unless the value is already present, in which case $addToSet does nothing to that array.',
         example: "db.test.update(\n   { _id: 1 },\n   { $addToSet: {letters: [ \"c\", \"d\" ] } }\n)",
         meta: "template",
-        score: 90,
     },
     {
         caption: "upsert",
@@ -964,7 +1000,6 @@ var mongoUpdateTemplates = [
         comment: ' An upsert updates the documentif found or inserts it if not. ',
         example: "db.products.update(\n   { _id: 100 },\n   { $set: { quantity: 500 } },\n   { upsert: true}\n)",
         meta: "template",
-        score: 90,
     },
     {
         caption: "updateWithMultiOption",
@@ -972,7 +1007,6 @@ var mongoUpdateTemplates = [
         comment: 'update with multi option',
         example: "db.products.update(\n   {_id: 100},\n   {$set: {quantity: 500}},\n   {multi: true}\n)",
         meta: "template",
-        score: 90,
     },
     {
         caption: "updateWithUpsertMulti",
@@ -980,7 +1014,6 @@ var mongoUpdateTemplates = [
         comment: 'Combine the upsert and multi Options',
         example: "db.books.update(\n   { item: \"EFG222\" },\n   { $set: { reorder: false, tags: [ \"literature\", \"translated\" ] } },\n   { upsert: true, multi: true }\n)",
         meta: "template",
-        score: 90,
     },
 ];
 var mongoFindAndModifyTemplates = [
@@ -989,14 +1022,12 @@ var mongoFindAndModifyTemplates = [
         snippet: "findAndModify({query: {$2},sort: {$3}, update: {$4}, new: true})",
         comment: 'Modifies and returns a single document. By default, the returned document does not include the modifications made on the update. To return the document with the modifications made on the update, use the new option.',
         example: "db.people.findAndModify({\n    query: { name: \"Andy\" },\n    sort: { rating: 1 },\n    update: { $inc: { score: 1 } },\n    new: true\n})",
-        score: 100
     },
     {
         caption: "findAndModifySortRemove",
         snippet: "findAndModify({query: {$2}, sort: {$3}, remove: true})",
         comment: 'Modifies and returns a single document. By default, the returned document does not include the modifications made on the update. To return the document with the modifications made on the update, use the new option.',
         example: "db.people.findAndModify(\n   {\n     query: { state: \"active\" },\n     sort: { rating: 1 },\n     remove: true\n   }\n)",
-        score: 90
     },
 ];
 var mongoDistinctTemplates = [
@@ -1005,14 +1036,12 @@ var mongoDistinctTemplates = [
         snippet: "distinct(\"$2\")",
         comment: 'Finds the distinct values for a specified field across a single collection and returns the results in an array.',
         example: "db.inventory.distinct( \"item.sku\", {dept: \"A\" })",
-        score: 100
     },
     {
         caption: "distinctWithQuerySort",
         snippet: "distinct(\"$2\", {$3}).sort((a,b)=>compare(b,a))",
         comment: 'distinct with query and sort.',
         example: "db.inventory.distinct( \"item.sku\", {dept: \"A\" })\n    .sort((a,b)=>compare(b,a)) //desc",
-        score: 10
     }
 ];
 var mongoMapReduceTemplates = [
@@ -1021,7 +1050,6 @@ var mongoMapReduceTemplates = [
         snippet: "mapReduce(\n      function () {emit(this.$2cust_id, this.amount)}, //mapFunction\n      (key, values)=>{return Array.sum(values)},//reduceFunction\n      {\n          query:{ status: \"A\" },\n          out: { \"inline\":1 }\n      })",
         comment: 'The mapReduce command allows you to run map-reduce aggregation operations over a collection. ',
         example: "db.orders.mapReduce(\n      function() {emit(this.cust_id, this.amount)}, //mapFunction\n      (key, values)=>{return Array.sum(values)},//reduceFunction\n      {\n          query:{ status: \"A\" },\n           out: { \"inline\":1 }\n      })",
-        score: 100
     }
 ];
 var mongoRemoveTemplates = [
@@ -1030,14 +1058,12 @@ var mongoRemoveTemplates = [
         snippet: "remove({$2})",
         comment: 'Removes documents from a collection.',
         example: "db.products.remove({qty:{$gt: 20}})",
-        score: 100
     },
     {
         caption: "removeOne",
         snippet: "remove({$2},{justOne: true}} )",
         comment: 'Removes documents from a collection. The "justone" option to limit the deletion to just one document',
         example: "db.products.remove({qty:{$gt: 20}},{justOne: true}})",
-        score: 100
     }
 ];
 var mongoCreateIndexTemplates = [
@@ -1046,49 +1072,42 @@ var mongoCreateIndexTemplates = [
         snippet: "createIndex({$2: 1})",
         comment: 'Creates indexes on collections.',
         example: "db.collection.createIndex( { orderDate: 1 } )",
-        score: 100
     },
     {
         caption: "createIndexWithTTL",
         snippet: "createIndex({$2: 1}, {expireAfterSeconds: ${3:60*60} })",
         comment: 'To create a TTL index, use the db.collection.createIndex() method with the expireAfterSeconds option on a field whose value is either a date or an array that contains date values.',
         example: "db.eventlog.createIndex( { \"lastModifiedDate\": 1 }, { expireAfterSeconds: 3600 } )",
-        score: 10
     },
     {
         caption: "createIndexWithOptions",
         snippet: "createIndex(\n             {$2: 1},\n             {\n              background:false,//Specify true to build in the background.\n              unique:false, //Specify true to create a unique index. A unique index causes MongoDB to reject all documents that contain a duplicate value for the indexed field.\n              sparse:false, //If true, the index only references documents with the specified field.\n              //expireAfterSeconds:0, //Specifies a value, in seconds, as a TTL to control how long MongoDB retains documents in this collection.\n              //storageEngine:{WiredTiger: <options> }\n             }\n)",
         comment: "Creates indexes on collections. The options document contains a set of options that controls the creation of the index. Different index types can have additional options specific for that type.",
         example: "db.eventlog.createIndex( { \"lastModifiedDate\": 1 }, { background:true, unique:false, sparse:true } )",
-        score: 10
     },
     {
         caption: "createIndexWithTextOptions",
         snippet: "createIndex({ \n    \"\\$**\" : \"text\", //$** to index all fields that contain string content\n    \"name\" : \"text\",\n    \"content\": \"text\"\n}, { \n    \"name\" : \"indexName\", \n    \"default_language\" : \"english\", \n    //\"language_override\" : \"lang\", \n    \"weights\" : {\n        \"name\" : 1,\n        \"content\": 2\n    }\n})",
         comment: "You can create a text index on the field or fields whose value is a string or an array of string elements. When creating a text index on multiple fields, you can specify the individual fields or you can use wildcard specifier ($**)",
         example: "createIndex({ \n    \"$**\" : \"text\",  \n    \"name\" : \"text\",\n    \"content\": \"text\"\n}, { \n    \"weights\" : {\n        \"name\" : 1,\n        \"content\": 2\n    }\n    //\"name\" : \"indexName\", \n    //\"default_language\" : \"english\", \n    //\"language_override\" : \"lang\", \n    //\"textIndexVersion\": 2  //In MongoDB 2.6, the default version is 2. MongoDB 2.4 can only support version 1.\n})",
-        score: 10
     },
     {
         caption: "createIndexGeo2dsphere",
         snippet: "createIndex( \n      { \"${3:locationField}\" : \"2dsphere\" },\n      { \"2dsphereIndexVersion\" : 2 }//In MongoDB 2.6, the default version is 2. MongoDB 2.4 can only support version 1.             \n)",
         comment: 'To create a geospatial index for GeoJSON-formatted data.specify the location field as the index key and specify the string literal "2dsphere" as the value',
         example: "db.collection.createIndex( { \"loc\" : \"2dsphere\" } )",
-        score: 10
     },
     {
         caption: "createIndexGeo2dIndex",
         snippet: "createIndex( \n      { \"${3:locationField}\" : \"2d\" },\n      { bits: 26, min : -180 , max : 180 }\n)",
         comment: 'o build a geospatial 2d index',
         example: "db.collection.createIndex( { \"loc\" : \"2d\" } ,\n                           { bits: 26, min : -180 , max : 180 } )",
-        score: 10
     },
     {
         caption: "createIndexGeoHaystack",
         snippet: "createIndex( \n      { \"${3:locationField}\" : \"geoHaystack\" } ,\n      { bucketSize : 1 } \n)",
         comment: 'o build a geospatial 2d index',
         example: "db.collection.createIndex( \n      { pos : \"geoHaystack\", type : 1 } ,\n      { bucketSize : 1 } \n)",
-        score: 10
     },
 ];
 var mongoInsertTemplates = [
@@ -1097,37 +1116,39 @@ var mongoInsertTemplates = [
         snippet: "insert([{$2}])",
         comment: 'Inserts a document or documents into a collection.',
         example: "db.products.insert( { item: \"card\", qty: 15 } )",
-        score: 100
     },
     {
         caption: "insertMultipleDocuments",
         snippet: "insert([{$2}])",
         comment: 'insert Multiple Documents',
         example: "db.products.insert(\n   [\n     { _id: 11, item: \"pencil\", qty: 50, type: \"no.2\" },\n     { item: \"pen\", qty: 20 },\n     { item: \"eraser\", qty: 25 }\n   ]\n)",
-        score: 100
     }
 ];
+var mongoSaveTemplates = [
+    {
+        caption: "save",
+        snippet: "save({$2})",
+        comment: 'Updates an existing document or inserts a new document, depending on its document parameter.',
+        example: "db.products.save( { item: \"book\", qty: 40 } )",
+    }];
 var mongoAggregateTemplates = [
     {
         caption: "aggregate",
         snippet: "aggregate(\n   [\n     { \\$match: { \"$2\" } },\n     { \\$group: { _id: \"\\$groupByField\", total: { \\$sum: \"$amount\" } } },\n     { \\$sort: { total: -1 } }\n   ]\n)",
         comment: "Aggregation operation: Group by and Calculate a Sum.",
         example: "db.orders.aggregate([\n      { $match: { status: \"A\" } },\n      { $group: { _id: \"$cust_id\", total: { $sum: \"$amount\" } } },\n      { $sort: { total: -1 } }\n])",
-        score: 100
     },
     {
         caption: "aggregatePreformACount",
         snippet: "aggregate(\n   [\n      { \\$match: { \"$2\" } },\n      { \\$group: { _id: null, count: { \\$sum: 1 } } }\n   ]\n)",
         comment: "compute a count of the documents.On a sharded cluster, db.collection.count() can result in an inaccurate count if orphaned documents exist or if a chunk migration is in progress.\nTo avoid these situations, on a sharded cluster, use the $group stage of the db.collection.aggregate() method to $sum the documents.",
         example: "db.articles.aggregate([\n      { $match : { score : { $gt : 70, $lte : 90 } } },\n      { $group: { _id: null, count: { $sum: 1 } } }\n]);",
-        score: 10
     },
     {
         caption: "SqlToAggregationCount",
         snippet: "aggregate([\n   {\n     \\$group: {\n        _id: null,\n        count: { \\$sum: 1 }\n     }\n   }\n])",
         comment: "SELECT COUNT(*) AS count FROM orders",
         example: "db.orders.aggregate( [\n   {\n     $group: {\n        _id: null,\n        count: { $sum: 1 }\n     }\n   }\n] )",
-        score: 10,
         docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
     },
     {
@@ -1135,7 +1156,6 @@ var mongoAggregateTemplates = [
         snippet: "aggregate([\n   {\n     \\$group: {\n        _id: null,\n        total: { \\$sum: \"\\$price\" }\n     }\n   }\n])",
         comment: "SELECT SUM(price) AS total FROM orders",
         example: "db.orders.aggregate( [\n   {\n     $group: {\n        _id: null,\n        total: { $sum: \"$price\" }\n     }\n   }\n] )",
-        score: 10,
         docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
     },
     {
@@ -1143,7 +1163,6 @@ var mongoAggregateTemplates = [
         snippet: "aggregate([\n   {\n     \\$group: {\n        _id: \"\\$cust_id\",\n        total: { \\$sum: \"\\$price\" }\n     }\n   }\n])",
         comment: "SELECT cust_id,\n       SUM(price) AS total\nFROM orders\nGROUP BY cust_id",
         example: "db.orders.aggregate( [\n   {\n     $group: {\n        _id: \"$cust_id\",\n        total: { $sum: \"$price\" }\n     }\n   }\n] )",
-        score: 10,
         docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
     },
     {
@@ -1151,7 +1170,6 @@ var mongoAggregateTemplates = [
         snippet: "aggregate([\n   {\n     \\$group: {\n        _id: \"\\$cust_id\",\n        total: { \\$sum: \"\\$price\" }\n     }\n   },\n   { \\$sort: { total: 1 } }\n])",
         comment: "SELECT cust_id,\n       SUM(price) AS total\nFROM orders\nGROUP BY cust_id\nORDER BY total",
         example: "db.orders.aggregate( [\n   {\n     $group: {\n        _id: \"$cust_id\",\n        total: { $sum: \"$price\" }\n     }\n   },\n   { $sort: { total: 1 } }\n] )",
-        score: 10,
         docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
     },
     {
@@ -1159,7 +1177,6 @@ var mongoAggregateTemplates = [
         snippet: "aggregate( [\n   {\n     \\$group: {\n        _id: {\n           cust_id: \"\\$cust_id\",\n           ord_date: {\n               month: { \\$month: \"\\$ord_date\" },\n               day: { \\$dayOfMonth: \"\\$ord_date\" },\n               year: { \\$year: \"\\$ord_date\"}\n           }\n        },\n        total: { \\$sum: \"\\$price\" }\n     }\n   }\n] )",
         comment: "SELECT cust_id,\n       ord_date,\n       SUM(price) AS total\nFROM orders\nGROUP BY cust_id,\n         ord_date",
         example: "db.orders.aggregate( [\n   {\n     $group: {\n        _id: {\n           cust_id: \"$cust_id\",\n           ord_date: {\n               month: { $month: \"$ord_date\" },\n               day: { $dayOfMonth: \"$ord_date\" },\n               year: { $year: \"$ord_date\"}\n           }\n        },\n        total: { $sum: \"$price\" }\n     }\n   }\n] )",
-        score: 10,
         docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
     },
     {
@@ -1167,7 +1184,6 @@ var mongoAggregateTemplates = [
         snippet: "aggregate([\n   {\n     \\$group: {\n        _id: \"\\$cust_id\",\n        count: { \\$sum: 1 }\n     }\n   },\n   { \\$match: { count: { \\$gt: 1 } } }\n])",
         comment: "SELECT cust_id,\n       count(*)\nFROM orders\nGROUP BY cust_id\nHAVING count(*) > 1",
         example: "db.orders.aggregate( [\n   {\n     $group: {\n        _id: \"$cust_id\",\n        count: { $sum: 1 }\n     }\n   },\n   { $match: { count: { $gt: 1 } } }\n] )",
-        score: 10,
         docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
     },
 ];
@@ -1177,7 +1193,6 @@ var mongoStatsTemplates = [
         snippet: "stats(1024);",
         comment: "Returns statistics about the collection. Specify a scale value of 1024 to display kilobytes rather than bytes.",
         example: "db.orders.stats(1024)",
-        score: 100
     },
 ];
 var mongoCodeTemplates = [];
@@ -1198,7 +1213,6 @@ var attachDateRangeToMongoFindTemlates = function () {
             snippet: "find({ ${2:dateField}: " + it.snippet + " })",
             comment: 'Selects documents in a collection and returns a cursor to the selected documents',
             example: "db.products.find( { at: " + it.example + "} )",
-            score: 100
         });
     });
 };
@@ -1208,6 +1222,7 @@ var initMongoCodeTemplates = function () {
     addMongoCodeTemplates("findOne", mongoFindOneTemplates);
     addMongoCodeTemplates("findAndModify", mongoFindAndModifyTemplates);
     addMongoCodeTemplates("insert", mongoInsertTemplates);
+    addMongoCodeTemplates("save", mongoSaveTemplates);
     addMongoCodeTemplates("update", mongoUpdateTemplates);
     addMongoCodeTemplates("distinct", mongoDistinctTemplates);
     addMongoCodeTemplates("remove", mongoRemoveTemplates);
@@ -1240,6 +1255,7 @@ exports.getShellCmdCompleter = function (tsServ, scriptFileName) {
             var mongoShellCommands = require('./mongoShellCommands');
             mongoShellCommands.map(function (it) {
                 it.isMongoShellCommand = true;
+                it.score = it.score || 1;
                 return it;
             });
             return callback(null, mongoShellCommands);
@@ -1284,14 +1300,13 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     return fieldsFetcher('');
                 }
             };
-            var score = 0;
             var fields = getFields().map(function (it) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 return {
                     caption: fieldValue,
                     value: fieldValue,
                     meta: it.collection,
-                    score: score
+                    score: it["score"] || 1,
                 };
             });
             callback(null, fields);
@@ -1305,6 +1320,7 @@ exports.operatorsCompleter = {
             var mongoOperators = require('./mongoOperators');
             mongoOperators.map(function (it) {
                 it.isMongoOperator = true;
+                it.score = it["score"] || 1;
                 return it;
             });
             return callback(null, mongoOperators);
@@ -1382,6 +1398,10 @@ exports.getCollectionMethodsCompleter = function (tsServ, scriptFileName, helpUr
                 if (it)
                     concatTmpls = concatTmpls.concat(it);
             });
+            concatTmpls.map(function (it) {
+                it.score = it.score || 1;
+                return it;
+            });
             callback(null, concatTmpls);
         },
         getDocTooltip: function (item) {
@@ -1405,6 +1425,7 @@ exports.dateRangeCompleter = {
         var templates = require("./mongoDateRangeSnippets").map(function (it) {
             var item = _.clone(it);
             item.isDateRangeCompleter = true;
+            item.score = item["score"] || 1;
             return item;
         });
         return callback(null, templates);
@@ -1423,7 +1444,6 @@ var mongoForEachTemplates = [
         snippet: "forEach((it)=> { \n      $1\n });",
         comment: 'Iterates the cursor to apply a JavaScript function to each document from the cursor.',
         example: "db.users.find().forEach( function(myDoc) { print( \"user: \" + myDoc.name ); } );",
-        score: 1000
     }
 ];
 var mongoMapTemplates = [
@@ -1432,7 +1452,6 @@ var mongoMapTemplates = [
         snippet: "map((it)=> { \n      $1\n      return it;\n });",
         comment: 'Applies function to each document visited by the cursor and collects the return values from successive application into an array.',
         example: "db.users.find().map( function(u) { return u.name; } );",
-        score: 1000
     },
 ];
 var mongoLimitTemplates = [
@@ -1441,7 +1460,6 @@ var mongoLimitTemplates = [
         snippet: "limit(${2:5})",
         comment: 'Use the limit() method on a cursor to specify the maximum number of documents the cursor will return. limit() is analogous to the LIMIT statement in a SQL database.',
         example: "db.orders.find().limit(5)",
-        score: 1000
     },
 ];
 var mongoSortTemplates = [
@@ -1450,42 +1468,36 @@ var mongoSortTemplates = [
         snippet: "sort({ ${2:sortField}:${3:-1} })",
         comment: 'Specifies the order in which the query returns matching documents.',
         example: "db.orders.find().sort({ amount: -1 })",
-        score: 1000
     },
     {
         caption: "sortById",
         snippet: "sort({ _id:${2:1} })",
         comment: 'Sort by Id',
         example: "db.orders.find().sort({ _id: -1 })",
-        score: 100
     },
     {
         caption: "sortAsInserted",
         snippet: "sort({ \\$natural:${2:1} })",
         comment: 'Specifies the order in which the query returns matching documents. Use $natural operator to return documents in the order they exist on disk',
         example: "db.orders.find().sort({ $natural: 1 })",
-        score: 100
     },
     {
         caption: "sortAsInsertedDesc",
         snippet: "sort({ \\$natural:${2:-1} })",
         comment: 'Specifies the order in which the query returns matching documents. Use $natural operator to return documents in the reversed order they exist on disk',
         example: "db.orders.find().sort({ $natural: -1 })",
-        score: 100
     },
     {
         caption: "first",
         snippet: "sort({ \\$natural:1 }).limit(${2:1})",
         comment: 'Return first N records. Use $natural operator to return documents in the order they exist on disk',
         example: "db.orders.find().sort({ $natural: 1 }).limit(n)",
-        score: 100
     },
     {
         caption: "last",
         snippet: "sort({ \\$natural:-1 }).limit(${2:1})",
         comment: 'Return last N records. Use $natural operator to return documents in the reversed order they exist on disk',
         example: "db.orders.find().sort({ $natural: -1 }).limit(n)",
-        score: 100
     },
 ];
 var cursorTemplates = [];
@@ -1515,7 +1527,6 @@ var mongoCreateCollectionTemplates = [
         snippet: "createCollection(\"${1:name}\", { capped : true, size : 512 * 1024, max : 1000 } )",
         comment: 'Creates a new collection explicitly. set capped option is true',
         example: "db.createCollection(\"log\", { capped : true, size : 5242880, max : 5000 } )",
-        score: 1000
     }
 ];
 var mongoStatsTemplates = [
@@ -1525,7 +1536,6 @@ var mongoStatsTemplates = [
         //`stats(1024);`,
         comment: 'Returns statistics that reflect the use state of a single database.',
         example: "db.stats(1024)",
-        score: 1000
     }
 ];
 var mongoCreateUserTemplates = [
@@ -1534,7 +1544,6 @@ var mongoCreateUserTemplates = [
         snippet: "createUser(\n   {\n     user: \"$2\",\n     pwd: \"$3\",\n     roles: [ \"read\" ] //read|readWrite|dbAdmin|dbOwner|userAdmin ...\n   }\n)",
         comment: 'Creates a new user for the database where the method runs. db.createUser() returns a duplicate user error if the user already exists on the database.',
         example: "use products\ndb.createUser({\n        \"user\" : \"accountAdmin01\",\n        \"pwd\": \"cleartext password\",\n        \"customData\" : { employeeId: 12345 },\n        \"roles\" : [ { role: \"clusterAdmin\", db: \"admin\" },\n                    { role: \"readAnyDatabase\", db: \"admin\" },\n                    \"readWrite\"\n                  ] \n      },\n      { w: \"majority\" , wtimeout: 5000 } )",
-        score: 1000
     }
 ];
 var mongoCurrentOpTemplates = [
@@ -2002,14 +2011,12 @@ var mongoInitializeTemplates = [
         snippet: "initiate();",
         comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
         example: "rs.initiate()",
-        score: 100
     },
     {
         caption: "initiateWithSampleConfig",
         snippet: "initiate(" + configSample + ");",
         comment: 'Initiates a replica set. Optionally takes a configuration argument in the form of a document that holds the configuration of a replica set.',
         example: "rs.initiate(" + configSample + ")",
-        score: 10
     }
 ];
 var replTemplates = [];
@@ -2252,6 +2259,7 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
             return (kind === "method") || (kind === "function");
         };
         var completions = completionsInfo.entries.map(function (it) {
+            //console.log("completionsInfo",it); 
             return {
                 caption: it.name,
                 snippet: it.name + (isMethodOrFunction(it.kind) ? "($2)" : ""),
@@ -2277,6 +2285,25 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
             if (!prefix) {
                 session.__firstCompletionEntry = completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption);
             }
+            ;
+            var isMongoDatabaseMethod = (function () {
+                if (!session.__firstCompletionEntry)
+                    return;
+                return session.__firstCompletionEntry.type.indexOf("(method) mongo.IDatabase.") === 0;
+            })();
+            if (isMongoDatabaseMethod) {
+                completionEntries = completionEntries.map(function (it) {
+                    if (it.meta === "property") {
+                        it.score = 10;
+                        it.meta = "collection";
+                    }
+                    else {
+                        it.score = 1;
+                    }
+                    return it;
+                });
+            }
+            //console.log(session.__firstCompletionEntry);
             // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
             callback(null, completionEntries);
         },
@@ -2556,8 +2583,8 @@ var TypescriptService = (function () {
     TypescriptService.prototype.getCompletionsInfoByPos = function (brief, file, pos) {
         var _this = this;
         var startTime = Date.now();
-        //console.log("getCompletionsInfoByPos", pos);
         var info = this.ls.getCompletionsAtPosition(file, pos) || null;
+        //console.log("getCompletionsInfoByPos", info);
         if (info) {
             // fill in completion entry details, unless briefness requested
             !brief && (info.entries = info.entries.map(function (e) {

@@ -20,7 +20,7 @@
           //    console.log(tsEditor.typescriptServ.ts.fileCache.getScriptInfo(lodashTypingFile).content);
           // }
           if (collectionName)
-            console.log("fieldFetcher",collectionName);
+              console.log("fieldFetcher",collectionName);
           
           return [{
                       fieldName: '_id',

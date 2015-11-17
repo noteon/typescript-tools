@@ -137,6 +137,60 @@ export var highlightTypeCommentAndTip = (type, docComment, tipHtml: string) => {
     return highlightTypeAndComment({ type: type, docComment: docComment }, true) + tipHtml;
 }
 
+const collectionMethods=`aggregate
+count
+copyTo
+createIndex
+dataSize
+distinct
+drop
+dropIndex
+dropIndexes
+ensureIndex
+explain
+find
+findAndModify
+findOne
+getIndexes
+getShardDistribution
+getShardVersion
+group
+insert
+isCapped
+mapReduce
+reIndex
+remove
+renameCollection
+save
+stats
+storageSize
+totalSize
+totalIndexSize
+update
+validate`
+
+//"db.db.test.test1.insert(".match(/\bdb\.(.+)\.(find|insert)\(/)
+// function getDBDotCollectionNamesFromText(text:string){
+//   const REG=`\\bdb\.([^\\(\\)]+)\\.(${collectionMethods.split("\n").join("|")})(\\()*`;
+  
+//   let gReg=new RegExp(REG,'g');
+//   let matches=text.match(gReg);
+  
+//   let cols=[];
+//   if (!_.isEmpty(matches)){
+//     matches.forEach((it)=>{
+//       let colsMatches=it.match(new RegExp(REG));
+//       if (colsMatches && colsMatches[1]){
+//         cols.push(colsMatches[1].replace(/\s|\n/g,""));
+//       }
+//     })
+//   }
+//   return _.compact(cols);
+  
+//   //"db.db.\ntest.test1.insert()db.db.test.test1.insert()db.db.test.test1.insert()".match(/\bdb\.([^\(\)]+)\.(find|insert)\(/g)
+  
+// }
+
 export var getCollectionName = (currentLine: string) => {
   let colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);
   if (colMatches && colMatches[1])

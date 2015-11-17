@@ -6,7 +6,7 @@
     
     var appendedMethod=false
 
-    var tsEditor=aceTs.setupAceEditor({
+    window["editor"]=aceTs.setupAceEditor({
         tsFilePath:"/tmp/guid.ts",
         tsTypings:[__dirname+"/lodash.d.ts",__dirname+"/mongo-shell.d.ts"],
         editorTheme:"monokai",
@@ -75,7 +75,7 @@
     jsEditor.$blockScrolling = Infinity;
 
     setInterval(function(){
-      jsEditor.getSession().setValue(tsEditor.typescriptServ.transpile(function(src){
+      jsEditor.getSession().setValue(window["editor"].typescriptServ.transpile(function(src){
         src=src+"\n//// transpiled from typescript";
         return src
         

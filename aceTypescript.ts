@@ -255,6 +255,8 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         format: () => {
             var newText = tsServ.format(fileName);
             editor.setValue(newText);
+            editor.selection.clearSelection();
+            editor.gotoLine(1);
 
             return newText;
         },
@@ -262,6 +264,11 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         appendScriptContent: (scriptFile, lines: string[]) => {
             return tsServ.appendScriptContent(scriptFile, lines);
         },
+        
+        updateScript: (scriptFile, content:string) => {
+            return tsServ.updateScript(scriptFile, content);
+        },
+        
         reloadDocument,
         
         getOriginPos({row,column}){//0-based

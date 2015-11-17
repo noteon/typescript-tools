@@ -35,6 +35,7 @@ export var getShellCmdCompleter = (tsServ: ts.TypescriptService, scriptFileName:
 
             mongoShellCommands.map((it) => {
                 it.isMongoShellCommand = true;
+                it.score=it.score || 1;
                 return it
             });
             
@@ -101,7 +102,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                     caption: fieldValue,
                     value: fieldValue,
                     meta: it.collection,
-                    score: it["score"]||0,
+                    score: it["score"]||1,
                 }
             });
             
@@ -120,6 +121,7 @@ export var operatorsCompleter = {
 
             mongoOperators.map((it) => {
                 it.isMongoOperator = true;
+                it.score=it["score"]||1;
                 return it
             });
 
@@ -219,7 +221,12 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
             ].forEach((it) => {
                 if (it)
                     concatTmpls = concatTmpls.concat(it);
-            })     
+            });
+            
+            concatTmpls.map((it)=>{
+                it.score=it.score||1;
+                return it;
+            })
                 
             callback(null, concatTmpls)
         },
@@ -250,6 +257,7 @@ export var dateRangeCompleter = {
         let templates = require("./mongoDateRangeSnippets").map((it)=>{
             let item=_.clone(it)
             item.isDateRangeCompleter=true;
+            item.score=item["score"]||1;
             return item;
         });
 

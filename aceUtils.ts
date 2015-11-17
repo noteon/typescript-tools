@@ -282,7 +282,7 @@ export function compareCompletionItem(filterText, a,b){
         }
         let aWeight=metaWeight[a.meta]|| defaultWeight;
         let bWeight=metaWeight[b.meta]|| defaultWeight;
-        return (aWeight-bWeight)?1:-1;
+        return (aWeight-bWeight)? 1:-1;
       }
       
       var compare = function(a, b) {

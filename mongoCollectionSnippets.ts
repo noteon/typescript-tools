@@ -672,7 +672,7 @@ let addMongoCodeTemplates = (mongoMethod, templates: any[]) => {
             it.meta = "code template"
             it.isMongoTemplateCommand = true;
             it.methodDotName = "mongo.ICollection." + mongoMethod;  //for help url
-          
+            
             return it;
       })
 

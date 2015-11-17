@@ -94,9 +94,11 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             if (isMongoDatabaseMethod){
                 completionEntries=completionEntries.map((it)=>{
                     if (it.meta==="property"){
-                        it.score=1;
+                        it.score=10;
                         it.meta="collection";
                         //console.log("set top", it);
+                    }else{
+                        it.score=1;
                     }
                     return it;
                 });

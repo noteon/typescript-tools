@@ -8,7 +8,6 @@ var mongoFindTemplates = [
             comment: 'Selects documents in a collection and returns a cursor to the selected documents.',
             example:
             `db.products.find( { qty: { $gte: 25, $lt: 35 } })`,
-            score: 1000
       },
 
       {
@@ -18,7 +17,6 @@ var mongoFindTemplates = [
             comment: 'The projection parameter specifies which fields to return. corresponds to the SELECT statement in SQL. The parameter contains either include or exclude specifications, not both, unless the exclude is for the _id field.',
             example:
             `db.products.find( { qty: { $gte: 25, $lt: 35 } }, { _id: 0, qty: 1 } )`,
-            score: 100
       },
 
       {
@@ -38,7 +36,6 @@ var mongoFindTemplates = [
       it.fullName=it.fname+" "+it.lname;
       return it;
 })`,
-            score: 90
       },
 
       {
@@ -48,7 +45,6 @@ var mongoFindTemplates = [
             comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
             example:
             `db.bios.find().sort({name:1}).limit(5)`,
-            score: 90
       },
 
 ];
@@ -61,7 +57,6 @@ var mongoFindOneTemplates = [
             comment: 'Returns one document that satisfies the specified query criteria. ',
             example:
             `db.bios.findOne({name:/name/})`,
-            score: 100
       },
 
       {
@@ -74,7 +69,6 @@ var mongoFindOneTemplates = [
     { },
     { name: 1, contribs: 1 }
 )`,
-            score: 10
       },
 ]
 
@@ -91,7 +85,6 @@ var mongoUpdateTemplates = [
    { _id: 100 },
    { $set: { quantity: 500 } }
 )`,
-            score: 1000
       },
 
       {
@@ -105,7 +98,6 @@ var mongoUpdateTemplates = [
    { $set: { quantity: 500 } }
 )`,
             meta: "template",
-            score: 100,
       },
 
 
@@ -120,7 +112,6 @@ var mongoUpdateTemplates = [
    { $inc: { quantity: -2, "metrics.orders": 1 } }
 )`,
             meta: "template",
-            score: 90,
       },
 
 
@@ -135,7 +126,6 @@ var mongoUpdateTemplates = [
    { $push: { scores: 89 } }
 )`,
             meta: "template",
-            score: 90,
       },
 
 
@@ -150,7 +140,6 @@ var mongoUpdateTemplates = [
    { $addToSet: {letters: [ "c", "d" ] } }
 )`,
             meta: "template",
-            score: 90,
       },
 
 
@@ -168,7 +157,6 @@ var mongoUpdateTemplates = [
 )`,
 
             meta: "template",
-            score: 90,
       },
 
       {
@@ -184,7 +172,6 @@ var mongoUpdateTemplates = [
 )`,
 
             meta: "template",
-            score: 90,
       },
 
       {
@@ -200,7 +187,6 @@ var mongoUpdateTemplates = [
 )`,
 
             meta: "template",
-            score: 90,
       },
 ];
 
@@ -217,7 +203,6 @@ var mongoFindAndModifyTemplates = [
     update: { $inc: { score: 1 } },
     new: true
 })`,
-            score: 100
       },
       {
             caption: "findAndModifySortRemove",
@@ -232,7 +217,6 @@ var mongoFindAndModifyTemplates = [
      remove: true
    }
 )`,
-            score: 90
       },
 ]
 
@@ -244,7 +228,6 @@ var mongoDistinctTemplates = [
             comment: 'Finds the distinct values for a specified field across a single collection and returns the results in an array.',
             example:
             `db.inventory.distinct( "item.sku", {dept: "A" })`,
-            score: 100
       },
 
       {
@@ -255,7 +238,6 @@ var mongoDistinctTemplates = [
             example:
             `db.inventory.distinct( "item.sku", {dept: "A" })
     .sort((a,b)=>compare(b,a)) //desc`,
-            score: 10
       }
 ]
 
@@ -279,7 +261,6 @@ var mongoMapReduceTemplates = [
           query:{ status: "A" },
            out: { "inline":1 }
       })`,
-            score: 100
       }
 ]
 
@@ -291,7 +272,6 @@ var mongoRemoveTemplates = [
             comment: 'Removes documents from a collection.',
             example:
             `db.products.remove({qty:{$gt: 20}})`,
-            score: 100
       },
       {
             caption: "removeOne",
@@ -300,7 +280,6 @@ var mongoRemoveTemplates = [
             comment: 'Removes documents from a collection. The "justone" option to limit the deletion to just one document',
             example:
             `db.products.remove({qty:{$gt: 20}},{justOne: true}})`,
-            score: 100
       }
 ]
 
@@ -312,7 +291,6 @@ var mongoCreateIndexTemplates = [
             comment: 'Creates indexes on collections.',
             example:
             `db.collection.createIndex( { orderDate: 1 } )`,
-            score: 100
       },
 
       {
@@ -322,7 +300,6 @@ var mongoCreateIndexTemplates = [
             comment: 'To create a TTL index, use the db.collection.createIndex() method with the expireAfterSeconds option on a field whose value is either a date or an array that contains date values.',
             example:
             `db.eventlog.createIndex( { "lastModifiedDate": 1 }, { expireAfterSeconds: 3600 } )`,
-            score: 10
       },
 
       {
@@ -341,7 +318,6 @@ var mongoCreateIndexTemplates = [
             comment: `Creates indexes on collections. The options document contains a set of options that controls the creation of the index. Different index types can have additional options specific for that type.`,
             example:
             `db.eventlog.createIndex( { "lastModifiedDate": 1 }, { background:true, unique:false, sparse:true } )`,
-            score: 10
       },
       
       
@@ -377,7 +353,6 @@ var mongoCreateIndexTemplates = [
     //"language_override" : "lang", 
     //"textIndexVersion": 2  //In MongoDB 2.6, the default version is 2. MongoDB 2.4 can only support version 1.
 })`,
-            score: 10
       },
       
       {
@@ -390,7 +365,6 @@ var mongoCreateIndexTemplates = [
             comment: 'To create a geospatial index for GeoJSON-formatted data.specify the location field as the index key and specify the string literal "2dsphere" as the value',
             example:
             `db.collection.createIndex( { "loc" : "2dsphere" } )`,
-            score: 10
       },
       
       {
@@ -404,7 +378,6 @@ var mongoCreateIndexTemplates = [
             example:
             `db.collection.createIndex( { "loc" : "2d" } ,
                            { bits: 26, min : -180 , max : 180 } )`,
-            score: 10
       },
       
       {
@@ -420,7 +393,6 @@ var mongoCreateIndexTemplates = [
       { pos : "geoHaystack", type : 1 } ,
       { bucketSize : 1 } 
 )`,
-            score: 10
       },
       
 ]
@@ -433,7 +405,6 @@ var mongoInsertTemplates = [
             comment: 'Inserts a document or documents into a collection.',
             example:
             `db.products.insert( { item: "card", qty: 15 } )`,
-            score: 100
       },
 
       {
@@ -449,7 +420,6 @@ var mongoInsertTemplates = [
      { item: "eraser", qty: 25 }
    ]
 )`,
-            score: 100
       }
 ]
 
@@ -461,7 +431,6 @@ var mongoSaveTemplates = [
             comment: 'Updates an existing document or inserts a new document, depending on its document parameter.',
             example:
             `db.products.save( { item: "book", qty: 40 } )`,
-            score: 100
       }]
 
 var mongoAggregateTemplates = [
@@ -482,7 +451,6 @@ var mongoAggregateTemplates = [
       { $group: { _id: "$cust_id", total: { $sum: "$amount" } } },
       { $sort: { total: -1 } }
 ])`,
-            score: 100
       },
       {
             caption: "aggregatePreformACount",
@@ -500,7 +468,6 @@ To avoid these situations, on a sharded cluster, use the $group stage of the db.
       { $match : { score : { $gt : 70, $lte : 90 } } },
       { $group: { _id: null, count: { $sum: 1 } } }
 ]);`,
-            score: 10
       },
 
       {
@@ -524,7 +491,6 @@ To avoid these situations, on a sharded cluster, use the $group stage of the db.
      }
    }
 ] )`,
-            score: 10,
             docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
       },
 
@@ -549,7 +515,6 @@ To avoid these situations, on a sharded cluster, use the $group stage of the db.
      }
    }
 ] )`,
-            score: 10,
             docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
       },
 
@@ -577,7 +542,6 @@ GROUP BY cust_id`,
      }
    }
 ] )`,
-            score: 10,
             docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
       },
 
@@ -608,7 +572,6 @@ ORDER BY total`,
    },
    { $sort: { total: 1 } }
 ] )`,
-            score: 10,
             docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
       },
 
@@ -652,7 +615,6 @@ GROUP BY cust_id,
      }
    }
 ] )`,
-            score: 10,
             docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
       },
 
@@ -684,7 +646,6 @@ HAVING count(*) > 1`,
    },
    { $match: { count: { $gt: 1 } } }
 ] )`,
-            score: 10,
             docUrl: "https://docs.mongodb.org/manual/reference/sql-aggregation-comparison/"
       },
 
@@ -698,7 +659,6 @@ var mongoStatsTemplates = [
             comment: `Returns statistics about the collection. Specify a scale value of 1024 to display kilobytes rather than bytes.`,
             example:
             `db.orders.stats(1024)`,
-            score: 100
       },
 ]
 
@@ -730,7 +690,6 @@ let attachDateRangeToMongoFindTemlates = () => {
                   snippet: `find({ \${2:dateField}: ${it.snippet} })`,
                   comment: 'Selects documents in a collection and returns a cursor to the selected documents',
                   example:  `db.products.find( { at: ${it.example}} )`,
-                  score: 100
             });
       });     
 }

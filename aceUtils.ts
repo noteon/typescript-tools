@@ -237,8 +237,12 @@ export function injectCompleterToAdjustMethodParamWidth(){
 
 export function compareCompletionItem(filterText, a,b){
       var matchFunc = function(elm) {
+          if (elm.caption===filterText) return 3;
+          if (elm.caption.toLowerCase()===filterText.toLowerCase()) return 2;
+          
           return elm.caption.indexOf(filterText) === 0 ? 1 : 0;
       };
+      
 
       var matchCompare = function(a, b) {
           return matchFunc(b) - matchFunc(a);
@@ -252,7 +256,8 @@ export function compareCompletionItem(filterText, a,b){
           
           
         if (aScore!== bScore){
-          return (aScore-bScore)>0?-1:1;
+          
+           return (aScore-bScore)>0?-1:1;
         }else return 0;
         
       }
@@ -281,7 +286,8 @@ export function compareCompletionItem(filterText, a,b){
       }
       
       var compare = function(a, b) {
-          var ret = matchCompare(a, b);
+          let  ret = matchCompare(a, b);
+          
           if (ret===0)
               ret=scoreCompare(a,b)
               

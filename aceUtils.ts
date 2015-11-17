@@ -1,4 +1,6 @@
 /// <reference path="./typings/tsd.d.ts" />
+var AceRange = ace.require('ace/range').Range;
+
 declare var hljs: any;
 
 export var EOL = require("os").EOL;
@@ -36,8 +38,14 @@ export var getChars = function(docOrSession, pos: AceAjax.Position) {
   return getLinesChars(docOrSession.getLines(0, pos.row - 1)) + pos.column;
 }
 
+
 export var isStringChar=(char)=>{
    return char && ["'",'"','`'].indexOf(char)>-1;
+}
+
+export function getLineTextBeforePos(session:AceAjax.IEditSession,pos:AceAjax.Position){
+  var range = new AceRange(pos.row, 0, pos.row, pos.column);
+  return session.getTextRange(range);
 }
 
 export var getPrevChar = function(docOrSession, pos: AceAjax.Position) {

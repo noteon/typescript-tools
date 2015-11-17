@@ -70,13 +70,29 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
             if (prefix && (prefix[0] === "$") && (session.getValue().indexOf('.aggregate')<0)){
                 return callback(null,[]);
             }
+            
+            let currentLine =aceUtils.getLineTextBeforePos(session,pos); 
+            if (currentLine.indexOf("db.getCollection(")>-1){//db.getCollection(
+                let matches=currentLine.match(/\./g);
+                if (matches && (matches.length===1)){
+                    let cols=session.__collectionNames && session.__collectionNames.map((it)=>{
+                        return {
+                               caption: it,
+                                value: it,
+                                meta: 'collection',
+                                score: 1,
+                        };
+                    });
+                    //console.log("getCollection",cols);
+                    return callback(null, cols ||[]);
+                }
+            }
 
             
             let prevChar = aceUtils.getPrevChar(session, pos);
 
             var getFields = () => {
                 if (prevChar === ".") {
-                    let currentLine = session.getLine(pos.row);
                     var colName = aceUtils.getCollectionName(currentLine);
                     if (colName)
                         fieldsFetcher(aceUtils.getCollectionName(currentLine));

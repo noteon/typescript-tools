@@ -8,5 +8,7 @@ declare module AceAjax {
     __prevChar:string;
     //除firstCompletionEntry,其它的参数皆在placeHolderCompleter里assign.
 	  __firstCompletionEntry:any;
+    
+    __collectionNames:string[];
   } 
 }

@@ -92,16 +92,21 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             })();
             
             if (isMongoDatabaseMethod){
+                let cols=[];
                 completionEntries=completionEntries.map((it)=>{
                     if (it.meta==="property"){
                         it.score=10;
                         it.meta="collection";
+                        cols.push(it.caption);
                         //console.log("set top", it);
                     }else{
                         it.score=1;
                     }
                     return it;
                 });
+                
+                if (!_.isEmpty(cols))
+                    session.__collectionNames=cols;
             }            
             
             //console.log(session.__firstCompletionEntry);

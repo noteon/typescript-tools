@@ -235,6 +235,8 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
 
     require('./quickAndDefinitionTooltip').setupTooltip(editor, tsServ, fileName,params.helpUrlFetcher);
+    
+    
 
     var rst = {
         //editor,

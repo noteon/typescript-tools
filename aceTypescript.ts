@@ -167,18 +167,9 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
             end = end - (e.lines.join(aceUtils.EOL).length);
 
             tsServ.editScriptByPos(script, start, end, e.lines);
-
-            e.lines.forEach((line) => {
-                if (!line) return;
-                if (line.length < 3) return; // db.
-                
-                var colName = aceUtils.getCollectionName(line);
-                // console.log("syncType",line, colName);
-
-                
-                if (colName)
-                    params.dbFieldsFetcher(aceUtils.getCollectionName(line));
-            })
+            
+            let colNames=aceUtils.getCollectionNames(e.lines.join("\n"));
+            colNames && colNames.forEach(params.dbFieldsFetcher);
         } else if (action == "remove") {
             var end = start + (e.lines.join(aceUtils.EOL).length)
 
@@ -273,6 +264,8 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         },
         
         reloadDocument,
+        
+        utils:aceUtils,
         
         getOriginPos({row,column}){//0-based
             let result=rst["sourceMap"].originalPositionFor({line:row+1,column});

@@ -178,39 +178,40 @@ update
 validate`
 
 //"db.db.test.test1.insert(".match(/\bdb\.(.+)\.(find|insert)\(/)
-// function getDBDotCollectionNamesFromText(text:string){
-//   const REG=`\\bdb\.([^\\(\\)]+)\\.(${collectionMethods.split("\n").join("|")})(\\()*`;
+function getDBDotCollectionNamesFromText(text:string){
+  let matches=text.match(/\bdb.[\w|.]+\b/g);
+  if (_.isEmpty(matches)) return [];
   
-//   let gReg=new RegExp(REG,'g');
-//   let matches=text.match(gReg);
+  let methods=collectionMethods.split("\n");
   
-//   let cols=[];
-//   if (!_.isEmpty(matches)){
-//     matches.forEach((it)=>{
-//       let colsMatches=it.match(new RegExp(REG));
-//       if (colsMatches && colsMatches[1]){
-//         cols.push(colsMatches[1].replace(/\s|\n/g,""));
-//       }
-//     })
-//   }
-//   return _.compact(cols);
-  
-//   //"db.db.\ntest.test1.insert()db.db.test.test1.insert()db.db.test.test1.insert()".match(/\bdb\.([^\(\)]+)\.(find|insert)\(/g)
-  
-// }
-
-export var getCollectionName = (currentLine: string) => {
-  let colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);
-  if (colMatches && colMatches[1])
-    return colMatches[1].substring(1, colMatches[1].length - 1);
-
-  let dotMatches = currentLine.match(/[^\w]?db\.(.*?)\..*$/)
-  if (dotMatches && dotMatches[1]){
-    let colName=<any>dotMatches[1]
-    if (colName && [")","}"].indexOf(<any>_.last(colName))>-1) return;
+  let cols=matches.map((it)=>{
+    let parts=it.split('.');
+    parts.shift();
     
-    return colName
-  }
+    if (methods.indexOf(parts[parts.length-1])>-1){
+      parts.pop();
+    }
+    
+    return parts.join(".")
+  });
+  
+  return _.uniq(_.compact(cols));
+}
+
+function getCollectionMethodColNames(text:string){
+  let matches=text.match(/\bdb\.getCollection\((.*?)\)/g);
+  if (_.isEmpty(matches)) return [];
+  
+  let cols=matches.map((it)=>{
+     let founds=it.match(/\bdb\.getCollection\((.*?)\)/); //remove /g option
+     return founds && founds[1];
+  });
+  
+  return  _.uniq(_.compact(cols));
+}
+
+export var getCollectionNames = (text: string):string[] => {
+  return _.union(getCollectionMethodColNames(text),getDBDotCollectionNamesFromText(text));
 }
 
 

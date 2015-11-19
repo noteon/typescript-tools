@@ -93,9 +93,9 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
 
             var getFields = () => {
                 if (prevChar === ".") {
-                    var colName = aceUtils.getCollectionName(currentLine);
-                    if (colName)
-                        fieldsFetcher(aceUtils.getCollectionName(currentLine));
+                    var colNames = aceUtils.getCollectionNames(currentLine);
+                    if (!_.isEmpty(colNames))
+                        colNames.forEach(fieldsFetcher)
                     else {
                         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
                         var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar - 2);

@@ -208,7 +208,7 @@ function bindTypescriptExtension(editor, params) {
         //reloadDocument();
         lastChangedTime = Date.now();
         try {
-            if (!checkTsErrorHandler) {
+            if (!params.disableErrorInsight && !checkTsErrorHandler) {
                 triggerCheckTsErrorHandler();
             }
             syncTypeScriptServiceContent(fileName, e);
@@ -304,6 +304,7 @@ function bindTypescriptExtension(editor, params) {
             return tsServ.updateScript(scriptFile, content);
         },
         reloadDocument: reloadDocument,
+        utils: aceUtils,
         getOriginPos: function (_a) {
             var row = _a.row, column = _a.column;
             var result = rst["sourceMap"].originalPositionFor({ line: row + 1, column: column });
@@ -510,33 +511,34 @@ exports.highlightTypeCommentAndTip = function (type, docComment, tipHtml) {
 };
 var collectionMethods = "aggregate\ncount\ncopyTo\ncreateIndex\ndataSize\ndistinct\ndrop\ndropIndex\ndropIndexes\nensureIndex\nexplain\nfind\nfindAndModify\nfindOne\ngetIndexes\ngetShardDistribution\ngetShardVersion\ngroup\ninsert\nisCapped\nmapReduce\nreIndex\nremove\nrenameCollection\nsave\nstats\nstorageSize\ntotalSize\ntotalIndexSize\nupdate\nvalidate";
 //"db.db.test.test1.insert(".match(/\bdb\.(.+)\.(find|insert)\(/)
-// function getDBDotCollectionNamesFromText(text:string){
-//   const REG=`\\bdb\.([^\\(\\)]+)\\.(${collectionMethods.split("\n").join("|")})(\\()*`;
-//   let gReg=new RegExp(REG,'g');
-//   let matches=text.match(gReg);
-//   let cols=[];
-//   if (!_.isEmpty(matches)){
-//     matches.forEach((it)=>{
-//       let colsMatches=it.match(new RegExp(REG));
-//       if (colsMatches && colsMatches[1]){
-//         cols.push(colsMatches[1].replace(/\s|\n/g,""));
-//       }
-//     })
-//   }
-//   return _.compact(cols);
-//   //"db.db.\ntest.test1.insert()db.db.test.test1.insert()db.db.test.test1.insert()".match(/\bdb\.([^\(\)]+)\.(find|insert)\(/g)
-// }
+function getDBDotCollectionNamesFromText(text) {
+    var REG = "\\bdb.([^\\(\\)]+)(.(" + collectionMethods.split("\n").join("|") + ")|;|,|s)(\\()*";
+    var gReg = new RegExp(REG, 'g');
+    var matches = text.match(gReg);
+    var cols = [];
+    if (!_.isEmpty(matches)) {
+        matches.forEach(function (it) {
+            var colsMatches = it.match(new RegExp(REG));
+            if (colsMatches && colsMatches[1]) {
+                cols.push(colsMatches[1].replace(/\s|\n/g, ""));
+            }
+        });
+    }
+    return _.compact(cols);
+    //"db.db.\ntest.test1.insert()db.db.test.test1.insert()db.db.test.test1.insert()".match(/\bdb\.([^\(\)]+)\.(find|insert)\(/g)
+}
 exports.getCollectionName = function (currentLine) {
     var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);
     if (colMatches && colMatches[1])
         return colMatches[1].substring(1, colMatches[1].length - 1);
-    var dotMatches = currentLine.match(/[^\w]?db\.(.*?)\..*$/);
-    if (dotMatches && dotMatches[1]) {
-        var colName = dotMatches[1];
-        if (colName && [")", "}"].indexOf(_.last(colName)) > -1)
-            return;
-        return colName;
-    }
+    var cols = getDBDotCollectionNamesFromText(currentLine);
+    return cols && cols[0];
+    // let dotMatches = currentLine.match(/[^\w]?db\.(.*?)\..*$/)
+    // if (dotMatches && dotMatches[1]){
+    //   let colName=<any>dotMatches[1]
+    //   if (colName && [")","}"].indexOf(<any>_.last(colName))>-1) return;
+    //   return colName
+    // }
 };
 function calcTextWidth(text, font) {
     var f = font || '12px', o = $('<div>' + text + '</div>')
@@ -1322,16 +1324,18 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                 }
             };
             var noQuotaStr = (function () {
-                var theLine = currentLine.slice(0, currentLine.length - (prefix || "").length - 1).trim();
+                var theLine = currentLine.slice(0, currentLine.length - (prefix || "").length).trim();
+                //console.log(currentLine,"theLine",theLine,"prefix",prefix);
                 if (_.isEmpty(theLine))
                     return true;
                 return ["'", '"', '`'].indexOf(theLine[theLine.length - 1]) < 0;
             })();
             var fields = getFields().map(function (it) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
+                var hasDot = fieldValue.indexOf('.') > -1;
                 return {
                     caption: fieldValue,
-                    value: noQuotaStr ? "\"" + fieldValue + "\"" : fieldValue,
+                    value: (hasDot && noQuotaStr) ? "\"" + fieldValue + "\"" : fieldValue,
                     meta: it.collection,
                     score: it["score"] || 1,
                 };

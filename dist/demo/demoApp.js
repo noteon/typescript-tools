@@ -5,7 +5,7 @@
     
     
     var appendedMethod=false
-
+    
     window["editor"]=aceTs.setupAceEditor({
         tsFilePath:"/tmp/guid.ts",
         tsTypings:[__dirname+"/lodash.d.ts",__dirname+"/mongo-shell.d.ts"],

@@ -54,6 +54,8 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
     let lastChangedTime=Date.now();
     
     function updateTsErrorMarkers() {
+        if (params.disableErrorInsight) return;
+        
         var session = editor.getSession();
         
         if ($(".ace_editor.ace_autocomplete").is(":visible") && _.isEmpty(session.getAnnotations())) return;

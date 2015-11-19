@@ -21,6 +21,7 @@ var AceRange = ace.require('ace/range').Range;
 
 interface AceTsSetupParams {
     tsFilePath: string;
+    disableErrorInsight:boolean;
     tsFileInitContent?: string;
     tsTypings?: (string|{ path: string; content?: string })[];
     editorElem: string|HTMLElement, editorTheme?: string;
@@ -144,7 +145,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         //reloadDocument();
         lastChangedTime=Date.now();
         try {
-            if (!checkTsErrorHandler){
+            if (!params.disableErrorInsight && !checkTsErrorHandler){
                 triggerCheckTsErrorHandler();
             }
             

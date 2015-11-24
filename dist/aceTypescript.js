@@ -552,7 +552,6 @@ exports.getCollectionNames = function (text) {
             it = matches[1];
         return it;
     });
-    console.log("getCollectionNames", cols);
     return _.compact(cols);
 };
 function calcTextWidth(text, font) {
@@ -1578,7 +1577,7 @@ var mongoCreateCollectionTemplates = [
 var mongoStatsTemplates = [
     {
         caption: "stats",
-        snippet: "stats(${2:1024});",
+        snippet: "stats(1024);",
         //`stats(1024);`,
         comment: 'Returns statistics that reflect the use state of a single database.',
         example: "db.stats(1024)",
@@ -2002,7 +2001,45 @@ var aggregationOperators = [
     ['$push', 'Returns an array of expression values for each group.',
         "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: { day: { $dayOfYear: \"$date\"}, year: { $year: \"$date\" } },\n           itemsSold: { $push:  { item: \"$item\", quantity: \"$quantity\" } }\n         }\n     }\n   ])", '{$1}'],
     ['$addToSet', 'Returns an array of unique expression values for each group. Order of the array elements is undefined.',
-        "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: { day: { $dayOfYear: \"$date\"}, year: { $year: \"$date\" } },\n           itemsSold: { $addToSet: \"$item\" }\n         }\n     }\n   ])", '{$1}']
+        "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: { day: { $dayOfYear: \"$date\"}, year: { $year: \"$date\" } },\n           itemsSold: { $addToSet: \"$item\" }\n         }\n     }\n   ])", '{$1}'],
+    ['$sample', 'New in 3.2. Randomly selects N documents from its input.',
+        "db.users.aggregate(\n   [ { $sample: { size: 3 } } ]\n)", '{size: $13}'],
+    ['$indexStats', 'New in 3.2. Returns statistics on index usage.',
+        "db.orders.aggregate( [ { $indexStats: { } } ] )", '{$1}'],
+    ['$lookup', 'New in 3.2. Performs a left outer join with another collection.',
+        "db.orders.aggregate([\n    {\n      $lookup:\n        {\n          from: \"inventory\",\n          localField: \"item\",\n          foreignField: \"sku\",\n          as: \"inventory_docs\"\n        }\n   }\n])", "{\n       from: \"$1<collection to join>\",\n       localField: \"<field from the input documents>\",\n       foreignField: \"<field from the documents of the from collection>\",\n       as: \"<output array field>\"\n     }"],
+    ['$stdDevSamp', 'New in 3.2. Calculates standard deviation.',
+        "db.users.aggregate(\n   [\n      { $sample: { size: 100 } },\n      { $group: { _id: null, ageStdDev: { $stdDevSamp: \"$age\" } } }\n   ]\n)", '$1'],
+    ['$stdDevPop', 'New in 3.2. Calculates population standard deviation.',
+        "db.users.aggregate([\n   { $group: { _id: \"$quiz\", stdDev: { $stdDevPop: \"$score\" } } }\n])", '$1'],
+    ['$sqrt', 'New in 3.2. Calculates the square root.',
+        "db.points.aggregate([\n   {\n     $project: {\n        distance: {\n           $sqrt: {\n               $add: [\n                  { $pow: [ { $subtract: [ \"$p2.y\", \"$p1.y\" ] }, 2 ] },\n                  { $pow: [ { $subtract: [ \"$p2.x\", \"$p1.x\" ] }, 2 ] }\n               ]\n           }\n        }\n     }\n   }\n])", '$1'],
+    ['$abs', 'New in 3.2. Returns the absolute value of a number.',
+        "db.ratings.aggregate([\n   {\n     $project: { delta: { $abs: { $subtract: [ \"$start\", \"$end\" ] } } }\n   }\n])", '$1'],
+    ['$log', 'New in 3.2. Calculates the log of a number in the specified base.',
+        "db.examples.aggregate([\n   { $project: { bitsNeeded:\n      {\n         $floor: { $add: [ 1, { $log: [ \"$positiveInt\", 2 ] } ] } } }\n      }\n])", '["$1",2]'],
+    ['$log10', 'New in 3.2. Calculates the log base 10 of a number.',
+        "db.samples.aggregate( [\n   { $project: { pH: { $multiply: [ -1, { $log10: \"$H3O\" } ] } } }\n] )", '"$1"'],
+    ['$ln', 'New in 3.2. Calculates the natural log of a number.',
+        "db.sales.aggregate( [ { $project: { x: \"$year\", y: { $ln: \"$sales\"  } } } ] )", '"$1"'],
+    ['$pow', 'New in 3.2. Raises a number to the specified exponent.',
+        "db.quizzes.aggregate([\n   { $project: { variance: { $pow: [ { $stdDevPop: \"$scores.score\" }, 2 ] } } }\n])", '[$1]'],
+    ['$exp', 'New in 3.2. Raises e to the specified exponent.',
+        "db.accounts.aggregate( [ { $project: { effectiveRate: { $subtract: [ { $exp: \"$rate\"}, 1 ] } } } ] )", '"$1"'],
+    ['$trunc', 'New in 3.2. Truncates a number to its integer.',
+        "db.samples.aggregate([\n   { $project: { value: 1, truncatedValue: { $trunc: \"$value\" } } }\n])", '"$1"'],
+    ['$ceil', 'New in 3.2. Returns the smallest integer greater than or equal to the specified number.',
+        "db.samples.aggregate([\n   { $project: { value: 1, ceilingValue: { $ceil: \"$value\" } } }\n])", '"$1"'],
+    ['$floor', 'New in 3.2. Returns the largest integer less than or equal to the specified number.',
+        "db.samples.aggregate([\n   { $project: { value: 1, floorValue: { $floor: \"$value\" } } }\n])", '"$1"'],
+    ['$arrayElemAt', 'New in 3.2. Returns the element at the specified array index.',
+        "db.users.aggregate([\n   {\n     $project:\n      {\n         name: 1,\n         first: { $arrayElemAt: [ \"$favorites\", 0 ] },\n         last: { $arrayElemAt: [ \"$favorites\", -1 ] }\n      }\n   }\n])", '["$1",0]'],
+    ['$concatArrays', 'New in 3.2. Concatenates arrays.',
+        "db.warehouses.aggregate([\n   { $project: { items: { $concatArrays: [ \"$instock\", \"$ordered\" ] } } }\n])", '["$1"]'],
+    ['$isArray', 'New in 3.2. Determines if the operand is an array.',
+        "db.warehouses.aggregate([\n   { $project:\n      { items:\n          { $cond:\n            {\n              if: { $and: [ { $isArray: \"$instock\" }, { $isArray: \"$ordered\" } ] },\n              then: { $concatArrays: [ \"$instock\", \"$ordered\" ] },\n              else: \"One or more fields is not an array.\"\n            }\n          }\n      }\n   }\n])", '"$1"'],
+    ['$filter', 'New in 3.2. Selects a subset of the array based on the condition.',
+        "db.sales.aggregate([\n   {\n      $project: {\n         items: {\n            $filter: {\n               input: \"$items\",\n               as: \"item\",\n               cond: { $gte: [ \"$$item.price\", 100 ] }\n            }\n         }\n      }\n   }\n])", "{\n               input: \"$1$items\",\n               as: \"item\",\n               cond: { $gte: [ \"$$item.price\", 100 ] }\n            }"],
 ];
 //Query Modifiers
 //category, meta

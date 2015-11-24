@@ -3,7 +3,8 @@ var AceRange = ace.require('ace/range').Range;
 
 declare var hljs: any;
 
-export var EOL = require("os").EOL;
+//export var EOL = require("os").EOL;
+export var EOL = "\n";
 
 export var getLinesChars = function(lines) {
   var count = 0;

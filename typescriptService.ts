@@ -41,7 +41,8 @@ function switchToForwardSlashes(path: string) {
 }
 
 
-var EOL = require("os").EOL;
+//var EOL = require("os").EOL;
+var EOL = "\n";
 
 /** TypeScript Services Server,
     an interactive commandline tool

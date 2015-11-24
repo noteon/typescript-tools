@@ -2,13 +2,19 @@
     moment=require("moment");
     
     var aceTs=require("../../bin/aceTypescript");
+    var path=require("path");
+    var fs=require('fs');
     
     
     var appendedMethod=false
+    //console.log(__dirname);
+    
+    var tsFilePath=path.resolve(__dirname,"tmp.ts");
     
     window["editor"]=aceTs.setupAceEditor({
-        tsFilePath:"/tmp/guid.ts",
-        tsTypings:[__dirname+"/lodash.d.ts",__dirname+"/mongo-shell.d.ts"],
+        tsFilePath:tsFilePath,
+        tsFileInitContent:fs.readFileSync(tsFilePath), 
+        tsTypings:[path.resolve(__dirname,"lodash.d.ts"),path.resolve(__dirname,"mongo-shell.d.ts")],
         editorTheme:"monokai",
         editorElem:'ts-editor',
         dbFieldsFetcher: function (collectionName){

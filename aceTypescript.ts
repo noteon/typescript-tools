@@ -165,6 +165,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         var start = aceUtils.getChars(doc, e.start);
 
         if (action == "insert") {
+           // console.log("doc change insert",e.lines);
             var end = aceUtils.getChars(doc, e.end);
             end = end - (e.lines.join(aceUtils.EOL).length);
 
@@ -345,6 +346,11 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
 
 let aceInjected=false;
 
+
+function switchFoward(fileName){
+	return fileName && fileName.replace(/\\/g,"/");
+}
+
 //default theme twilight
 export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     
@@ -353,6 +359,14 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
         aceUtils.appendTooltipToBody();
         aceUtils.injectCompleterToAdjustMethodParamWidth();
     }
+    
+    params.tsFilePath=switchFoward(params.tsFilePath);
+    params.tsTypings=params.tsTypings.map((it)=>{
+        if (_.isString) return switchFoward(it);
+        
+        it["path"]=switchFoward(it["path"]);
+        return it;
+    });
     
     var editor = ace.edit(<any>params.editorElem);
 

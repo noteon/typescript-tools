@@ -143,6 +143,8 @@ function bindTypescriptExtension(editor, params) {
     var errorMarkers = [];
     var lastChangedTime = Date.now();
     function updateTsErrorMarkers() {
+        if (params.disableErrorInsight)
+            return;
         var session = editor.getSession();
         if ($(".ace_editor.ace_autocomplete").is(":visible") && _.isEmpty(session.getAnnotations()))
             return;
@@ -225,16 +227,8 @@ function bindTypescriptExtension(editor, params) {
             var end = aceUtils.getChars(doc, e.end);
             end = end - (e.lines.join(aceUtils.EOL).length);
             tsServ.editScriptByPos(script, start, end, e.lines);
-            e.lines.forEach(function (line) {
-                if (!line)
-                    return;
-                if (line.length < 3)
-                    return; // db.
-                var colName = aceUtils.getCollectionName(line);
-                // console.log("syncType",line, colName);
-                if (colName)
-                    params.dbFieldsFetcher(aceUtils.getCollectionName(line));
-            });
+            var colNames = aceUtils.getCollectionNames(e.lines.join("\n"));
+            colNames && colNames.forEach(params.dbFieldsFetcher);
         }
         else if (action == "remove") {
             var end = start + (e.lines.join(aceUtils.EOL).length);
@@ -512,33 +506,32 @@ exports.highlightTypeCommentAndTip = function (type, docComment, tipHtml) {
 var collectionMethods = "aggregate\ncount\ncopyTo\ncreateIndex\ndataSize\ndistinct\ndrop\ndropIndex\ndropIndexes\nensureIndex\nexplain\nfind\nfindAndModify\nfindOne\ngetIndexes\ngetShardDistribution\ngetShardVersion\ngroup\ninsert\nisCapped\nmapReduce\nreIndex\nremove\nrenameCollection\nsave\nstats\nstorageSize\ntotalSize\ntotalIndexSize\nupdate\nvalidate";
 //"db.db.test.test1.insert(".match(/\bdb\.(.+)\.(find|insert)\(/)
 function getDBDotCollectionNamesFromText(text) {
-    var REG = "\\bdb.([^\\(\\)]+)(.(" + collectionMethods.split("\n").join("|") + ")|;|,|s)(\\()*";
-    var gReg = new RegExp(REG, 'g');
-    var matches = text.match(gReg);
-    var cols = [];
-    if (!_.isEmpty(matches)) {
-        matches.forEach(function (it) {
-            var colsMatches = it.match(new RegExp(REG));
-            if (colsMatches && colsMatches[1]) {
-                cols.push(colsMatches[1].replace(/\s|\n/g, ""));
-            }
-        });
-    }
-    return _.compact(cols);
-    //"db.db.\ntest.test1.insert()db.db.test.test1.insert()db.db.test.test1.insert()".match(/\bdb\.([^\(\)]+)\.(find|insert)\(/g)
+    var matches = text.match(/\bdb.[\w|.]+\b/g);
+    if (_.isEmpty(matches))
+        return [];
+    var methods = collectionMethods.split("\n");
+    var cols = matches.map(function (it) {
+        var parts = it.split('.');
+        parts.shift();
+        if (methods.indexOf(parts[parts.length - 1]) > -1) {
+            parts.pop();
+        }
+        return parts.join(".");
+    });
+    return _.uniq(_.compact(cols));
 }
-exports.getCollectionName = function (currentLine) {
-    var colMatches = currentLine.match(/[^\w]?db\.getCollection\((.*?)\).*$/);
-    if (colMatches && colMatches[1])
-        return colMatches[1].substring(1, colMatches[1].length - 1);
-    var cols = getDBDotCollectionNamesFromText(currentLine);
-    return cols && cols[0];
-    // let dotMatches = currentLine.match(/[^\w]?db\.(.*?)\..*$/)
-    // if (dotMatches && dotMatches[1]){
-    //   let colName=<any>dotMatches[1]
-    //   if (colName && [")","}"].indexOf(<any>_.last(colName))>-1) return;
-    //   return colName
-    // }
+function getCollectionMethodColNames(text) {
+    var matches = text.match(/\bdb\.getCollection\((.*?)\)/g);
+    if (_.isEmpty(matches))
+        return [];
+    var cols = matches.map(function (it) {
+        var founds = it.match(/\bdb\.getCollection\((.*?)\)/); //remove /g option
+        return founds && founds[1];
+    });
+    return _.uniq(_.compact(cols));
+}
+exports.getCollectionNames = function (text) {
+    return _.union(getCollectionMethodColNames(text), getDBDotCollectionNamesFromText(text));
 };
 function calcTextWidth(text, font) {
     var f = font || '12px', o = $('<div>' + text + '</div>')
@@ -1306,9 +1299,9 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             var prevChar = currentLine[currentLine.length - 1];
             var getFields = function () {
                 if (prevChar === ".") {
-                    var colName = aceUtils.getCollectionName(currentLine);
-                    if (colName)
-                        fieldsFetcher(aceUtils.getCollectionName(currentLine));
+                    var colNames = aceUtils.getCollectionNames(currentLine);
+                    if (!_.isEmpty(colNames))
+                        colNames.forEach(fieldsFetcher);
                     else {
                         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
                         var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar - 2);
@@ -21514,6 +21507,7 @@ exports.SourceMapConsumer = require('./lib/source-map-consumer').SourceMapConsum
 exports.SourceNode = require('./lib/source-node').SourceNode;
 
 },{"./lib/source-map-consumer":28,"./lib/source-map-generator":29,"./lib/source-node":30}],33:[function(require,module,exports){
+(function (__filename,__dirname){
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved. 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -70864,5 +70858,6 @@ var TypeScript;
 /* @internal */
 var toolsVersion = "1.6";
 
+}).call(this,"/MyWorkspace\\aceTypescript\\node_modules\\typescript\\lib\\typescript.js","/MyWorkspace\\aceTypescript\\node_modules\\typescript\\lib")
 },{"fs":undefined,"os":undefined,"path":undefined}]},{},[2])(2)
 });

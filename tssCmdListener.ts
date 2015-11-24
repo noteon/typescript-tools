@@ -17,7 +17,8 @@ function switchToForwardSlashes(path: string) {
     return path.replace(/\\/g, "/");
 }
 
-var EOL = require("os").EOL;
+//var EOL = require("os").EOL;
+var EOL = "\n";
 
 // some approximated subsets..
 interface ReadlineHandlers {

@@ -160,6 +160,18 @@ export var getTypescriptParameterCompleter=(tsServ: ts.TypescriptService, script
 
             if (!helpItems) return callback(null, [])
             
+            let lineBefore=aceUtils.getLineTextBeforePos(editor.session, pos);
+            
+            let canShowHelpItems=(()=>{
+                if (lineBefore.indexOf("(")>-1) return true;
+                
+                if (lineBefore.indexOf("{")>-1 && lineBefore.indexOf("}")>-1) return false;
+                
+                return true;
+            })();
+            if (!canShowHelpItems)
+               return callback(null,[]);
+            
             let trimType=(type)=>{
                 if (!type) return type;
                 

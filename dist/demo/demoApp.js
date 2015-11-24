@@ -13,7 +13,7 @@
     
     window["editor"]=aceTs.setupAceEditor({
         tsFilePath:tsFilePath,
-        tsFileInitContent:fs.readFileSync(tsFilePath), 
+        //tsFileInitContent:fs.readFileSync(tsFilePath), 
         tsTypings:[path.resolve(__dirname,"lodash.d.ts"),path.resolve(__dirname,"mongo-shell.d.ts")],
         editorTheme:"monokai",
         editorElem:'ts-editor',

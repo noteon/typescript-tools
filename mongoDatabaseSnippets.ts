@@ -15,7 +15,7 @@ var mongoStatsTemplates = [
       {
             caption: "stats",
             snippet: 
-`stats(\${2:1024});`,
+`stats(1024);`,
 //`stats(1024);`,
             comment: 'Returns statistics that reflect the use state of a single database.',
             example:

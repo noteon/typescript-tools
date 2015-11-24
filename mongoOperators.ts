@@ -1137,7 +1137,150 @@ db.forecasts.aggregate([
            itemsSold: { $addToSet: "$item" }
          }
      }
-   ])`, '{$1}']
+   ])`, '{$1}'],
+   
+  ['$sample', 'New in 3.2. Randomly selects N documents from its input.',
+    `db.users.aggregate(
+   [ { $sample: { size: 3 } } ]
+)`, '{$1}'],
+       
+  ['$indexStats', 'New in 3.2. Returns statistics on index usage.',
+    `db.orders.aggregate( [ { $indexStats: { } } ] )`, '{$1}'],
+       
+  ['$lookup', 'New in 3.2. Performs a left outer join with another collection.',
+    `db.orders.aggregate([
+    {
+      $lookup:
+        {
+          from: "inventory",
+          localField: "item",
+          foreignField: "sku",
+          as: "inventory_docs"
+        }
+   }
+])`, '{$1}'],
+   
+  ['$stdDevSamp', 'New in 3.2. Calculates standard deviation.',
+    `db.users.aggregate(
+   [
+      { $sample: { size: 100 } },
+      { $group: { _id: null, ageStdDev: { $stdDevSamp: "$age" } } }
+   ]
+)`, '{$1}'],
+   
+  ['$stdDevPop', 'New in 3.2. Calculates population standard deviation.',
+    `db.users.aggregate([
+   { $group: { _id: "$quiz", stdDev: { $stdDevPop: "$score" } } }
+])`, '{$1}'],
+
+  ['$sqrt', 'New in 3.2. Calculates the square root.',
+    `db.points.aggregate([
+   {
+     $project: {
+        distance: {
+           $sqrt: {
+               $add: [
+                  { $pow: [ { $subtract: [ "$p2.y", "$p1.y" ] }, 2 ] },
+                  { $pow: [ { $subtract: [ "$p2.x", "$p1.x" ] }, 2 ] }
+               ]
+           }
+        }
+     }
+   }
+])`, '{$1}'],
+   
+  ['$abs', 'New in 3.2. Returns the absolute value of a number.',
+    `db.ratings.aggregate([
+   {
+     $project: { delta: { $abs: { $subtract: [ "$start", "$end" ] } } }
+   }
+])`, '{$1}'],
+
+  ['$log', 'New in 3.2. Calculates the log of a number in the specified base.',
+    `db.examples.aggregate([
+   { $project: { bitsNeeded:
+      {
+         $floor: { $add: [ 1, { $log: [ "$positiveInt", 2 ] } ] } } }
+      }
+])`, '{$1}'],
+
+  ['$log10', 'New in 3.2. Calculates the log base 10 of a number.',
+    `db.samples.aggregate( [
+   { $project: { pH: { $multiply: [ -1, { $log10: "$H3O" } ] } } }
+] )`, '{$1}'],
+
+  ['$ln', 'New in 3.2. Calculates the natural log of a number.',
+    `db.sales.aggregate( [ { $project: { x: "$year", y: { $ln: "$sales"  } } } ] )`, '{$1}'],
+
+  ['$pow', 'New in 3.2. Raises a number to the specified exponent.',
+    `db.quizzes.aggregate([
+   { $project: { variance: { $pow: [ { $stdDevPop: "$scores.score" }, 2 ] } } }
+])`, '{$1}'],
+
+  ['$exp', 'New in 3.2. Raises e to the specified exponent.',
+    `db.accounts.aggregate( [ { $project: { effectiveRate: { $subtract: [ { $exp: "$rate"}, 1 ] } } } ] )`, '{$1}'],
+    
+  ['$trunc', 'New in 3.2. Truncates a number to its integer.',
+    `db.samples.aggregate([
+   { $project: { value: 1, truncatedValue: { $trunc: "$value" } } }
+])`, '{$1}'],
+
+  ['$ceil', 'New in 3.2. Returns the smallest integer greater than or equal to the specified number.',
+    `db.samples.aggregate([
+   { $project: { value: 1, ceilingValue: { $ceil: "$value" } } }
+])`, '{$1}'],
+
+  ['$floor', 'New in 3.2. Returns the largest integer less than or equal to the specified number.',
+    `db.samples.aggregate([
+   { $project: { value: 1, floorValue: { $floor: "$value" } } }
+])`, '{$1}'],
+
+  ['$arrayElemAt', 'New in 3.2. Returns the element at the specified array index.',
+    `db.users.aggregate([
+   {
+     $project:
+      {
+         name: 1,
+         first: { $arrayElemAt: [ "$favorites", 0 ] },
+         last: { $arrayElemAt: [ "$favorites", -1 ] }
+      }
+   }
+])`, '{$1}'],
+
+  ['$concatArrays', 'New in 3.2. Concatenates arrays.',
+    `db.warehouses.aggregate([
+   { $project: { items: { $concatArrays: [ "$instock", "$ordered" ] } } }
+])`, '{$1}'],
+
+  ['$isArray', 'New in 3.2. Determines if the operand is an array.',
+    `db.warehouses.aggregate([
+   { $project:
+      { items:
+          { $cond:
+            {
+              if: { $and: [ { $isArray: "$instock" }, { $isArray: "$ordered" } ] },
+              then: { $concatArrays: [ "$instock", "$ordered" ] },
+              else: "One or more fields is not an array."
+            }
+          }
+      }
+   }
+])`, '{$1}'],
+
+  ['$filter', 'New in 3.2. Selects a subset of the array based on the condition.',
+    `db.sales.aggregate([
+   {
+      $project: {
+         items: {
+            $filter: {
+               input: "$items",
+               as: "item",
+               cond: { $gte: [ "$$item.price", 100 ] }
+            }
+         }
+      }
+   }
+])`, '{$1}'],
 ]
 
 //Query Modifiers

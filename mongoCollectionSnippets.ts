@@ -439,7 +439,7 @@ var mongoAggregateTemplates = [
             snippet:
             `aggregate(
    [
-     { \\$match: { "$2" } },
+     { \\$match: { $2 } },
      { \\$group: { _id: "\\$groupByField", total: { \\$sum: "$amount" } } },
      { \\$sort: { total: -1 } }
    ]
@@ -457,7 +457,7 @@ var mongoAggregateTemplates = [
             snippet:
             `aggregate(
    [
-      { \\$match: { "$2" } },
+      { \\$match: { $2 } },
       { \\$group: { _id: null, count: { \\$sum: 1 } } }
    ]
 )`,

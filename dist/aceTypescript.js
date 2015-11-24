@@ -224,6 +224,7 @@ function bindTypescriptExtension(editor, params) {
         var action = e.action;
         var start = aceUtils.getChars(doc, e.start);
         if (action == "insert") {
+            // console.log("doc change insert",e.lines);
             var end = aceUtils.getChars(doc, e.end);
             end = end - (e.lines.join(aceUtils.EOL).length);
             tsServ.editScriptByPos(script, start, end, e.lines);
@@ -356,6 +357,9 @@ function bindTypescriptExtension(editor, params) {
     reloadDocument();
 }
 var aceInjected = false;
+function switchFoward(fileName) {
+    return fileName && fileName.replace(/\\/g, "/");
+}
 //default theme twilight
 function setupAceEditor(params) {
     if (!aceInjected) {
@@ -363,6 +367,13 @@ function setupAceEditor(params) {
         aceUtils.appendTooltipToBody();
         aceUtils.injectCompleterToAdjustMethodParamWidth();
     }
+    params.tsFilePath = switchFoward(params.tsFilePath);
+    params.tsTypings = params.tsTypings.map(function (it) {
+        if (_.isString)
+            return switchFoward(it);
+        it["path"] = switchFoward(it["path"]);
+        return it;
+    });
     var editor = ace.edit(params.editorElem);
     editor.setOptions({ enableBasicAutocompletion: false });
     editor.$blockScrolling = Infinity;
@@ -382,7 +393,8 @@ exports.setupAceEditor = setupAceEditor;
 },{"./aceUtils":3,"./mongoCompleters":8,"./quickAndDefinitionTooltip":15,"./typescriptCompleters":17,"./typescriptService":18,"lodash":20,"source-map":32,"typescript":33}],3:[function(require,module,exports){
 /// <reference path="./typings/tsd.d.ts" />
 var AceRange = ace.require('ace/range').Range;
-exports.EOL = require("os").EOL;
+//export var EOL = require("os").EOL;
+exports.EOL = "\n";
 exports.getLinesChars = function (lines) {
     var count = 0;
     lines.forEach(function (line) {
@@ -531,7 +543,17 @@ function getCollectionMethodColNames(text) {
     return _.uniq(_.compact(cols));
 }
 exports.getCollectionNames = function (text) {
-    return _.union(getCollectionMethodColNames(text), getDBDotCollectionNamesFromText(text));
+    var cols = _.union(getCollectionMethodColNames(text), getDBDotCollectionNamesFromText(text));
+    cols = cols.map(function (it) {
+        if (it === "getCollection")
+            return undefined;
+        var matches = it.match(/^"(.*)"$/) || it.match(/^'(.*)'$/);
+        if (matches)
+            it = matches[1];
+        return it;
+    });
+    console.log("getCollectionNames", cols);
+    return _.compact(cols);
 };
 function calcTextWidth(text, font) {
     var f = font || '12px', o = $('<div>' + text + '</div>')
@@ -652,7 +674,7 @@ function compareCompletionItem(filterText, a, b) {
 }
 exports.compareCompletionItem = compareCompletionItem;
 
-},{"os":undefined}],4:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 // Copyright (c) Claus Reinke. All rights reserved.
 // Licensed under the Apache License, Version 2.0.
 // See LICENSE.txt in the project root for complete license information.
@@ -2425,7 +2447,8 @@ function resolvePath(rpath) {
 function switchToForwardSlashes(path) {
     return path.replace(/\\/g, "/");
 }
-var EOL = require("os").EOL;
+//var EOL = require("os").EOL;
+var EOL = "\n";
 /** TypeScript Services Server,
     an interactive commandline tool
     for getting info on .ts projects */
@@ -2754,7 +2777,7 @@ var TypescriptService = (function () {
 })();
 exports.TypescriptService = TypescriptService;
 
-},{"./fileCache":4,"./tsFormatter":16,"os":undefined,"path":undefined,"typescript":33}],19:[function(require,module,exports){
+},{"./fileCache":4,"./tsFormatter":16,"path":undefined,"typescript":33}],19:[function(require,module,exports){
 //     keymaster.js
 //     (c) 2011-2013 Thomas Fuchs
 //     keymaster.js may be freely distributed under the MIT license.
@@ -21507,7 +21530,6 @@ exports.SourceMapConsumer = require('./lib/source-map-consumer').SourceMapConsum
 exports.SourceNode = require('./lib/source-node').SourceNode;
 
 },{"./lib/source-map-consumer":28,"./lib/source-map-generator":29,"./lib/source-node":30}],33:[function(require,module,exports){
-(function (__filename,__dirname){
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved. 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -70858,6 +70880,5 @@ var TypeScript;
 /* @internal */
 var toolsVersion = "1.6";
 
-}).call(this,"/MyWorkspace\\aceTypescript\\node_modules\\typescript\\lib\\typescript.js","/MyWorkspace\\aceTypescript\\node_modules\\typescript\\lib")
 },{"fs":undefined,"os":undefined,"path":undefined}]},{},[2])(2)
 });

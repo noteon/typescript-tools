@@ -212,7 +212,18 @@ function getCollectionMethodColNames(text:string){
 }
 
 export var getCollectionNames = (text: string):string[] => {
-  return _.union(getCollectionMethodColNames(text),getDBDotCollectionNamesFromText(text));
+  let cols:string[]=_.union(getCollectionMethodColNames(text),getDBDotCollectionNamesFromText(text));
+  cols=cols.map((it)=>{
+    if (it==="getCollection") return undefined;
+    
+    let matches=it.match(/^"(.*)"$/) || it.match(/^'(.*)'$/);
+    if (matches)
+       it=matches[1];
+    
+    return it;
+  })
+  
+  return _.compact(cols);
 }
 
 

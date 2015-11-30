@@ -276,7 +276,7 @@ var mongoRemoveTemplates = [
       {
             caption: "removeOne",
             snippet:
-            `remove({$2},{justOne: true}} )`,
+            `remove({$2},{justOne: true})`,
             comment: 'Removes documents from a collection. The "justone" option to limit the deletion to just one document',
             example:
             `db.products.remove({qty:{$gt: 20}},{justOne: true}})`,
@@ -655,10 +655,10 @@ var mongoStatsTemplates = [
       {
             caption: "stats",
             snippet:
-            `stats(1024);`,
-            comment: `Returns statistics about the collection. Specify a scale value of 1024 to display kilobytes rather than bytes.`,
+            `stats();`,
+            comment: `Returns statistics about the collection. `,
             example:
-            `db.orders.stats(1024)`,
+            `db.orders.stats()`,
       },
 ]
 

@@ -31,7 +31,7 @@ var mongoLimitTemplates = [
       {
             caption: "limit",
             snippet: 
-`limit(\${2:5})`,
+`limit(5)`,
             comment: 'Use the limit() method on a cursor to specify the maximum number of documents the cursor will return. limit() is analogous to the LIMIT statement in a SQL database.',
             example:
 `db.orders.find().limit(5)`,

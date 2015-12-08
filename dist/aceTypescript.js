@@ -605,7 +605,8 @@ function injectCompleterToAdjustMethodParamWidth() {
         if (methodParamItem.currentParam) {
             _.delay(function () {
                 var $line = $('.ace_editor.ace_autocomplete').find('.ace_line.ace_selected');
-                var start = methodParamItem.caption.indexOf(methodParamItem.currentParam);
+                var reg = new RegExp("\\b" + methodParamItem.currentParam + "\\b");
+                var start = methodParamItem.caption.search(reg);
                 if (start > -1) {
                     var newHtml = (methodParamItem.caption.slice(0, start) || "") +
                         ("<span class='ace_completion-highlight'>" + methodParamItem.currentParam + "</span>") +
@@ -1083,7 +1084,7 @@ var mongoRemoveTemplates = [
     },
     {
         caption: "removeOne",
-        snippet: "remove({$2},{justOne: true}} )",
+        snippet: "remove({$2},{justOne: true})",
         comment: 'Removes documents from a collection. The "justone" option to limit the deletion to just one document',
         example: "db.products.remove({qty:{$gt: 20}},{justOne: true}})",
     }
@@ -1156,13 +1157,13 @@ var mongoSaveTemplates = [
 var mongoAggregateTemplates = [
     {
         caption: "aggregate",
-        snippet: "aggregate(\n   [\n     { \\$match: { \"$2\" } },\n     { \\$group: { _id: \"\\$groupByField\", total: { \\$sum: \"$amount\" } } },\n     { \\$sort: { total: -1 } }\n   ]\n)",
+        snippet: "aggregate(\n   [\n     { \\$match: { $2 } },\n     { \\$group: { _id: \"\\$groupByField\", total: { \\$sum: \"$amount\" } } },\n     { \\$sort: { total: -1 } }\n   ]\n)",
         comment: "Aggregation operation: Group by and Calculate a Sum.",
         example: "db.orders.aggregate([\n      { $match: { status: \"A\" } },\n      { $group: { _id: \"$cust_id\", total: { $sum: \"$amount\" } } },\n      { $sort: { total: -1 } }\n])",
     },
     {
         caption: "aggregatePreformACount",
-        snippet: "aggregate(\n   [\n      { \\$match: { \"$2\" } },\n      { \\$group: { _id: null, count: { \\$sum: 1 } } }\n   ]\n)",
+        snippet: "aggregate(\n   [\n      { \\$match: { $2 } },\n      { \\$group: { _id: null, count: { \\$sum: 1 } } }\n   ]\n)",
         comment: "compute a count of the documents.On a sharded cluster, db.collection.count() can result in an inaccurate count if orphaned documents exist or if a chunk migration is in progress.\nTo avoid these situations, on a sharded cluster, use the $group stage of the db.collection.aggregate() method to $sum the documents.",
         example: "db.articles.aggregate([\n      { $match : { score : { $gt : 70, $lte : 90 } } },\n      { $group: { _id: null, count: { $sum: 1 } } }\n]);",
     },
@@ -1212,9 +1213,9 @@ var mongoAggregateTemplates = [
 var mongoStatsTemplates = [
     {
         caption: "stats",
-        snippet: "stats(1024);",
-        comment: "Returns statistics about the collection. Specify a scale value of 1024 to display kilobytes rather than bytes.",
-        example: "db.orders.stats(1024)",
+        snippet: "stats();",
+        comment: "Returns statistics about the collection. ",
+        example: "db.orders.stats()",
     },
 ];
 var mongoCodeTemplates = [];
@@ -1577,10 +1578,9 @@ var mongoCreateCollectionTemplates = [
 var mongoStatsTemplates = [
     {
         caption: "stats",
-        snippet: "stats(1024);",
-        //`stats(1024);`,
+        snippet: "stats();",
         comment: 'Returns statistics that reflect the use state of a single database.',
-        example: "db.stats(1024)",
+        example: "db.stats()",
     }
 ];
 var mongoCreateUserTemplates = [
@@ -1947,7 +1947,7 @@ var aggregationOperators = [
         "db.articles.aggregate(\n   [\n     { $match: { $text: { $search: \"cake\" } } },\n     { $group: { _id: { $meta: \"textScore\" }, count: { $sum: 1 } } }\n   ]\n)", '"$1"'],
     //Array Operators
     ['$size', 'New in version 2.6. Returns the number of elements in the array. Accepts a single expression as argument.',
-        "db.inventory.aggregate(\n   [\n      {\n         $project: {\n            item: 1,\n            numberOfColors: { $size: \"$colors\" }\n         }\n      }\n   ]\n)", '"$1"'],
+        "db.inventory.aggregate(\n   [\n      {\n         $project: {\n            item: 1,\n            numberOfColors: { $size: \"$colors\" }\n         }\n      }\n   ]\n)", '"$$1"'],
     //Variable Operators
     ['$map', 'Applies a subexpression to each element of an array and returns the array of resulting values in order. Accepts named parameters.',
         "db.grades.aggregate(\n   [\n      { $project:\n         { adjustedGrades:\n            {\n              $map:\n                 {\n                   input: \"$quizzes\",\n                   as: \"grade\",\n                   in: { $add: [ \"$$grade\", 2 ] }\n                 }\n            }\n         }\n      }\n   ]\n)", '{$1}'],
@@ -1960,23 +1960,23 @@ var aggregationOperators = [
     ['$dayOfYear', 'Returns the day of the year for a date as a number between 1 and 366 (leap year).',
         "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
     ['$dayOfMonth', 'Returns the day of the month for a date as a number between 1 and 31.',
-        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
+        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$$1"'],
     ['$dayOfWeek', 'Returns the day of the week for a date as a number between 1 (Sunday) and 7 (Saturday).',
-        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
+        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$$1"'],
     ['$year', 'Returns the year for a date as a number (e.g. 2014).',
-        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
+        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$$1"'],
     ['$month', 'Returns the month for a date as a number between 1 (January) and 12 (December).',
-        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
+        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$$1"'],
     ['$week', 'Returns the week number for a date as a number between 0 (the partial week that precedes the first Sunday of the year) and 53 (leap year).',
-        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
+        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$$1"'],
     ['$hour', 'Returns the hour for a date as a number between 0 and 23.',
-        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
+        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$$1"'],
     ['$minute', 'Returns the minute for a date as a number between 0 and 59.',
-        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
+        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$$1"'],
     ['$second', 'Returns the seconds for a date as a number between 0 and 60 (leap seconds).',
         "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
     ['$millisecond', 'Returns the milliseconds of a date as a number between 0 and 999.',
-        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$1"'],
+        "db.sales.aggregate([{\n       $project:\n         {\n           year: { $year: \"$date\" },\n           month: { $month: \"$date\" },\n           day: { $dayOfMonth: \"$date\" },\n           hour: { $hour: \"$date\" },\n           minutes: { $minute: \"$date\" },\n           seconds: { $second: \"$date\" },\n           milliseconds: { $millisecond: \"$date\" },\n           dayOfYear: { $dayOfYear: \"$date\" },\n           dayOfWeek: { $dayOfWeek: \"$date\" },\n           week: { $week: \"$date\" }\n         }\n     }])", '"$$1"'],
     ['$dateToString', 'New in version 3.0. Returns the date as a formatted string.',
         "db.sales.aggregate([\n     {\n       $project: {\n          yearMonthDay: { $dateToString: { format: \"%Y-%m-%d\", date: \"$date\" } },\n          time: { $dateToString: { format: \"%H:%M:%S:%L\", date: \"$date\" } }\n       }\n     }\n   ])", '{ format: "$1%Y-%m-%d", date: "\\$date" }'],
     //Conditional Expressions
@@ -1991,27 +1991,27 @@ var aggregationOperators = [
     ['$avg', 'Returns an average for each group. Ignores non-numeric values.',
         "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: \"$item\",\n           avgAmount: { $avg: { $multiply: [ \"$price\", \"$quantity\" ] } },\n           avgQuantity: { $avg: \"$quantity\" }\n         }\n     }\n   ])", '{$1}'],
     ['$first', 'Returns a value from the first document for each group. Order is only defined if the documents are in a defined order.',
-        "db.sales.aggregate([\n     { $sort: { item: 1, date: 1 } },\n     {\n       $group:\n         {\n           _id: \"$item\",\n           firstSalesDate: { $first: \"$date\" }\n         }\n     }\n   ])", '"$1"'],
+        "db.sales.aggregate([\n     { $sort: { item: 1, date: 1 } },\n     {\n       $group:\n         {\n           _id: \"$item\",\n           firstSalesDate: { $first: \"$date\" }\n         }\n     }\n   ])", '"$$1"'],
     ['$last', 'Returns a value from the last document for each group. Order is only defined if the documents are in a defined order.',
-        "db.sales.aggregate([\n     { $sort: { item: 1, date: 1 } },\n     {\n       $group:\n         {\n           _id: \"$item\",\n           lastSalesDate: { $last: \"$date\" }\n         }\n     }\n   ])", '"$1"'],
+        "db.sales.aggregate([\n     { $sort: { item: 1, date: 1 } },\n     {\n       $group:\n         {\n           _id: \"$item\",\n           lastSalesDate: { $last: \"$date\" }\n         }\n     }\n   ])", '"$$1"'],
     ['$max', 'Returns the highest expression value for each group.',
-        "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: \"$item\",\n           maxTotalAmount: { $max: { $multiply: [ \"$price\", \"$quantity\" ] } },\n           maxQuantity: { $max: \"$quantity\" }\n         }\n     }\n   ])", '{$1}'],
+        "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: \"$item\",\n           maxTotalAmount: { $max: { $multiply: [ \"$price\", \"$quantity\" ] } },\n           maxQuantity: { $max: \"$quantity\" }\n         }\n     }\n   ])", '"$$1"'],
     ['$min', 'Returns the lowest expression value for each group.',
-        "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: \"$item\",\n           minQuantity: { $min: \"$quantity\" }\n         }\n     }\n   ])", '{$1}'],
+        "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: \"$item\",\n           minQuantity: { $min: \"$quantity\" }\n         }\n     }\n   ])", '"$$1"'],
     ['$push', 'Returns an array of expression values for each group.',
         "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: { day: { $dayOfYear: \"$date\"}, year: { $year: \"$date\" } },\n           itemsSold: { $push:  { item: \"$item\", quantity: \"$quantity\" } }\n         }\n     }\n   ])", '{$1}'],
     ['$addToSet', 'Returns an array of unique expression values for each group. Order of the array elements is undefined.',
         "db.sales.aggregate([\n     {\n       $group:\n         {\n           _id: { day: { $dayOfYear: \"$date\"}, year: { $year: \"$date\" } },\n           itemsSold: { $addToSet: \"$item\" }\n         }\n     }\n   ])", '{$1}'],
     ['$sample', 'New in 3.2. Randomly selects N documents from its input.',
-        "db.users.aggregate(\n   [ { $sample: { size: 3 } } ]\n)", '{size: $13}'],
+        "db.users.aggregate(\n   [ { $sample: { size: 3 } } ]\n)", '{size: ${1:3}}'],
     ['$indexStats', 'New in 3.2. Returns statistics on index usage.',
         "db.orders.aggregate( [ { $indexStats: { } } ] )", '{$1}'],
     ['$lookup', 'New in 3.2. Performs a left outer join with another collection.',
         "db.orders.aggregate([\n    {\n      $lookup:\n        {\n          from: \"inventory\",\n          localField: \"item\",\n          foreignField: \"sku\",\n          as: \"inventory_docs\"\n        }\n   }\n])", "{\n       from: \"$1<collection to join>\",\n       localField: \"<field from the input documents>\",\n       foreignField: \"<field from the documents of the from collection>\",\n       as: \"<output array field>\"\n     }"],
     ['$stdDevSamp', 'New in 3.2. Calculates standard deviation.',
-        "db.users.aggregate(\n   [\n      { $sample: { size: 100 } },\n      { $group: { _id: null, ageStdDev: { $stdDevSamp: \"$age\" } } }\n   ]\n)", '$1'],
+        "db.users.aggregate(\n   [\n      { $sample: { size: 100 } },\n      { $group: { _id: null, ageStdDev: { $stdDevSamp: \"$age\" } } }\n   ]\n)", '"$$1"'],
     ['$stdDevPop', 'New in 3.2. Calculates population standard deviation.',
-        "db.users.aggregate([\n   { $group: { _id: \"$quiz\", stdDev: { $stdDevPop: \"$score\" } } }\n])", '$1'],
+        "db.users.aggregate([\n   { $group: { _id: \"$quiz\", stdDev: { $stdDevPop: \"$score\" } } }\n])", '"$$1"'],
     ['$sqrt', 'New in 3.2. Calculates the square root.',
         "db.points.aggregate([\n   {\n     $project: {\n        distance: {\n           $sqrt: {\n               $add: [\n                  { $pow: [ { $subtract: [ \"$p2.y\", \"$p1.y\" ] }, 2 ] },\n                  { $pow: [ { $subtract: [ \"$p2.x\", \"$p1.x\" ] }, 2 ] }\n               ]\n           }\n        }\n     }\n   }\n])", '$1'],
     ['$abs', 'New in 3.2. Returns the absolute value of a number.',
@@ -2021,23 +2021,23 @@ var aggregationOperators = [
     ['$log10', 'New in 3.2. Calculates the log base 10 of a number.',
         "db.samples.aggregate( [\n   { $project: { pH: { $multiply: [ -1, { $log10: \"$H3O\" } ] } } }\n] )", '"$1"'],
     ['$ln', 'New in 3.2. Calculates the natural log of a number.',
-        "db.sales.aggregate( [ { $project: { x: \"$year\", y: { $ln: \"$sales\"  } } } ] )", '"$1"'],
+        "db.sales.aggregate( [ { $project: { x: \"$year\", y: { $ln: \"$sales\"  } } } ] )", '"$$1"'],
     ['$pow', 'New in 3.2. Raises a number to the specified exponent.',
         "db.quizzes.aggregate([\n   { $project: { variance: { $pow: [ { $stdDevPop: \"$scores.score\" }, 2 ] } } }\n])", '[$1]'],
     ['$exp', 'New in 3.2. Raises e to the specified exponent.',
-        "db.accounts.aggregate( [ { $project: { effectiveRate: { $subtract: [ { $exp: \"$rate\"}, 1 ] } } } ] )", '"$1"'],
+        "db.accounts.aggregate( [ { $project: { effectiveRate: { $subtract: [ { $exp: \"$rate\"}, 1 ] } } } ] )", '"$$1"'],
     ['$trunc', 'New in 3.2. Truncates a number to its integer.',
-        "db.samples.aggregate([\n   { $project: { value: 1, truncatedValue: { $trunc: \"$value\" } } }\n])", '"$1"'],
+        "db.samples.aggregate([\n   { $project: { value: 1, truncatedValue: { $trunc: \"$value\" } } }\n])", '"$$1"'],
     ['$ceil', 'New in 3.2. Returns the smallest integer greater than or equal to the specified number.',
-        "db.samples.aggregate([\n   { $project: { value: 1, ceilingValue: { $ceil: \"$value\" } } }\n])", '"$1"'],
+        "db.samples.aggregate([\n   { $project: { value: 1, ceilingValue: { $ceil: \"$value\" } } }\n])", '"$$1"'],
     ['$floor', 'New in 3.2. Returns the largest integer less than or equal to the specified number.',
-        "db.samples.aggregate([\n   { $project: { value: 1, floorValue: { $floor: \"$value\" } } }\n])", '"$1"'],
+        "db.samples.aggregate([\n   { $project: { value: 1, floorValue: { $floor: \"$value\" } } }\n])", '"$$1"'],
     ['$arrayElemAt', 'New in 3.2. Returns the element at the specified array index.',
-        "db.users.aggregate([\n   {\n     $project:\n      {\n         name: 1,\n         first: { $arrayElemAt: [ \"$favorites\", 0 ] },\n         last: { $arrayElemAt: [ \"$favorites\", -1 ] }\n      }\n   }\n])", '["$1",0]'],
+        "db.users.aggregate([\n   {\n     $project:\n      {\n         name: 1,\n         first: { $arrayElemAt: [ \"$favorites\", 0 ] },\n         last: { $arrayElemAt: [ \"$favorites\", -1 ] }\n      }\n   }\n])", '["$$1",0]'],
     ['$concatArrays', 'New in 3.2. Concatenates arrays.',
-        "db.warehouses.aggregate([\n   { $project: { items: { $concatArrays: [ \"$instock\", \"$ordered\" ] } } }\n])", '["$1"]'],
+        "db.warehouses.aggregate([\n   { $project: { items: { $concatArrays: [ \"$instock\", \"$ordered\" ] } } }\n])", '["$$1"]'],
     ['$isArray', 'New in 3.2. Determines if the operand is an array.',
-        "db.warehouses.aggregate([\n   { $project:\n      { items:\n          { $cond:\n            {\n              if: { $and: [ { $isArray: \"$instock\" }, { $isArray: \"$ordered\" } ] },\n              then: { $concatArrays: [ \"$instock\", \"$ordered\" ] },\n              else: \"One or more fields is not an array.\"\n            }\n          }\n      }\n   }\n])", '"$1"'],
+        "db.warehouses.aggregate([\n   { $project:\n      { items:\n          { $cond:\n            {\n              if: { $and: [ { $isArray: \"$instock\" }, { $isArray: \"$ordered\" } ] },\n              then: { $concatArrays: [ \"$instock\", \"$ordered\" ] },\n              else: \"One or more fields is not an array.\"\n            }\n          }\n      }\n   }\n])", '"$$1"'],
     ['$filter', 'New in 3.2. Selects a subset of the array based on the condition.',
         "db.sales.aggregate([\n   {\n      $project: {\n         items: {\n            $filter: {\n               input: \"$items\",\n               as: \"item\",\n               cond: { $gte: [ \"$$item.price\", 100 ] }\n            }\n         }\n      }\n   }\n])", "{\n               input: \"$1$items\",\n               as: \"item\",\n               cond: { $gte: [ \"$$item.price\", 100 ] }\n            }"],
 ];
@@ -2429,6 +2429,16 @@ exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
         getCompletions: function (editor, session, pos, prefix, callback) {
             var helpItems = (session.__paramHelpItems);
             if (!helpItems)
+                return callback(null, []);
+            var lineBefore = aceUtils.getLineTextBeforePos(editor.session, pos);
+            var canShowHelpItems = (function () {
+                if (lineBefore.indexOf("(") > -1)
+                    return true;
+                if (lineBefore.indexOf("{") > -1 && lineBefore.indexOf("}") > -1)
+                    return false;
+                return true;
+            })();
+            if (!canShowHelpItems)
                 return callback(null, []);
             var trimType = function (type) {
                 if (!type)

@@ -295,7 +295,12 @@ export function injectCompleterToAdjustMethodParamWidth(){
         if (methodParamItem.currentParam){
           _.delay(()=>{
             let $line=$('.ace_editor.ace_autocomplete').find('.ace_line.ace_selected');
-            let start=methodParamItem.caption.indexOf(methodParamItem.currentParam);
+            
+            let paramName=methodParamItem.currentParam && methodParamItem.currentParam.split(/\b/)[0];
+            
+            let reg=new RegExp(`\\b${paramName}\\b`);
+            
+            let start=methodParamItem.caption.search(reg);
             if (start>-1){
               let newHtml=(methodParamItem.caption.slice(0,start)||"")+ 
                   `<span class='ace_completion-highlight'>${methodParamItem.currentParam}</span>`+ 

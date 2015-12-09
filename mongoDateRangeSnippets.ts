@@ -17,7 +17,7 @@ var dateRangeSnippets = [
             `{
    $gte: new Date("${todayStr}"),
    $lte: new Date("${tomorrowStr}")
- }`,
+}`,
             attachedToFindMethod: true
       },
 
@@ -27,13 +27,13 @@ var dateRangeSnippets = [
             `{
    \\$gte: moment("\${3:${todayStr}}").startOf("day").toDate(),
    \\$lte: moment("\${3:${todayStr}}").endOf("day").toDate()
- }`,
+}`,
             comment: 'Date Range (use momentjs)',
             example:
             `{
    $gte: moment("${todayStr}").startOf("day").toDate(),
    $lte: moment("${todayStr}").endOf("day").toDate()
- }`,
+}`,
             attachedToFindMethod: true
       },
       {
@@ -42,13 +42,13 @@ var dateRangeSnippets = [
             `{
    \\$gte: moment().startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
- }`,
+}`,
             comment: 'Today (use momentjs)',
             example:
             `{
    $gte: moment().startOf("day").toDate(),
    $lte: moment().endOf("day").toDate()
- }`,
+}`,
             attachedToFindMethod: true
       },
 
@@ -58,13 +58,13 @@ var dateRangeSnippets = [
             `{
    \\$gte: moment().subtract(1,"day").startOf("day").toDate(),
    \\$lte: moment().subtract(1,"day").endOf("day").toDate()
- }`,
+}`,
             comment: 'Yesterday (use momentjs)',
             example:
             `{
    $gte: moment().subtract(1,"day").startOf("day").toDate(),
    $lte: moment().subtract(1,"day").endOf("day").toDate()
- }`,
+}`,
       },
 
       {
@@ -73,13 +73,13 @@ var dateRangeSnippets = [
             `{
    \\$gte: moment().subtract(\${3:7},"day").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
- }`,
+}`,
             comment: 'Last N days (use momentjs)',
             example:
             `{
    $gte: moment().subtract(N,"day").startOf("day").toDate(),
    $lte: moment().endOf("day").toDate()
- }`,
+}`,
             attachedToFindMethod: true
       },
 
@@ -89,13 +89,13 @@ var dateRangeSnippets = [
             `{
    \\$gte: moment().subtract(\${3:1},"week").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
- }`,
+}`,
             comment: 'Last N weeks (use momentjs)',
             example:
             `{
    $gte: moment().subtract(N,"week").startOf("day").toDate(),
    $lte: moment().endOf("day").toDate()
- }`,
+}`,
       },
 
       {
@@ -104,13 +104,13 @@ var dateRangeSnippets = [
             `{
    \\$gte: moment().subtract(\${3:1},"month").startOf("day").toDate(),
    \\$lte: moment().endOf("day").toDate()
- }`,
+}`,
             comment: 'Last N months (use momentjs)',
             example:
             `{
    $gte: moment().subtract(N,"month").startOf("day").toDate(),
    $lte: moment().endOf("day").toDate()
- }`,
+}`,
       }
 
 ];

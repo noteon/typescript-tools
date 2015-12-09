@@ -6,7 +6,7 @@ var mongoForEachTemplates = [
             snippet: 
 `forEach((it)=> { 
       $1
- });`,
+});`,
             comment: 'Iterates the cursor to apply a JavaScript function to each document from the cursor.',
             example:
 `db.users.find().forEach( function(myDoc) { print( "user: " + myDoc.name ); } );`,
@@ -20,7 +20,7 @@ var mongoMapTemplates = [
 `map((it)=> { 
       $1
       return it;
- });`,
+});`,
             comment: 'Applies function to each document visited by the cursor and collects the return values from successive application into an array.',
             example:
 `db.users.find().map( function(u) { return u.name; } );`,

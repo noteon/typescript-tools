@@ -176,8 +176,15 @@ export var getTypescriptParameterCompleter=(tsServ: ts.TypescriptService, script
                 if (!type) return type;
                 
                 let rst=type.replace(/: any$/,'');
+               
+                rst=rst.replace(/ |\t|\n/g,'');
                 
-                return rst.replace(/ /g,'');
+                if (rst && rst.length>30){
+                    rst=rst.split(":")[0];                    
+                }
+                   
+                return rst;
+
             }
             //console.log({helpItems});
             

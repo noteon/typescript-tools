@@ -2449,7 +2449,9 @@ exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
                 if (!type)
                     return type;
                 var rst = type.replace(/: any$/, '');
-                return rst.replace(/ /g, '');
+                if (rst && rst.length > 30)
+                    rst = rst.slice(0, 30) + "...";
+                return rst;
             };
             //console.log({helpItems});
             var completionsItems = helpItems.items.map(function (it, idx) {

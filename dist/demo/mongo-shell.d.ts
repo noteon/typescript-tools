@@ -10,7 +10,8 @@ declare module mongo{
 		*                      { $sort: { total: -1 } }
 		*                    ])
         **/
-		aggregate(pipeline:any[], options?:IAggregateOption):IAggregateCursor;
+		aggregate(pipeline:Object[], options?:IAggregateOption):IAggregateCursor;
+		aggregate(...pipeline:Object[]):IAggregateCursor;
 		
 		/**
 		* Returns the count of documents that would match a find() query. The db.collection.count() method does not perform the find() operation but instead counts and returns the number of results that match a query.
@@ -104,6 +105,26 @@ declare module mongo{
 		findOne(query?, projection?:IField):any;
 		
 		/**
+		* New in version 3.2
+		* return the deleted document, otherwise null
+		**/
+		findOneAndDelete(query:Object, options?:{projection?:Object,sort?:IField,maxTimeMS?:number}):any;
+		
+		/**
+		* New in version 3.2
+		* Returns either the original document or, if returnNewDocument: true, the replacement document.
+		* If returnNewDocument was false, the operation would return null as there is no original document to return.
+		**/
+		findOneAndReplace(query:Object, replacement:Object, options?:{projection?:Object, sort?:IField, maxTimeMS?:number, upsert?:mongoBoolean, returnNewDocument?:mongoBoolean})
+		
+		/**
+		* New in version 3.2
+		* Returns either the original document or, if returnNewDocument: true, the replacement document.
+		* If returnNewDocument was false, the operation would return null as there is no original document to return.
+		**/
+		findOneAndUpdate(query:Object, update:Object, options?:{projection?:Object, sort?:IField, maxTimeMS?:number, upsert?:mongoBoolean, returnNewDocument?:mongoBoolean})
+		
+		/**
 		* Returns an array that holds a list of documents that identify and describe the existing indexes on the collection. You must call db.collection.getIndexes() on a collection.
 		**/
 		getIndexes():IIndex[];
@@ -142,7 +163,17 @@ declare module mongo{
 		* @param options writeConcern Optional. A document expressing the write concern. Omit to use the default write concern
 		* @param options ordered Optional. If true, perform an ordered insert of the documents in the array, and if an error occurs with one of documents, MongoDB will return without processing the remaining documents in the array.If false, perform an unordered insert, and if an error occurs with one of documents, continue processing the remaining documents in the array.Defaults to true.
 		**/
-		insert(docs:any|any[], options?:{writeConcern?:IWriteConcern, ordered?:mongoBoolean}):{nInserted:number;writeError?:any;writeConcernError?:any};
+		insert(docs:Object|Object[], options?:{writeConcern?:IWriteConcern, ordered?:mongoBoolean}):IInsertResult;
+		
+		/**
+		* New in version 3.2
+		**/
+		insertMany(docs:Object[], options?:{writeConcern?:IWriteConcern, ordered?:mongoBoolean}|IWriteConcern):IInsertResult;
+		
+		/**
+		* New in version 3.2
+		**/
+		insertOne(doc:Object, options?:{writeConcern?:IWriteConcern}|IWriteConcern):IInsertResult;
 		
 		/**
 		* Returns true if the collection is a capped collection, otherwise returns false.
@@ -173,11 +204,20 @@ declare module mongo{
 		* @param options justOne Optional. To limit the deletion to just one document, set to true. Omit to use the default value of false and delete all documents matching the deletion criteria.
 		* @param options writeConcern Optional. A document expressing the write concern. Omit to use the default write concern
 		**/
-		remove(query,options?:{justOne?:mongoBoolean,writeConcern?:IWriteConcern}):{nRemoved:number;writeError?:any;writeConcernError?:any};
+		remove(query,options?:{justOne?:mongoBoolean,writeConcern?:IWriteConcern}):IRemoveResult;
 		/**
 		* @param justOne Optional. To limit the deletion to just one document, set to true. Omit to use the default value of false and delete all documents matching the deletion criteria.
 		**/
-		remove(query,justOne?:mongoBoolean):{nRemoved:number;writeError?:any;writeConcernError?:any};
+		remove(query,justOne?:mongoBoolean):IRemoveResult;
+		
+		/**
+		* New in version 3.2
+		**/
+		deleteOne(query,options?:{writeConcern?:IWriteConcern}|IWriteConcern):IRemoveResult;
+		/**
+		* New in version 3.2
+		**/
+		deleteMany(query,options?:{writeConcern?:IWriteConcern}|IWriteConcern):IRemoveResult;
 		
 		/**
 		* Renames a collection. Provides a wrapper for the renameCollection database command.
@@ -191,7 +231,7 @@ declare module mongo{
 		* @param doc A document to save to the collection.
 		* @param options writeConcern Optional. A document expressing the write concern. Omit to use the default write concern.
 		**/
-		save(doc, options?:{writeConcern?:IWriteConcern}):{ nMatched? : number, nUpserted? : number, nModified? : number;nInserted?:number; writeError?:any;writeConcernError?:any};
+		save(doc, options?:{writeConcern?:IWriteConcern}):ISaveResult;
 		
 		/**
 		* Returns statistics about the collection. 
@@ -238,7 +278,22 @@ declare module mongo{
 		* @param options multi Optional. If set to true, updates multiple documents that meet the query criteria. If set to false, updates one document. The default value is false. 
 		* @param options writeConcern Optional. A document expressing the write concern. Omit to use the default write concern.
 		**/
-		update(query,update,options?:{upsert?:mongoBoolean, multi?:mongoBoolean, writeConcern?:IWriteConcern}):{ nMatched : number, nUpserted : number, nModified : number; writeError?:any;writeConcernError?:any};
+		update(query,update:Object,options?:{upsert?:mongoBoolean, multi?:mongoBoolean, writeConcern?:IWriteConcern}):IUpdateResult;
+		update(query,update:Object,upsert?:mongoBoolean,multi?:mongoBoolean):IUpdateResult;
+		/**
+		* New in version 3.2
+		**/
+		replaceOne(query, replacement:Object, options?:{upsert?:mongoBoolean, writeConcern?:IWriteConcern}|IWriteConcern):IUpdateResult;
+		
+		/**
+		* New in version 3.2
+		**/
+		updateOne(query,update:Object,options?:{upsert?:mongoBoolean, writeConcern?:IWriteConcern}|IWriteConcern):IUpdateResult;
+
+		/**
+		* New in version 3.2
+		**/
+		updateMany(query,update:Object,options?:{upsert?:mongoBoolean, writeConcern?:IWriteConcern}|IWriteConcern):IUpdateResult;
 		
 		/**
 		* Validates a collection. The method scans a collection’s data structures for correctness and returns a single document that describes the relationship between the logical collection and the physical representation of the data.
@@ -273,6 +328,11 @@ declare module mongo{
 		* @see db.collection.count
 		**/		
 		count(query?):IExplainResult;
+		/**
+		* New in version 3.2
+		* @see db.collection.distinct
+		**/		
+		distinct(field:string, query?):IExplainResult;
 		/**
 		* @see db.collection.find
 		**/
@@ -529,6 +589,12 @@ declare module mongo{
 		**/
 		showDiskLoc():ICursor;
 		/**
+		 * New in Version 3.2
+		 * This method replaces the previous cursor.showDiskLoc().
+		 * Modifies the output of a query by adding a field $recordId to matching documents. $recordId is the internal key which uniquely identifies a document in a collection. It has the form:
+		 */
+		showRecordId():ICursor;
+		/**
 		* A count of the number of documents that match the db.collection.find() query after applying any cursor.skip() and cursor.limit() methods.
 		**/
 		size():number;
@@ -552,7 +618,11 @@ declare module mongo{
 		/**
 		* The toArray() method returns an array that contains all the documents from a cursor. The method iterates completely the cursor, loading all the documents into RAM and exhausting the cursor.
 		**/
-		toArray():any[];		
+		toArray():any[];
+		/**
+		* To list the available modifier and cursor handling methods
+		**/
+		help():void;
 	}
 	
 	interface IDatabase{
@@ -563,9 +633,6 @@ declare module mongo{
 		* @param query Optional. A standard query document that limits the documents copied as part of the db.cloneCollection() operation. All query selectors available to the find() are available here.
 		**/
 		cloneCollection(fromSvr:string, collection:string, query?):void;
-		
-		faq:ICollection;
-		
 		/**
 		* Copies a remote database to the current database. The command assumes that the remote database has the same name as the current database.
 		* New databases are implicitly created, so the current host does not need to have a database named "importdb" for this command to succeed.
@@ -636,7 +703,7 @@ declare module mongo{
 		* @param func A JavaScript function to execute.
 		* @param arguments Optional. A list of arguments to pass to the JavaScript function. Omit if the function does not take arguments.
 		**/
-		eval(func:Function, arguments?:any[]):any;
+		eval(func:Function, ...arguments:any[]):any;
 		/**
 		* Forces the mongod to flush all pending write operations to the disk and locks the entire mongod instance to prevent additional writes until the user releases the lock with the db.fsyncUnlock() command. db.fsyncLock() is an administrative command.
 		**/
@@ -653,7 +720,7 @@ declare module mongo{
 		/**
 		* Returns an array of documents with collection information, i.e. collection name and options, for the current database.
 		**/
-		getCollectionInfos():{name:string;options:any}[];
+		getCollectionInfos(filter?:any):{name:string;options:any}[];
 		/**
 		* Returns an array containing the names of all collections in the current database.
 		**/
@@ -671,7 +738,7 @@ declare module mongo{
 		* @param w Optional. The write concern’s w value.
 		* @param wtimeout Optional. The time limit in milliseconds.
 		**/
-		getLastErrorObj(w?:number, wtimeout?:number):{ connectionId: number; err?: string; n: number; ok: number; syncMillis: number; writtenTo: any};
+		getLastErrorObj(w?:number, wtimeout?:number):IErrorObj;
 		/**
 		* Returns the current verbosity settings. The verbosity settings determine the amount of Log Messages that MongoDB produces for each log message component.
 		* If a component inherits the verbosity level of its parent, db.getLogComponents() displays -1 for the component’s verbosity.
@@ -748,7 +815,7 @@ declare module mongo{
 		/**
 		* Prints a formatted report of the sharding configuration and the information regarding existing chunks in a sharded cluster.
 		**/
-		printShardingStatus():void;
+		printShardingStatus(verbose?:mongoBoolean):void;
 		/**
 		* Returns a formatted report of the status of a replica set from the perspective of the secondary member of the set. The output is identical to that of rs.printSlaveReplicationInfo().
 		**/
@@ -771,7 +838,9 @@ declare module mongo{
 		/**
 		* @param cmdObj A database command, specified in document form, e.g. {"listCollections":1}
 		**/
-		runCommand(cmdObj:any):any;
+		runCommand(cmdObj:Object):any;
+		adminCommand(cmdObj:string|Object):any;
+		_adminCommand(cmdObj:string|Object):any;
 		/**
 		* Provides a wrapper around the buildInfo database command. buildInfo returns a document that contains an overview of parameters used to compile this mongod instance.
 		**/
@@ -804,7 +873,7 @@ declare module mongo{
 		* This operation fails when the current database is not the admin database.
 		* This command provides a wrapper around the shutdown.
 		**/
-		shutdownServer():void;
+		shutdownServer(options?:{timeoutSecs?:number}):void;
 		/**
 		* Returns statistics that reflect the use state of a single database.
 		* @param scale Optional. The scale at which to deliver results. Unless specified, this command returns all data in bytes.
@@ -821,7 +890,8 @@ declare module mongo{
 		* @param mechanism Optional. Specifies the authentication mechanism used. Defaults to either: SCRAM-SHA-1 on new 3.0, MONGODB-CR otherwise.
 		* @param digestPassword Optional. Determines whether the server receives digested or undigested password. Set to false to specify undigested password. For use with SASL/LDAP authentication since the server must forward an undigested password to saslauthd.
 		**/
-		auth(username:string, password:string, mechanism?:string, digestPassword?:mongoBoolean):number;
+		auth(username:string, password:string):number;
+		auth(options:{user:string,pwd:string,mechanism?:string,digestPassword:mongoBoolean}):number;
 		/**
 		* Creates a new user for the database where the method runs. db.createUser() returns a duplicate user error if the user already exists on the database.
 		* @param user The document with authentication and access information about the user to create.
@@ -829,21 +899,33 @@ declare module mongo{
 		**/
 		createUser(user:IUser, writeConcern?:IWriteConcern);
 		/**
+		* To create legacy (2.2. and earlier) privilege documents
+		* Deprecated since version 2.4: The roles parameter replaces the readOnly parameter for db.addUser(). 2.4 also adds the otherDBRoles and userSource fields to documents in the system.users collection.
+		**/
+		addUser(user:string, pwd:string, readonly?:mongoBoolean);
+		/**
+		* Use db.addUser() to add privilege documents to the system.users collection in a database, which creates database credentials in MongoDB.
+		* Changed in version 2.4: The schema of system.users changed in 2.4 to accommodate a more sophisticated privilege model. In 2.4 db.addUser() supports both forms of privilege documents.
+		**/
+		addUser(user:IUser);
+		/**
 		* Updates the user’s profile on the database on which you run the method. An update to a field completely replaces the previous field’s values. This includes updates to the user’s roles array.
 		* When you update the roles array, you completely replace the previous array’s values. To add or remove roles without replacing all the user’s existing roles, use the db.grantRolesToUser() or db.revokeRolesFromUser() methods.
 		* @param username The name of the user to update.
 		* @param update A document containing the replacement data for the user. This data completely replaces the corresponding data for the user.
 		* @param writeConcern Optional. The level of write concern for the update operation. 
 		**/
-		updateUser(username:string, update:any, writeConcern?:IWriteConcern);
+		updateUser(username:string, update:{customData?:any;roles?:(string|{role:string,db:string})[],pwd?:string}, writeConcern?:IWriteConcern);
 		/**
 		* Updates a user’s password. Run the method in the database where the user is defined, i.e. the database you created the user.
 		* @param username Specifies an existing username with access privileges for this database.
 		* @param password Specifies the corresponding password.
-		* @param mechanism Optional. Specifies the authentication mechanism used. Defaults to either: SCRAM-SHA-1 on new 3.0, MONGODB-CR otherwise.
-		* @param digestPassword Optional. Determines whether the server receives digested or undigested password. Set to false to specify undigested password. For use with SASL/LDAP authentication since the server must forward an undigested password to saslauthd.
+		* @param writeConcern Optional. The level of write concern for the update operation. 
 		**/
-		changeUserPassword(username:string, password:string, mechanism?:string, digestPassword?:mongoBoolean);
+		changeUserPassword(username:string, password:string, writeConcern?:IWriteConcern);
+		// changeUserPassword(username:string, password:string, mechanism?:string, digestPassword?:mongoBoolean);
+		// * @param mechanism Optional. Specifies the authentication mechanism used. Defaults to either: SCRAM-SHA-1 on new 3.0, MONGODB-CR otherwise.
+		// * @param digestPassword Optional. Determines whether the server receives digested or undigested password. Set to false to specify undigested password. For use with SASL/LDAP authentication since the server must forward an undigested password to saslauthd.
 		/**
 		* Removes the specified username from the database.
 		* @param username The database username.
@@ -950,7 +1032,7 @@ declare module mongo{
 		* @param showPrivileges Optional. Set the field to true to show role privileges, including both privileges inherited from other roles and privileges defined directly. By default, the command returns only the roles from which this role inherits privileges and does not return specific privileges.
 		* @param showBuiltinRoles Optional. Set to true to display built-in roles as well as user-defined roles.
 		**/
-		getRoles(rolesInfo:number, showPrivileges?:mongoBoolean, showBuiltinRoles?:mongoBoolean):IRole[];		
+		getRoles(options?:{rolesInfo?:number, showPrivileges?:mongoBoolean, showBuiltinRoles?:mongoBoolean}):IRole[];		
 	}
 	interface IReplication{
 		/**
@@ -1212,6 +1294,7 @@ declare module mongo{
 		* @param database The name of the database to access.
 		**/
 		getDB(database:string):IDatabase;
+		getDBNames():string[];
 		/**
 		* See Read Preference for an introduction to read preferences in MongoDB. Use getReadPrefMode() to return the current read preference mode
 		**/
@@ -1267,7 +1350,7 @@ declare module mongo{
 		* Adds an insert operation to a bulk operations list.
 		* @param doc Document to insert. The size of the document must be less than or equal to the maximum BSON document size (16 megabytes)
 		**/
-		insert(doc:any);
+		insert(doc:Object);
 		/**
 		* Specifies a query condition for an update or a remove operation.
 		* @param query Specifies a query condition using Query Selectors to select documents for an update or a remove operation. To specify all documents, use an empty document {}.With update operations, the sum of the query document and the update document must be less than or equal to the maximum BSON document size (16 megabytes).With remove operations, the query document must be less than or equal to the maximum BSON document size (16 megabytes).
@@ -1332,7 +1415,7 @@ declare module mongo{
 		/**
 		* Build-in roles: read readWrite dbAdmin dbOwner userAdmin clusterAdmin clusterManager clusterMonitor hostManager backup restore readAnyDatabase readWriteAnyDatabase userAdminAnyDatabase dbAdminAnyDatabase root
 		**/
-		roles:string[]|{role:string;db:string}[];
+		roles:(string|{role:string;db:string})[];
 	}
 	
 	interface IRole{
@@ -1342,7 +1425,7 @@ declare module mongo{
 	}
 	
 	interface IPrivilege{
-		resource:{db:string; collection:string};
+		resource:{db:string; collection:string}|{cluster:boolean}|{anyResource:boolean};
 		actions:string[]
 	}
 	
@@ -1374,7 +1457,21 @@ declare module mongo{
 		/**
 		* Optional. Available for the WiredTiger storage engine only. { storage-engine-name: options }
 		**/
-		storageEngine?:{ [storageEngineMame:string]: any };		
+		storageEngine?:{ [storageEngineMame:string]: any };
+		/**
+		* The validator option takes a document that specifies the validation rules or expressions. You can specify the expressions using the same operators as the query operators with the exception of the following operators: $geoNear, $near, $nearSphere, $text, $where.
+		**/
+		validator?:any;
+		/**
+		* The validationLevel determines how strictly MongoDB applies the validation rules to existing documents during an update.
+		* avaliable values: off, strict, moderate
+		**/
+		validationLevel?:string;
+		/**
+		* The validationAction option determines whether to error on invalid documents or just warn about the violations but allow invalid documents.
+		* avaliable values: error, warn
+		**/
+		validationAction?:string;
 	}
 	
 	interface IStatsOption{
@@ -1387,11 +1484,11 @@ declare module mongo{
 		**/
 		indexDetails?:mongoBoolean;
 		/**
-		* Optional. If indexDetails is true, use indexDetailsField to filter index details by specifying the index key. Use getIndexes() to discover index keys. You cannot use indexDetailsField with indexDetailsName.
+		* Optional. If indexDetails is true, use indexDetailsKey to filter index details by specifying the index key. Use getIndexes() to discover index keys. You cannot use indexDetailsKey with indexDetailsName.
 		**/
-		indexDetailsField?:IField;
+		indexDetailsKey?:IField;
 		/**
-		* Optional. If indexDetails is true, use indexDetailsName to filter index details by specifying the index name. Use getIndexes() to discover index names. You cannot use indexDetailsName with indexDetailsField.
+		* Optional. If indexDetails is true, use indexDetailsName to filter index details by specifying the index name. Use getIndexes() to discover index names. You cannot use indexDetailsName with indexDetailsKey.
 		**/
 		indexDetailsName?:string;		
 	}
@@ -1429,13 +1526,24 @@ declare module mongo{
 		* Specifies whether to include the timing information in the result information. The verbose defaults to true to include the timing information.
 		**/
 		verbose?:mongoBoolean;
+		/**
+		 * New in version 3.2
+		 * Enables mapReduce to bypass document validation during the operation. This lets you insert documents that do not meet the validation requirements.
+		 */
+		bypassDocumentValidation?:mongoBoolean;
 	}
+	
+	interface IInsertResult{nInserted:number;writeError?:any;writeConcernError?:any}
+	interface IRemoveResult{nRemoved:number;writeError?:any;writeConcernError?:any}
+	interface ISaveResult{ nMatched? : number, nUpserted? : number, nModified? : number;nInserted?:number; writeError?:any;writeConcernError?:any}
+	interface IUpdateResult{ nMatched : number, nUpserted : number, nModified : number; writeError?:any;writeConcernError?:any}
+	interface IErrorObj{ connectionId: number; err?: string; n: number; ok: number; syncMillis: number; writtenTo: any}
 	
 	interface IGroupArg{
 		/**
 		* The field or fields to group. Returns a “key object” for use as the grouping key.
 		**/
-		key:IField;
+		key?:IField;
 		/**
 		* An aggregation function that operates on the documents during the grouping operation. These functions may return a sum or a count. The function takes two arguments: the current document and an aggregation result document for that group.
 		**/
@@ -1491,6 +1599,10 @@ declare module mongo{
 		* Optional. Used in conjunction with the update field. When true, findAndModify() creates a new document if no document matches the query, or if documents match the query, findAndModify() performs an update. To avoid multiple upserts, ensure that the query fields are uniquely indexed.
 		**/
 		upsert?: mongoBoolean
+		/**
+		* New in version 3.2
+		**/
+		bypassDocumentValidation?:mongoBoolean;
 	}
 	
 	interface IIndex{
@@ -1517,12 +1629,22 @@ declare module mongo{
 		min?:number;
 		max?:number;
 		bucketSize?:number;
+		dropDups?:mongoBoolean;
+		partialFilterExpression?:Object;
 	}
 	
 	interface IAggregateOption{
 		explain?:mongoBoolean;
 		allowDiskUse?:mongoBoolean;
-		cursor?:{batchSize:number;}
+		cursor?:{batchSize:number;};
+		/**
+		 * New in Version 3.2
+		 */
+		bypassDocumentValidation?:mongoBoolean;
+		/**
+		 * New in Version 3.2
+		 */
+		readConcern?:Object;
 	}
 	
 	interface IWriteConcern{
@@ -1616,6 +1738,7 @@ declare module mongo{
 		numYields?:number;
 		fsyncLock?:boolean;
 		info?:string;
+		lockType?:string;
 		lockStats?:{
 			acquireCount:number;
 			acquireWaitCount:number;
@@ -1718,8 +1841,8 @@ declare module mongo{
 }
 
 interface ObjectIdConstructor{
-	new(val?):()=>ObjectId;
-	(val?):()=>ObjectId;
+	new(val?):ObjectId;
+	(val?):ObjectId;
 	fromDate(source:Date):ObjectId;
 }
 
@@ -1732,8 +1855,8 @@ interface ObjectId{
 declare var ObjectId:ObjectIdConstructor;
 
 interface TimestampConstructor{
-	new():(time:number, inc:number)=>Timestamp;
-	():(time:number, inc:number)=>Timestamp;
+	new(time:number, inc:number):Timestamp;
+	(time:number, inc:number):Timestamp;
 }
 
 interface Timestamp{
@@ -1778,6 +1901,7 @@ interface ObjectConstructor{
 	extend(dst, src, deep?:boolean):any;
 	merge(dst, src, deep?:boolean):any;
 	keySet(obj):string[];
+	bsonsize(obj:Object):number;
 }
 
 interface String{
@@ -1815,9 +1939,21 @@ interface NumberIntConstructor{
 
 declare var NumberInt:NumberIntConstructor;
 
+interface DoubleConstructor{
+	new(num):Double
+	(num):Double
+}
+
+interface Double{
+	valueOf():number
+	tojson():string
+}
+
+declare var Double:DoubleConstructor
+
 interface DBRef{
-	new():DBRef;
-	():DBRef;
+	new(namespace:string, _id, database?:string):DBRef;
+	(namespace:string, _id, database?:string):DBRef;
 	fetch();
 	tojson():string;
 	getDb();
@@ -1830,8 +1966,8 @@ interface DBRef{
 declare var DBRef:DBRef;
 
 interface Binary{
-	new():Binary;
-	():Binary;
+	new(sub_type:number, base64:string):Binary;
+	(sub_type:number, base64:string):Binary;
 }
 
 declare var Binary:Binary;
@@ -1850,15 +1986,36 @@ interface Map{
 	values():any[];
 }
 
+declare var rand:()=>number; //for 2.4
+declare var Random:Random;
+
+interface Random{
+	srand(s);
+	rand():number;
+	randInt():number;
+	setRandomSeed(s?);
+	genExp(mean):number;
+	genNormal(mean, standardDeviation):number;
+}
+
+declare var Geo:Geo;
+
+interface Geo{
+	distance(a,b):number;
+	sphereDistance(a,b):number;
+}
+
 declare function tojson(x, indent?, nohint?):string;
 declare function tojsononeline(x):string;
 declare function tojsonObject(x, indent?, nohint?):string;
 declare function print(...x);
 declare function printjson(x);
 declare function printjsononeline(x);
+declare function printArray(x:any[]);
 declare function isString(x);
 declare function isNumber(x);
 declare function isObject(x);
+declare function hex_md5(arg):string;
 declare function chatty(s);
 declare function friendlyEqual(a,b):boolean;
 declare function argumentsToArray(a):any[];

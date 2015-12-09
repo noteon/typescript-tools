@@ -605,12 +605,14 @@ function injectCompleterToAdjustMethodParamWidth() {
         if (methodParamItem.currentParam) {
             _.delay(function () {
                 var $line = $('.ace_editor.ace_autocomplete').find('.ace_line.ace_selected');
-                var reg = new RegExp("\\b" + methodParamItem.currentParam + "\\b");
-                var start = methodParamItem.caption.search(reg);
+                var paramName = methodParamItem.currentParam && methodParamItem.currentParam.split(/\b/)[0];
+                var reg = new RegExp("\\b" + paramName + "\\b");
+                var caption = methodParamItem.caption.replace(/\s/g, "");
+                var start = caption.search(reg);
                 if (start > -1) {
-                    var newHtml = (methodParamItem.caption.slice(0, start) || "") +
+                    var newHtml = (caption.slice(0, start) || "") +
                         ("<span class='ace_completion-highlight'>" + methodParamItem.currentParam + "</span>") +
-                        (methodParamItem.caption.slice(start + methodParamItem.currentParam.length) || "");
+                        (caption.slice(start + methodParamItem.currentParam.length) || "");
                     $line.html(newHtml);
                 }
             }, 25);
@@ -1338,7 +1340,10 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     return fieldsFetcher('');
                 }
             };
-            var noQuotaStr = (function () {
+            var canQuotaStr = (function () {
+                var prePrefixChar = currentLine[currentLine.length - 1 - (prefix || "").length];
+                if (prePrefixChar === ".")
+                    return false;
                 var theLine = currentLine.slice(0, currentLine.length - (prefix || "").length).trim();
                 //console.log(currentLine,"theLine",theLine,"prefix",prefix);
                 if (_.isEmpty(theLine))
@@ -1350,7 +1355,7 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                 var hasDot = fieldValue.indexOf('.') > -1;
                 return {
                     caption: fieldValue,
-                    value: (hasDot && noQuotaStr) ? "\"" + fieldValue + "\"" : fieldValue,
+                    value: (hasDot && canQuotaStr) ? "\"" + fieldValue + "\"" : fieldValue,
                     meta: it.collection,
                     score: it["score"] || 1,
                 };
@@ -1503,7 +1508,7 @@ var mongoMapTemplates = [
 var mongoLimitTemplates = [
     {
         caption: "limit",
-        snippet: "limit(${2:5})",
+        snippet: "limit(5)",
         comment: 'Use the limit() method on a cursor to specify the maximum number of documents the cursor will return. limit() is analogous to the LIMIT statement in a SQL database.',
         example: "db.orders.find().limit(5)",
     },

@@ -112,7 +112,11 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                 }
             }
             
-            let noQuotaStr=(()=>{
+            let canQuotaStr=(()=>{
+                let prePrefixChar=currentLine[currentLine.length-1-(prefix||"").length];
+                if (prePrefixChar === ".")
+                    return false;
+                
                let theLine=currentLine.slice(0,currentLine.length-(prefix||"").length).trim();
                //console.log(currentLine,"theLine",theLine,"prefix",prefix);
                if (_.isEmpty(theLine)) return true;
@@ -126,7 +130,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                 
                 return {
                     caption: fieldValue,
-                    value: (hasDot&&noQuotaStr)?`"${fieldValue}"`:fieldValue,
+                    value: (hasDot&&canQuotaStr)?`"${fieldValue}"`:fieldValue,
                     meta: it.collection,
                     score: it["score"]||1,
                 }

@@ -300,11 +300,13 @@ export function injectCompleterToAdjustMethodParamWidth(){
             
             let reg=new RegExp(`\\b${paramName}\\b`);
             
-            let start=methodParamItem.caption.search(reg);
+            let caption=methodParamItem.caption.replace(/\s/g,"");
+            
+            let start=caption.search(reg);
             if (start>-1){
-              let newHtml=(methodParamItem.caption.slice(0,start)||"")+ 
+              let newHtml=(caption.slice(0,start)||"")+ 
                   `<span class='ace_completion-highlight'>${methodParamItem.currentParam}</span>`+ 
-                  (methodParamItem.caption.slice(start+methodParamItem.currentParam.length)||"");
+                  (caption.slice(start+methodParamItem.currentParam.length)||"");
                   
               $line.html(newHtml);      
             }

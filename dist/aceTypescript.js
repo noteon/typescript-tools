@@ -1296,6 +1296,13 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
     var fieldsCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__firstCompletionEntry || nonMongoCompletePrevChar(session.__prevChar)) {
+                if (session.__firstCompletionEntry && (session.__prevChar === ".") && (!prefix)) {
+                    var currentLine_1 = (aceUtils.getLineTextBeforePos(session, pos) || "").trim();
+                    var colNames = aceUtils.getCollectionNames(currentLine_1);
+                    if (!_.isEmpty(colNames)) {
+                        colNames.forEach(fieldsFetcher);
+                    }
+                }
                 return callback(null, []);
             }
             if (prefix && aceUtils.isAllNumberStr(prefix)) {
@@ -1324,8 +1331,9 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             var getFields = function () {
                 if (prevChar === ".") {
                     var colNames = aceUtils.getCollectionNames(currentLine);
-                    if (!_.isEmpty(colNames))
+                    if (!_.isEmpty(colNames)) {
                         colNames.forEach(fieldsFetcher);
+                    }
                     else {
                         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
                         var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar - 2);
@@ -1492,7 +1500,7 @@ exports.dateRangeCompleter = {
 var mongoForEachTemplates = [
     {
         caption: "forEach",
-        snippet: "forEach((it)=> { \n      $1\n });",
+        snippet: "forEach((it)=> { \n      $1\n});",
         comment: 'Iterates the cursor to apply a JavaScript function to each document from the cursor.',
         example: "db.users.find().forEach( function(myDoc) { print( \"user: \" + myDoc.name ); } );",
     }
@@ -1500,7 +1508,7 @@ var mongoForEachTemplates = [
 var mongoMapTemplates = [
     {
         caption: "map",
-        snippet: "map((it)=> { \n      $1\n      return it;\n });",
+        snippet: "map((it)=> { \n      $1\n      return it;\n});",
         comment: 'Applies function to each document visited by the cursor and collects the return values from successive application into an array.',
         example: "db.users.find().map( function(u) { return u.name; } );",
     },
@@ -1652,47 +1660,47 @@ var dateRangeSnippets = [
         caption: "DateRange",
         snippet: "{\n   \\$gte: new Date(\"${3:" + todayStr + "}\"),\n   \\$lt: new Date(\"${4:" + tomorrowStr + "}\")\n }",
         comment: 'Date Range',
-        example: "{\n   $gte: new Date(\"" + todayStr + "\"),\n   $lte: new Date(\"" + tomorrowStr + "\")\n }",
+        example: "{\n   $gte: new Date(\"" + todayStr + "\"),\n   $lte: new Date(\"" + tomorrowStr + "\")\n}",
         attachedToFindMethod: true
     },
     {
         caption: "DateRangeMomentJS",
-        snippet: "{\n   \\$gte: moment(\"${3:" + todayStr + "}\").startOf(\"day\").toDate(),\n   \\$lte: moment(\"${3:" + todayStr + "}\").endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment(\"${3:" + todayStr + "}\").startOf(\"day\").toDate(),\n   \\$lte: moment(\"${3:" + todayStr + "}\").endOf(\"day\").toDate()\n}",
         comment: 'Date Range (use momentjs)',
-        example: "{\n   $gte: moment(\"" + todayStr + "\").startOf(\"day\").toDate(),\n   $lte: moment(\"" + todayStr + "\").endOf(\"day\").toDate()\n }",
+        example: "{\n   $gte: moment(\"" + todayStr + "\").startOf(\"day\").toDate(),\n   $lte: moment(\"" + todayStr + "\").endOf(\"day\").toDate()\n}",
         attachedToFindMethod: true
     },
     {
         caption: "TodayDateRange",
-        snippet: "{\n   \\$gte: moment().startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n}",
         comment: 'Today (use momentjs)',
-        example: "{\n   $gte: moment().startOf(\"day\").toDate(),\n   $lte: moment().endOf(\"day\").toDate()\n }",
+        example: "{\n   $gte: moment().startOf(\"day\").toDate(),\n   $lte: moment().endOf(\"day\").toDate()\n}",
         attachedToFindMethod: true
     },
     {
         caption: "YesterdayDateRange",
-        snippet: "{\n   \\$gte: moment().subtract(1,\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().subtract(1,\"day\").endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().subtract(1,\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().subtract(1,\"day\").endOf(\"day\").toDate()\n}",
         comment: 'Yesterday (use momentjs)',
-        example: "{\n   $gte: moment().subtract(1,\"day\").startOf(\"day\").toDate(),\n   $lte: moment().subtract(1,\"day\").endOf(\"day\").toDate()\n }",
+        example: "{\n   $gte: moment().subtract(1,\"day\").startOf(\"day\").toDate(),\n   $lte: moment().subtract(1,\"day\").endOf(\"day\").toDate()\n}",
     },
     {
         caption: "LastNdaysDateRange",
-        snippet: "{\n   \\$gte: moment().subtract(${3:7},\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().subtract(${3:7},\"day\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n}",
         comment: 'Last N days (use momentjs)',
-        example: "{\n   $gte: moment().subtract(N,\"day\").startOf(\"day\").toDate(),\n   $lte: moment().endOf(\"day\").toDate()\n }",
+        example: "{\n   $gte: moment().subtract(N,\"day\").startOf(\"day\").toDate(),\n   $lte: moment().endOf(\"day\").toDate()\n}",
         attachedToFindMethod: true
     },
     {
         caption: "LastNweeksDateRange",
-        snippet: "{\n   \\$gte: moment().subtract(${3:1},\"week\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().subtract(${3:1},\"week\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n}",
         comment: 'Last N weeks (use momentjs)',
-        example: "{\n   $gte: moment().subtract(N,\"week\").startOf(\"day\").toDate(),\n   $lte: moment().endOf(\"day\").toDate()\n }",
+        example: "{\n   $gte: moment().subtract(N,\"week\").startOf(\"day\").toDate(),\n   $lte: moment().endOf(\"day\").toDate()\n}",
     },
     {
         caption: "LastNmonthsDateRange",
-        snippet: "{\n   \\$gte: moment().subtract(${3:1},\"month\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n }",
+        snippet: "{\n   \\$gte: moment().subtract(${3:1},\"month\").startOf(\"day\").toDate(),\n   \\$lte: moment().endOf(\"day\").toDate()\n}",
         comment: 'Last N months (use momentjs)',
-        example: "{\n   $gte: moment().subtract(N,\"month\").startOf(\"day\").toDate(),\n   $lte: moment().endOf(\"day\").toDate()\n }",
+        example: "{\n   $gte: moment().subtract(N,\"month\").startOf(\"day\").toDate(),\n   $lte: moment().endOf(\"day\").toDate()\n}",
     }
 ];
 dateRangeSnippets = dateRangeSnippets.map(function (it) {
@@ -2449,8 +2457,10 @@ exports.getTypescriptParameterCompleter = function (tsServ, scriptFileName) {
                 if (!type)
                     return type;
                 var rst = type.replace(/: any$/, '');
-                if (rst && rst.length > 30)
-                    rst = rst.slice(0, 30) + "...";
+                rst = rst.replace(/ |\t|\n/g, '');
+                if (rst && rst.length > 30) {
+                    rst = rst.split(":")[0];
+                }
                 return rst;
             };
             //console.log({helpItems});

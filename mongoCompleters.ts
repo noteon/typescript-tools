@@ -59,6 +59,15 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
     var fieldsCompleter = {
         getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
             if (session.__paramHelpItems || session.__includeShellCmdSpaceChar || session.__firstCompletionEntry || nonMongoCompletePrevChar(session.__prevChar)) {
+                if (session.__firstCompletionEntry && (session.__prevChar===".") && (!prefix)){
+                    let currentLine =(aceUtils.getLineTextBeforePos(session,pos)||"").trim(); 
+                    let colNames=aceUtils.getCollectionNames(currentLine); 
+                    if (!_.isEmpty(colNames)){
+                        colNames.forEach(fieldsFetcher)
+                    }
+                }
+                
+                
                 return callback(null, [])
             }
             
@@ -94,8 +103,9 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
             var getFields = () => {
                 if (prevChar === ".") {
                     var colNames = aceUtils.getCollectionNames(currentLine);
-                    if (!_.isEmpty(colNames))
+                    if (!_.isEmpty(colNames)){
                         colNames.forEach(fieldsFetcher)
+                    }
                     else {
                         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
                         var quickInfo = tsServ.getQuickInfoByPos(scriptFileName, posChar - 2);

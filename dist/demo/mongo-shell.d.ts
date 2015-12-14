@@ -1838,6 +1838,10 @@ declare module mongo{
 	}
 	
 	type mongoBoolean = boolean|number;
+	
+	interface IDatabase{
+		test:ICollection
+	}
 }
 
 interface ObjectIdConstructor{

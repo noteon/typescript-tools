@@ -52,7 +52,7 @@ var mongoSortTemplates = [
       {
             caption: "sortById",
             snippet: 
-`sort({ _id:\${2:1} })`,
+`sort({ _id:1 })`,
             comment: 'Sort by Id',
             example:
 `db.orders.find().sort({ _id: -1 })`,
@@ -61,7 +61,7 @@ var mongoSortTemplates = [
       {
             caption: "sortAsInserted",
             snippet: 
-`sort({ \\$natural:\${2:1} })`,
+`sort({ \\$natural:1 })`,
             comment: 'Specifies the order in which the query returns matching documents. Use $natural operator to return documents in the order they exist on disk',
             example:
 `db.orders.find().sort({ $natural: 1 })`,
@@ -70,7 +70,7 @@ var mongoSortTemplates = [
       {
             caption: "sortAsInsertedDesc",
             snippet: 
-`sort({ \\$natural:\${2:-1} })`,
+`sort({ \\$natural:-1 })`,
             comment: 'Specifies the order in which the query returns matching documents. Use $natural operator to return documents in the reversed order they exist on disk',
             example:
 `db.orders.find().sort({ $natural: -1 })`,
@@ -79,7 +79,7 @@ var mongoSortTemplates = [
       {
             caption: "first",
             snippet: 
-`sort({ \\$natural:1 }).limit(\${2:1})`,
+`sort({ \\$natural:1 }).limit(1)`,
             comment: 'Return first N records. Use $natural operator to return documents in the order they exist on disk',
             example:
 `db.orders.find().sort({ $natural: 1 }).limit(n)`,
@@ -88,7 +88,7 @@ var mongoSortTemplates = [
       {
             caption: "last",
             snippet: 
-`sort({ \\$natural:-1 }).limit(\${2:1})`,
+`sort({ \\$natural:-1 }).limit(1)`,
             comment: 'Return last N records. Use $natural operator to return documents in the reversed order they exist on disk',
             example:
 `db.orders.find().sort({ $natural: -1 }).limit(n)`,

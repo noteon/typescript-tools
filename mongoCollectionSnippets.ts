@@ -11,6 +11,15 @@ var mongoFindTemplates = [
       },
 
       {
+            caption: "findById",
+            snippet:
+            `find({_id: ObjectId("$2")})`,
+            comment: 'Selects documents in a collection and returns a cursor to the selected documents.',
+            example:
+            `db.products.find( { _id: ObjectId("xxxxxxxxxxxxx") })`,
+      },
+      
+      {
             caption: "findProjection",
             snippet:
             `find({$2}, {$3: 0, name: 1})`,

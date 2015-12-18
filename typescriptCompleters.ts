@@ -94,12 +94,17 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             if (isMongoDatabaseMethod){
                 let cols=[];
                 completionEntries=completionEntries.map((it)=>{
-                    if (it.meta==="property"){
+                    if ((it.meta==="property") && (it.caption!=="$cmd")){
                         it.score=10;
                         it.meta="collection";
                         cols.push(it.caption);
                         //console.log("set top", it);
                     }else{
+                        if (it.caption==="$cmd"){
+                            delete it.snippet;
+                            it.value=it.caption;
+                        }
+                        
                         it.score=1;
                     }
                     return it;

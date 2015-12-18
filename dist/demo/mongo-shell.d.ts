@@ -84,16 +84,6 @@ declare module mongo{
 		
 		/**
 		* Modifies and returns a single document. By default, the returned document does not include the modifications made on the update. To return the document with the modifications made on the update, use the new option. The findAndModify() method is a shell helper around the findAndModify command.
-		* e.g. 
-		* db.collection.findAndModify({
-		*     query: document,
-		*     sort: document,
-		*     remove: boolean,
-		*     update: document,
-		*     new: boolean,
-		*     fields: document,
-		*     upsert: boolean
-		* });
 		**/
 		findAndModify(document:IFindAndModifyArg):any;
 		
@@ -323,16 +313,16 @@ declare module mongo{
 		/**
         * @see db.collection.aggregate
         **/
-		aggregate(pipeline:any[], options?:IAggregateOption):IExplainResult;
+		aggregate(pipeline:any[], options?:IAggregateOption):any;
 		/**
 		* @see db.collection.count
 		**/		
-		count(query?):IExplainResult;
+		count(query?):any;
 		/**
 		* New in version 3.2
 		* @see db.collection.distinct
 		**/		
-		distinct(field:string, query?):IExplainResult;
+		distinct(field:string, query?):any;
 		/**
 		* @see db.collection.find
 		**/
@@ -340,15 +330,15 @@ declare module mongo{
 		/**
 		* @see db.collection.group
 		**/		
-		group(arg:IGroupArg):IExplainResult;
+		group(arg:IGroupArg):any;
 		/**
 		* @see db.collection.remove
 		**/
-		remove(query,justOne?:mongoBoolean,writeConcern?:IWriteConcern):IExplainResult;
+		remove(query,justOne?:mongoBoolean,writeConcern?:IWriteConcern):any;
 		/**
 		* @see db.collection.update
 		**/
-		update(query,update,options?:{upsert?:mongoBoolean, multi?:mongoBoolean, writeConcern?:IWriteConcern}):IExplainResult;
+		update(query,update,options?:{upsert?:mongoBoolean, multi?:mongoBoolean, writeConcern?:IWriteConcern}):any;
 		/**
 		* To see the list of operations supported by db.collection.explain()
 		**/
@@ -367,16 +357,16 @@ declare module mongo{
 		**/		
 		setVerbosity(verbosity?:string|mongoBoolean):ICollectionExplain;
 	}
-	
+
 	interface IExplainCursor{
 		/**
 		* retrieve the explain result
 		**/
-		finish():IExplainResult;
+		finish():any;
 		/**
 		* alias for .finish()
 		**/
-		next():IExplainResult;
+		next():any;
 		/**
 		* For a list of query modifiers available
 		**/
@@ -392,7 +382,7 @@ declare module mongo{
 		/**
 		* @see collection.find({}).count
 		**/
-		count(applySkipLimit?:mongoBoolean):IExplainResult;
+		count(applySkipLimit?:mongoBoolean):any;
 		/**
 		* @see collection.find({}).forEach
 		**/
@@ -443,7 +433,7 @@ declare module mongo{
 		**/
 		sort(sort:IField):IExplainCursor;
 	}
-	
+
 	interface IAggregateCursor{
 		/**
 		* cursor.hasNext() returns true if the cursor returned by the db.collection.find() query can iterate further to return more documents.
@@ -479,7 +469,7 @@ declare module mongo{
 		**/
 		pretty():IAggregateCursor;
 	}
-	
+
 	interface ICursor{
 		/**
 		* Adds OP_QUERY wire protocol flags, such as the tailable flag, to change the behavior of queries.
@@ -507,7 +497,7 @@ declare module mongo{
 		* Provides information on the query plan for the db.collection.find() method.
 		* @param verbosity Optional. Specifies the verbosity mode for the explain output. The mode affects the behavior of explain() and determines the amount of information to return. The possible modes are: "queryPlanner", "executionStats", and "allPlansExecution". Default mode is "queryPlanner". For backwards compatibility with earlier versions of cursor.explain(), MongoDB interprets true as "allPlansExecution" and false as "queryPlanner".
 		**/
-		explain(verbosity?:string|mongoBoolean):IExplainResult;
+		explain(verbosity?:string|mongoBoolean):any;
 		/**
 		* Iterates the cursor to apply a JavaScript function to each document from the cursor.
 		* @param func A JavaScript function to apply to each document from the cursor. The <function> signature includes a single argument that is passed the current document to process.
@@ -555,6 +545,11 @@ declare module mongo{
 		* @param indexBounds The exclusive upper bound for the index keys
 		**/
 		max(indexBounds:IField):ICursor;
+		/**
+		* Constrains the query to only scan the specified number of documents when fulfilling the query. 
+		* Use this modifier to prevent potentially long running queries from disrupting performance by scanning through too much data.
+		**/
+		maxScan(count:number):ICursor;
 		/**
 		* Specifies the inclusive lower bound for a specific index in order to constrain the results of find(). min() provides a way to specify lower bounds on compound key indexes.
 		* The fields correspond to all the keys of a particular index in order. You can explicitly specify the particular index with the hint() method. Otherwise, MongoDB selects the index using the fields in the indexBounds; however, if multiple indexes exist on same fields with different sort orders, the selection of the index may be ambiguous.
@@ -624,7 +619,7 @@ declare module mongo{
 		**/
 		help():void;
 	}
-	
+
 	interface IDatabase{
 		/**
 		* Copies data directly between MongoDB instances. The db.cloneCollection() method wraps the cloneCollection database command.
@@ -684,11 +679,11 @@ declare module mongo{
 		* )
 		* @param operations Optional. Specify true to include operations on idle connections and system operations.
 		**/
-		currentOp(operations?:mongoBoolean):{inprog: ICurrentOp[]};
+		currentOp(operations?:mongoBoolean):{inprog:ICurrentOp[]};
 		/**
 		* @param query Optional. Specify a document with query conditions to report only on operations that match the conditions.
 		**/
-		currentOp(query?):{inprog: ICurrentOp[]};
+		currentOp(query?):{inprog:ICurrentOp[]};
 		/**
 		* Removes the current database, deleting the associated data files.
 		**/
@@ -841,6 +836,12 @@ declare module mongo{
 		runCommand(cmdObj:Object):any;
 		adminCommand(cmdObj:string|Object):any;
 		_adminCommand(cmdObj:string|Object):any;
+
+		/**
+		* another way to run command in old version of mongodb
+		**/
+		$cmd:{findOne:Function};
+		
 		/**
 		* Provides a wrapper around the buildInfo database command. buildInfo returns a document that contains an overview of parameters used to compile this mongod instance.
 		**/
@@ -1034,6 +1035,7 @@ declare module mongo{
 		**/
 		getRoles(options?:{rolesInfo?:number, showPrivileges?:mongoBoolean, showBuiltinRoles?:mongoBoolean}):IRole[];		
 	}
+
 	interface IReplication{
 		/**
 		* Adds a member to a replica set. To run the method, you must connect to the primary of the replica set.
@@ -1101,22 +1103,24 @@ declare module mongo{
 		/**
 		* Forces the primary of the replica set to become a secondary, triggering an election for primary. The method steps down the primary for a specified number of seconds; during this period, the stepdown member is ineligible from becoming primary.
 		* The method only steps down the primary if an electable secondary is up-to-date with the primary, waiting up to 10 seconds for a secondary to catch up.
-		* @param seconds Optional. The number of seconds to step down the primary, during which time the stepdown member is ineligible from becoming primary. If this parameter is unspecified, the method uses the default value of 60 seconds.
+		* @param stepDownSecs Optional. The number of seconds to step down the primary, during which time the stepdown member is ineligible from becoming primary. If this parameter is unspecified, the method uses the default value of 60 seconds.
+		* @param secondaryCatchUpPeriodSecs Optional. The number of seconds that mongod will wait for an electable secondary to catch up to the primary. When specified, secondaryCatchUpPeriodSecs overrides the default wait time of 10 seconds.
 		**/
-		stepDown(seconds?:number);
+		stepDown(stepDownSecs?:number,secondaryCatchUpPeriodSecs?:number);
 		/**
 		* Provides a wrapper around the replSetSyncFrom, which allows administrators to configure the member of a replica set that the current member will pull data from. Specify the name of the member you want to replicate from in the form of [hostname]:[port].
 		* @param server in the form of "[hostname]:[port]".
 		**/
 		syncFrom(server:string);		
 	}
+
 	interface ISharding{
 		/**
 		* Runs a database command against the admin database of a mongos instance.
 		* @param command A database command to run against the admin database.
 		* @param checkMongos Require verification that the shell is connected to a mongos instance.
 		**/
-		_adminCommand(command:string, checkMongos:mongoBoolean);
+		_adminCommand(command:string, checkMongos?:mongoBoolean);
 		/**
 		* Reports on the active balancer lock, if it exists.
 		* Returns:	null if lock document does not exist or no lock is not taken. Otherwise, returns the lock document.
@@ -1135,7 +1139,7 @@ declare module mongo{
 		* Returns information on the last migration performed on the specified database or collection.
 		* @param namespace The namespace of a database or collection within the current database.
 		**/
-		_lastMigration(namespace:string):ILastMigration;
+		_lastMigration(namespace?:string):ILastMigration;
 		/**
 		* Adds a database instance or replica set to a sharded cluster. The optimal configuration is to deploy shards across replica sets. This method must be run on a mongos instance.
 		* @param host The hostname of either a standalone database instance or of a replica set. [replica-set-name/]hostname[:port]. Include the port number if the instance is running on a non-standard port. Include the replica set name if the instance is a replica set, as explained below.
@@ -1238,7 +1242,7 @@ declare module mongo{
 		* @param timeout Milliseconds to wait.
 		* @param interval Milliseconds to sleep each cycle of waiting.
 		**/
-		startBalancer(timeout:number, interval:number);
+		startBalancer(timeout?:number, interval?:number);
 		/**
 		* When run on a mongos instance, prints a formatted report of the sharding configuration and the information regarding existing chunks in a sharded cluster. The default behavior suppresses the detailed chunk information if the total number of chunks is greater than or equal to 20.
 		* @param verbose Optional. If true, the method displays details of the document distribution across chunks when you have 20 or more chunks.
@@ -1249,7 +1253,7 @@ declare module mongo{
 		* @param timeout Milliseconds to wait.
 		* @param interval Milliseconds to sleep each cycle of waiting.
 		**/
-		stopBalancer(timeout:number, interval:number);
+		stopBalancer(timeout?:number, interval?:number);
 		/**
 		* Waits for a change in the state of the balancer.
 		* @param wait Optional. Set to true to ensure the balancer is now active. The default is false, which waits until balancing stops and becomes inactive.
@@ -1262,7 +1266,7 @@ declare module mongo{
 		* @param timeout Milliseconds to wait.
 		* @param interval Milliseconds to sleep.
 		**/
-		waitForBalancerOff(timeout:number, interval:number);
+		waitForBalancerOff(timeout?:number, interval?:number);
 		/**
 		* Waits until the specified distributed lock changes state. sh.waitForDLock() is an internal method 
 		* @param lockname The name of the distributed lock.
@@ -1277,8 +1281,10 @@ declare module mongo{
 		* @param timeout Number of milliseconds to wait for a change in ping state.
 		* @param interval Number of milliseconds to sleep in each waiting cycle.
 		**/
-		waitForPingChange(activePings:any[], timeout:number, interval:number);
+		waitForPingChange(activePings:any[], timeout?:number, interval?:number);
 	}
+
+	//≈ // for expand interface
 	interface ILastMigration{
 		_id:any;
 		server:string;
@@ -1288,6 +1294,8 @@ declare module mongo{
 		ns:string;
 		details:any;
 	}	
+	//≈
+
 	interface IMongo{
 		/**
 		* Provides access to database objects from the mongo shell or from a JavaScript file.
@@ -1315,6 +1323,7 @@ declare module mongo{
 		**/
 		setSlaveOk();
 	}
+
 	interface IPlanCache{
 		/**
 		* Displays the methods available to view and modify a collection’s query plan cache.
@@ -1345,6 +1354,7 @@ declare module mongo{
 		**/
 		clear():void;		
 	}
+
 	interface IBulk{
 		/**
 		* Adds an insert operation to a bulk operations list.
@@ -1375,6 +1385,7 @@ declare module mongo{
 		**/
 		toString():string;		
 	}
+
 	interface IBulkFindOp{
 		/**
 		* Adds a single document remove operation to a bulk operations list. Use the Bulk.find() method to specify the condition that determines which document to remove. The Bulk.find.removeOne() limits the removal to one document. To remove multiple documents, see Bulk.find.remove().
@@ -1407,8 +1418,10 @@ declare module mongo{
 		**/
 		upsert():IBulkFindOp;
 	}
-	
+
+	//≈ // for expand interface
 	interface IUser{
+		_id?:any;
 		user:string;
 		pwd:string;
 		customData?:any;
@@ -1417,18 +1430,21 @@ declare module mongo{
 		**/
 		roles:(string|{role:string;db:string})[];
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IRole{
 		role:string;
 		privileges:IPrivilege[];
 		roles:any[];
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IPrivilege{
 		resource:{db:string; collection:string}|{cluster:boolean}|{anyResource:boolean};
 		actions:string[]
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface ICollectionOption{
 		/**
 		* Optional. To create a capped collection, specify true. If you specify true, you must also set a maximum size in the size field.
@@ -1455,6 +1471,7 @@ declare module mongo{
 		**/
 		noPadding?:mongoBoolean;
 		/**
+		* New in version 3.0.
 		* Optional. Available for the WiredTiger storage engine only. { storage-engine-name: options }
 		**/
 		storageEngine?:{ [storageEngineMame:string]: any };
@@ -1473,7 +1490,8 @@ declare module mongo{
 		**/
 		validationAction?:string;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IStatsOption{
 		/**
 		* Optional. The scale used in the output to display the sizes of items. By default, output displays sizes in bytes. To display kilobytes rather than bytes, specify a scale value of 1024.
@@ -1492,7 +1510,8 @@ declare module mongo{
 		**/
 		indexDetailsName?:string;		
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IMapReduceOption{
 		/**
 		* Specifies the location of the result of the map-reduce operation. You can output to a collection, output to a collection with an action, or output inline. You may output to a collection when performing map reduce operations on the primary members of the set; on secondary members you may only use the inline output.
@@ -1532,13 +1551,23 @@ declare module mongo{
 		 */
 		bypassDocumentValidation?:mongoBoolean;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IInsertResult{nInserted:number;writeError?:any;writeConcernError?:any}
+	//≈
+	//≈ // for expand interface
 	interface IRemoveResult{nRemoved:number;writeError?:any;writeConcernError?:any}
+	//≈
+	//≈ // for expand interface
 	interface ISaveResult{ nMatched? : number, nUpserted? : number, nModified? : number;nInserted?:number; writeError?:any;writeConcernError?:any}
+	//≈
+	//≈ // for expand interface
 	interface IUpdateResult{ nMatched : number, nUpserted : number, nModified : number; writeError?:any;writeConcernError?:any}
+	//≈
+	//≈ // for expand interface
 	interface IErrorObj{ connectionId: number; err?: string; n: number; ok: number; syncMillis: number; writtenTo: any}
-	
+	//≈
+	//≈ // for expand interface
 	interface IGroupArg{
 		/**
 		* The field or fields to group. Returns a “key object” for use as the grouping key.
@@ -1565,11 +1594,13 @@ declare module mongo{
 		**/
 		finalize?:(result)=>void;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IField{
 		[field:string]:string|mongoBoolean|Object;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IFindAndModifyArg{
 		/**
 		* Optional. The selection criteria for the modification. The query field employs the same query selectors as used in the db.collection.find() method. Although the query may match multiple documents, findAndModify() will only select one document to modify.
@@ -1604,14 +1635,16 @@ declare module mongo{
 		**/
 		bypassDocumentValidation?:mongoBoolean;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IIndex{
-		key: IField;
+		key:IField;
 		name: string;
 		ns: string;
 		v: number;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IIndexOption{
 		background?:mongoBoolean;
 		unique?:mongoBoolean;
@@ -1632,7 +1665,8 @@ declare module mongo{
 		dropDups?:mongoBoolean;
 		partialFilterExpression?:Object;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IAggregateOption{
 		explain?:mongoBoolean;
 		allowDiskUse?:mongoBoolean;
@@ -1646,54 +1680,16 @@ declare module mongo{
 		 */
 		readConcern?:Object;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IWriteConcern{
 		w?:number|string;
 		j?:mongoBoolean;
 		wtimeout?:number;
 	}
+	//≈
 	
-	interface IExplainResult{
-		queryPlanner?:{
-			plannerVersion:string;
-			namespace:string;
-			indexFilterSet:boolean;
-			parsedQuery:any;
-			winningPlan:{
-				stage:string;
-				shards?:any[];
-				inputStage:any;
-			}
-			rejectedPlans:any[];
-		}
-		executionStats?:{
-			executionSuccess:boolean;
-			nReturned:number;
-			executionTimeMillis:number;
-			totalKeysExamined:number;
-			totalDocsExamined:number;
-			executionStages:{
-				stage:string;
-				shards?:any[];
-				nReturned:number;
-				executionTimeMillisEstimate:number;
-				works:number;
-				advanced:number;
-				needTime:number;
-				needYield:number;
-				isEOF:boolean;
-				inputStage:any;
-			}
-			allPlansExecution:any[]
-		}
-		serverInfo?:{
-			host:string;
-			port:number;
-			version:string;
-			gitVersion:string;
-		}
-	}
-	
+	//≈ // for expand interface
 	interface ICollStats{
 		ns:string;
 		count:number;
@@ -1705,14 +1701,19 @@ declare module mongo{
 		lastExtentSize?:number;
 		userFlags?:number;
 		totalIndexSize:number;
-		indexSizes:number;
+		indexSizes:{[indexName:string]:number};
 		capped:boolean;
 		max:number;
 		maxSize:number;
 		wiredTiger?:any;
 		indexDetails:any;
+		shards?:any;
+		sharded?:boolean;
+		nchunks?:number;
+		paddingFactorNote?:string
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface ICurrentOp{
 		desc:string;
 		threadId:number;
@@ -1746,7 +1747,8 @@ declare module mongo{
 			deadlockCount:number;
 		}
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface ILogComponents{
 		verbosity : number;
    		accessControl : {
@@ -1786,7 +1788,8 @@ declare module mongo{
       		verbosity : number;
    		}
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IReplicationInfo{
 		logSizeMB:number;
 		usedMB:number;
@@ -1798,7 +1801,8 @@ declare module mongo{
 		tLast?:Timestamp;
 		now?:Timestamp;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IHostInfo{
    		system : {
           	hostname : string;
@@ -1825,7 +1829,8 @@ declare module mongo{
    		},
    		ok : number;
 	}
-	
+	//≈
+	//≈ // for expand interface
 	interface IMasterInfo{
 		ismaster:boolean;
 		localTime:any;
@@ -1836,12 +1841,8 @@ declare module mongo{
   		minWireVersion: number;
   		ok: number;
 	}
-	
+	//≈
 	type mongoBoolean = boolean|number;
-	
-	interface IDatabase{
-		test:ICollection
-	}
 }
 
 interface ObjectIdConstructor{
@@ -1859,8 +1860,8 @@ interface ObjectId{
 declare var ObjectId:ObjectIdConstructor;
 
 interface TimestampConstructor{
-	new(time:number, inc:number):Timestamp;
-	(time:number, inc:number):Timestamp;
+	new(time?:number, inc?:number):Timestamp;
+	(time?:number, inc?:number):Timestamp;
 }
 
 interface Timestamp{
@@ -2008,6 +2009,8 @@ interface Geo{
 	distance(a,b):number;
 	sphereDistance(a,b):number;
 }
+
+declare function Code(func:Function, scope?:Object):Object;
 
 declare function tojson(x, indent?, nohint?):string;
 declare function tojsononeline(x):string;

@@ -2390,12 +2390,16 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
             if (isMongoDatabaseMethod) {
                 var cols = [];
                 completionEntries = completionEntries.map(function (it) {
-                    if (it.meta === "property") {
+                    if ((it.meta === "property") && (it.caption !== "$cmd")) {
                         it.score = 10;
                         it.meta = "collection";
                         cols.push(it.caption);
                     }
                     else {
+                        if (it.caption === "$cmd") {
+                            delete it.snippet;
+                            it.value = it.caption;
+                        }
                         it.score = 1;
                     }
                     return it;

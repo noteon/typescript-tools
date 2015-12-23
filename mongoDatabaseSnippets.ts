@@ -30,7 +30,14 @@ var mongoCreateUserTemplates = [
    {
      user: "$2",
      pwd: "$3",
-     roles: [ "read" ] //read|readWrite|dbAdmin|dbOwner|userAdmin ...
+     roles: [ {role:"read", db:"$4"} ]
+    /* All build-in Roles 
+    Database User Roles: read|readWrite
+    Database Admion Roles: dbAdmin|dbOwner|userAdmin
+    Cluster Admin Roles: clusterAdmin|clusterManager|clusterMonitor|hostManager
+    Backup and Restoration Roles: backup|restore
+    All-Database Roles: readAnyDatabase|readWriteAnyDatabase|userAdminAnyDatabase|dbAdminAnyDatabase
+    Superuser Roles: root */
    }
 )`,
             comment: 'Creates a new user for the database where the method runs. db.createUser() returns a duplicate user error if the user already exists on the database.',

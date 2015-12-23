@@ -233,7 +233,7 @@ var mongoDistinctTemplates = [
       {
             caption: "distinct",
             snippet:
-            `distinct("$2")`,
+            `distinct("$2").slice(0, 256)`,
             comment: 'Finds the distinct values for a specified field across a single collection and returns the results in an array.',
             example:
             `db.inventory.distinct( "item.sku", {dept: "A" })`,
@@ -242,7 +242,7 @@ var mongoDistinctTemplates = [
       {
             caption: "distinctWithQuerySort",
             snippet:
-            `distinct("$2", {$3}).sort((a,b)=>compare(b,a))`,
+            `distinct("$2", {$3}).slice(0, 256).sort((a,b)=>compare(b,a))`,
             comment: 'distinct with query and sort.',
             example:
             `db.inventory.distinct( "item.sku", {dept: "A" })

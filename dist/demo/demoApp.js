@@ -43,6 +43,11 @@
                   },
                   
                   {
+                      fieldName: 'user.order.title',
+                      collection: "order",
+                  },
+                  
+                  {
                       fieldName: 'user.lname',
                       collection: "order",
                   },

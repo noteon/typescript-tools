@@ -1064,13 +1064,13 @@ var mongoFindAndModifyTemplates = [
 var mongoDistinctTemplates = [
     {
         caption: "distinct",
-        snippet: "distinct(\"$2\")",
+        snippet: "distinct(\"$2\").slice(0, 256)",
         comment: 'Finds the distinct values for a specified field across a single collection and returns the results in an array.',
         example: "db.inventory.distinct( \"item.sku\", {dept: \"A\" })",
     },
     {
         caption: "distinctWithQuerySort",
-        snippet: "distinct(\"$2\", {$3}).sort((a,b)=>compare(b,a))",
+        snippet: "distinct(\"$2\", {$3}).slice(0, 256).sort((a,b)=>compare(b,a))",
         comment: 'distinct with query and sort.',
         example: "db.inventory.distinct( \"item.sku\", {dept: \"A\" })\n    .sort((a,b)=>compare(b,a)) //desc",
     }
@@ -1605,7 +1605,7 @@ var mongoStatsTemplates = [
 var mongoCreateUserTemplates = [
     {
         caption: "createUser",
-        snippet: "createUser(\n   {\n     user: \"$2\",\n     pwd: \"$3\",\n     roles: [ \"read\" ] //read|readWrite|dbAdmin|dbOwner|userAdmin ...\n   }\n)",
+        snippet: "createUser(\n   {\n     user: \"$2\",\n     pwd: \"$3\",\n     roles: [ {role:\"read\", db:\"$4\"} ]\n    /* All build-in Roles \n    Database User Roles: read|readWrite\n    Database Admion Roles: dbAdmin|dbOwner|userAdmin\n    Cluster Admin Roles: clusterAdmin|clusterManager|clusterMonitor|hostManager\n    Backup and Restoration Roles: backup|restore\n    All-Database Roles: readAnyDatabase|readWriteAnyDatabase|userAdminAnyDatabase|dbAdminAnyDatabase\n    Superuser Roles: root */\n   }\n)",
         comment: 'Creates a new user for the database where the method runs. db.createUser() returns a duplicate user error if the user already exists on the database.',
         example: "use products\ndb.createUser({\n        \"user\" : \"accountAdmin01\",\n        \"pwd\": \"cleartext password\",\n        \"customData\" : { employeeId: 12345 },\n        \"roles\" : [ { role: \"clusterAdmin\", db: \"admin\" },\n                    { role: \"readAnyDatabase\", db: \"admin\" },\n                    \"readWrite\"\n                  ] \n      },\n      { w: \"majority\" , wtimeout: 5000 } )",
     }

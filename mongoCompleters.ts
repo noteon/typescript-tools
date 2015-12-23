@@ -134,9 +134,27 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                return ["'",'"','`'].indexOf(theLine[theLine.length-1])<0 
             })();
 
+           let existingPart=(()=>{
+               let matches=currentLine.match(/\b[\w\d_\.]+$/g);
+               if (matches && matches.length>0){
+                   return matches[matches.length-1]
+               }
+           })();
+                
             let fields = getFields().map((it) => {
                 let fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 let hasDot=fieldValue.indexOf('.')>-1;
+                
+                if (hasDot && existingPart){
+                    fieldValue=(()=>{
+                        if  (!_.startsWith(fieldValue,existingPart)) return fieldValue;
+                        
+                        let lastDotPos=existingPart.lastIndexOf('.');
+                        if (lastDotPos===-1) return fieldValue;
+                        
+                        return fieldValue.slice(lastDotPos+1);                            
+                    })(); 
+                }
                 
                 return {
                     caption: fieldValue,

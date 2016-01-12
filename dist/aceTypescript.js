@@ -1364,9 +1364,25 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     return true;
                 return ["'", '"', '`'].indexOf(theLine[theLine.length - 1]) < 0;
             })();
+            var existingPart = (function () {
+                var matches = currentLine.match(/\b[\w\d_\.]+$/g);
+                if (matches && matches.length > 0) {
+                    return matches[matches.length - 1];
+                }
+            })();
             var fields = getFields().map(function (it) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 var hasDot = fieldValue.indexOf('.') > -1;
+                if (hasDot && existingPart) {
+                    fieldValue = (function () {
+                        if (!_.startsWith(fieldValue, existingPart))
+                            return fieldValue;
+                        var lastDotPos = existingPart.lastIndexOf('.');
+                        if (lastDotPos === -1)
+                            return fieldValue;
+                        return fieldValue.slice(lastDotPos + 1);
+                    })();
+                }
                 return {
                     caption: fieldValue,
                     value: (hasDot && canQuotaStr) ? "\"" + fieldValue + "\"" : fieldValue,
@@ -2383,6 +2399,8 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
             if (prefix && aceUtils.isAllNumberStr(prefix)) {
                 return callback(null, []);
             }
+            if (session.__prevChar !== ".")
+                session.__firstCompletionEntry = undefined;
             var completionEntries = getCompletionEntries(curPos, prefix);
             if (!prefix) {
                 session.__firstCompletionEntry = completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption);

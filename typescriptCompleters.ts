@@ -78,12 +78,17 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             if (prefix && aceUtils.isAllNumberStr(prefix)){
                 return callback(null,[]);
             }
+            
+            if (session.__prevChar!==".")
+                session.__firstCompletionEntry=undefined;
 
             let completionEntries=getCompletionEntries(curPos,prefix);
-            
+           
+                
             if (!prefix){
                 session.__firstCompletionEntry=completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption); 
             };
+            
             
             let isMongoDatabaseMethod=(()=>{//mongoDatabase 需要将属性（collection）置顶
                 if (!session.__firstCompletionEntry) return;

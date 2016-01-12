@@ -244,6 +244,8 @@ export var getCollectionMethodsCompleter = (tsServ: ts.TypescriptService, script
 
                 if (hasDot) {
                     let isSnippetsType = (type) => {
+                        if (methodType.indexOf(": mongo.__mb")>-1) return true;
+                        
                         return _.some(typeEnds, (endStr) => {
                             return type.indexOf(endStr) > -1;
                         })

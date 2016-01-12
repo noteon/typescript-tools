@@ -619,8 +619,18 @@ declare module mongo{
 		**/
 		help():void;
 	}
-
+    
+    interface __mbfiles extends ICollection{
+        
+    }
+    
+    interface __mbtest extends ICollection{
+        files:mongo.__mbfiles;
+    }
+    
 	interface IDatabase{
+        test: __mbtest;
+        
 		/**
 		* Copies data directly between MongoDB instances. The db.cloneCollection() method wraps the cloneCollection database command.
 		* @param fromSvr The address of the server to clone from.

@@ -7,7 +7,8 @@
 
 import ts = require("typescript");
 import TSSCmdListener=require("./tssCmdListener");
-import path=require("path")
+import path=require("path");
+import fs=require("fs");
 
 function extend(o1,o2) {
   var o = {};
@@ -44,28 +45,28 @@ if (commandLine.fileNames.length>0) {
 var options;
 
 if (configFile) {
+  const result = ts.readConfigFile(configFile, ts.sys.readFile);
+                if (result.error) {
+                    console.error("can't read tsconfig.json at",configFile);
+                    process.exit(1);
+                }
+                
 
-  configObject = ts.readConfigFile(configFile);
-
-  if (!configObject) {
-    console.error("can't read tsconfig.json at",configFile);
-    process.exit(1);
-  }
-  
-  
+                const configObject = result.config;
+                
   //change by qinghai
-  configObjectParsed = ts.parseConfigFile(configObject,ts.sys, path.dirname(configFile));
-
-  if (configObjectParsed.errors.length>0) {
-    console.error(configObjectParsed.errors);
-    process.exit(1);
-  }
-
-  fileNames = configObjectParsed.fileNames;
-  options   = extend(commandLine.options,configObjectParsed.options);
-
+                const configParseResult = ts.parseJsonConfigFileContent(configObject,
+                                 { readDirectory: ts.sys.readDirectory, fileExists: ts.sys.fileExists, readFile:ts.sys.readFile },
+                                 path.dirname(configFile));
+                if (configParseResult.errors.length > 0) {
+                    console.error({
+                        errors: configParseResult.errors
+                    });
+                    process.exit(1);
+                }
+                fileNames = configParseResult.fileNames;
+                options = configParseResult.options;
 } else {
-
   options = extend(commandLine.options,ts.getDefaultCompilerOptions());
 
 }

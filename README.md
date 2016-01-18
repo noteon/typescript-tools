@@ -13,7 +13,7 @@
 * $ git clone git://github.com/noteon/typescript-tools.git
 * $ npm install -g electron bower typescript
 * $ bower install
-* $ npm install 
+* $ npm install --production  //npm i will trigger npm prepublish, it's a bug
 
 ## 编译
 

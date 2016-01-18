@@ -425,6 +425,7 @@ export class TypescriptService {
   public createDefaultFormatCodeOptions(): ts.FormatCodeOptions {
     return {
         IndentSize: 4,
+        IndentStyle: 2,//smart
         TabSize: 4,
         NewLineCharacter: '\r\n',
         ConvertTabsToSpaces: true,

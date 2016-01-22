@@ -81,6 +81,10 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             
             if (session.__prevChar!==".")
                 session.__firstCompletionEntry=undefined;
+                
+                
+             if (!prefix && ["{","["].indexOf(session.__prevChar)>-1)
+                return callback(null, []);
 
             let completionEntries=getCompletionEntries(curPos,prefix);
            

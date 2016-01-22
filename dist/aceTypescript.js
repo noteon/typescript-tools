@@ -515,7 +515,7 @@ exports.highlightTypeCommentAndHelp = function (type, docComment, docUrl) {
 exports.highlightTypeCommentAndTip = function (type, docComment, tipHtml) {
     return exports.highlightTypeAndComment({ type: type, docComment: docComment }, true) + tipHtml;
 };
-var collectionMethods = "aggregate\ncount\ncopyTo\ncreateIndex\ndataSize\ndistinct\ndrop\ndropIndex\ndropIndexes\nensureIndex\nexplain\nfind\nfindAndModify\nfindOne\ngetIndexes\ngetShardDistribution\ngetShardVersion\ngroup\ninsert\nisCapped\nmapReduce\nreIndex\nremove\nrenameCollection\nsave\nstats\nstorageSize\ntotalSize\ntotalIndexSize\nupdate\nvalidate";
+var collectionMethods = "aggregate\ncount\ncopyTo\ncreateIndex\ndataSize\ndistinct\ndrop\ndropIndex\ndropIndexes\nensureIndex\nexplain\nfind\nfindAndModify\nfindOne\ngetIndexes\ngetShardDistribution\ngetShardVersion\ngroup\ninsert\ninsertOne\ninsertMany\nisCapped\nmapReduce\nreIndex\ndeleteOne\ndeleteMany\nremove\nrenameCollection\nsave\nreplaceOne\nstats\nstorageSize\ntotalSize\ntotalIndexSize\nupdate\nupdateOne\nupdateMany\nvalidate";
 //"db.db.test.test1.insert(".match(/\bdb\.(.+)\.(find|insert)\(/)
 function getDBDotCollectionNamesFromText(text) {
     var matches = text.match(/\bdb.[\w|.]+\b/g);
@@ -662,7 +662,7 @@ function compareCompletionItem(filterText, a, b) {
         };
         var aWeight = metaWeight[a.meta] || defaultWeight;
         var bWeight = metaWeight[b.meta] || defaultWeight;
-        return (aWeight - bWeight) ? 1 : -1;
+        return aWeight - bWeight;
     };
     var compare = function (a, b) {
         var ret = matchCompare(a, b);
@@ -1047,6 +1047,22 @@ var mongoUpdateTemplates = [
         meta: "template",
     },
 ];
+var mongoUpdateOneTemplates = [
+    {
+        caption: "updateOne",
+        snippet: "updateOne({$2},{\\$set:{$3}})",
+        comment: 'Updates a single document within the collection based on the filter.',
+        example: "db.inventory.updateOne(\n   { \"name\" : \"Central Perk Cafe\" },\n   { $set: { \"violations\" : 3 } }\n);",
+    }
+];
+var mongoUpdateManyTemplates = [
+    {
+        caption: "updateMany",
+        snippet: "updateMany({$2},{\\$set:{$3}})",
+        comment: 'Updates multiple documents within the collection based on the filter.',
+        example: "db.inventory.updateMany(\n   { violations: { $gt: 4 } },\n   { $set: { \"Review\" : true } }\n);",
+    }
+];
 var mongoFindAndModifyTemplates = [
     {
         caption: "findAndModify",
@@ -1089,13 +1105,23 @@ var mongoRemoveTemplates = [
         snippet: "remove({$2})",
         comment: 'Removes documents from a collection.',
         example: "db.products.remove({qty:{$gt: 20}})",
-    },
-    {
-        caption: "removeOne",
-        snippet: "remove({$2},{justOne: true})",
-        comment: 'Removes documents from a collection. The "justone" option to limit the deletion to just one document',
-        example: "db.products.remove({qty:{$gt: 20}},{justOne: true}})",
     }
+];
+var mongoDeleteOneTemplates = [
+    {
+        caption: "deleteOne",
+        snippet: "deleteOne({$2})",
+        comment: 'Removes a single document from a collection.',
+        example: "db.orders.deleteOne( { \"_id\" : ObjectId(\"563237a41a4d68582c2509da\") } );",
+    },
+];
+var mongoDeleteManyTemplates = [
+    {
+        caption: "deleteMany",
+        snippet: "deleteMany({$2})",
+        comment: 'Removes all documents that match the filter from a collection.',
+        example: "db.orders.deleteMany( { \"client\" : \"Crude Traders Inc.\" } );",
+    },
 ];
 var mongoCreateIndexTemplates = [
     {
@@ -1147,12 +1173,22 @@ var mongoInsertTemplates = [
         snippet: "insert([{$2}])",
         comment: 'Inserts a document or documents into a collection.',
         example: "db.products.insert( { item: \"card\", qty: 15 } )",
-    },
+    }
+];
+var mongoInsertOneTemplates = [
     {
-        caption: "insertMultipleDocuments",
-        snippet: "insert([{$2}])",
-        comment: 'insert Multiple Documents',
-        example: "db.products.insert(\n   [\n     { _id: 11, item: \"pencil\", qty: 50, type: \"no.2\" },\n     { item: \"pen\", qty: 20 },\n     { item: \"eraser\", qty: 25 }\n   ]\n)",
+        caption: "insertOne",
+        snippet: "insertOne({$2})",
+        comment: 'Inserts a document into a collection.',
+        example: "db.products.insertOne( { item: \"card\", qty: 15 } );",
+    }
+];
+var mongoInsertManyTemplates = [
+    {
+        caption: "insertMany",
+        snippet: "insertMany([{$2}])",
+        comment: 'Inserts multiple documents into a collection.',
+        example: "db.products.insertMany([\n   { item: \"card\", qty: 15 },\n   { item: \"envelope\", qty: 20 },\n   { item: \"stamps\" , qty: 30 }\n]);",
     }
 ];
 var mongoSaveTemplates = [
@@ -1161,6 +1197,13 @@ var mongoSaveTemplates = [
         snippet: "save({$2})",
         comment: 'Updates an existing document or inserts a new document, depending on its document parameter.',
         example: "db.products.save( { item: \"book\", qty: 40 } )",
+    }];
+var mongoReplaceOneTemplates = [
+    {
+        caption: "replaceOne",
+        snippet: "replaceOne({$2},{$3})",
+        comment: 'Replaces a single document within the collection based on the filter.',
+        example: "db.inventory.replaceOne(\n   { \"name\" : \"Central Perk Cafe\" },\n   { \"name\" : \"Central Pork Cafe\", \"Borough\" : \"Manhattan\" }\n);",
     }];
 var mongoAggregateTemplates = [
     {
@@ -1253,10 +1296,17 @@ var initMongoCodeTemplates = function () {
     addMongoCodeTemplates("findOne", mongoFindOneTemplates);
     addMongoCodeTemplates("findAndModify", mongoFindAndModifyTemplates);
     addMongoCodeTemplates("insert", mongoInsertTemplates);
+    addMongoCodeTemplates("insertOne", mongoInsertOneTemplates);
+    addMongoCodeTemplates("insertMany", mongoInsertManyTemplates);
     addMongoCodeTemplates("save", mongoSaveTemplates);
+    addMongoCodeTemplates("replaceOne", mongoReplaceOneTemplates);
     addMongoCodeTemplates("update", mongoUpdateTemplates);
+    addMongoCodeTemplates("updateOne", mongoUpdateOneTemplates);
+    addMongoCodeTemplates("updateMany", mongoUpdateManyTemplates);
     addMongoCodeTemplates("distinct", mongoDistinctTemplates);
     addMongoCodeTemplates("remove", mongoRemoveTemplates);
+    addMongoCodeTemplates("deleteOne", mongoDeleteOneTemplates);
+    addMongoCodeTemplates("deleteMany", mongoDeleteManyTemplates);
     addMongoCodeTemplates("mapReduce", mongoMapReduceTemplates);
     addMongoCodeTemplates("createIndex", mongoCreateIndexTemplates);
     addMongoCodeTemplates("aggregate", mongoAggregateTemplates);
@@ -2404,6 +2454,8 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
             }
             if (session.__prevChar !== ".")
                 session.__firstCompletionEntry = undefined;
+            if (!prefix && ["{", "["].indexOf(session.__prevChar) > -1)
+                return callback(null, []);
             var completionEntries = getCompletionEntries(curPos, prefix);
             if (!prefix) {
                 session.__firstCompletionEntry = completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption);

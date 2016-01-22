@@ -199,6 +199,36 @@ var mongoUpdateTemplates = [
       },
 ];
 
+var mongoUpdateOneTemplates = [
+      {
+            caption: "updateOne",
+            snippet:
+            `updateOne({$2},{\\$set:{$3}})`,
+            comment: 'Updates a single document within the collection based on the filter.',
+            example:
+            `db.inventory.updateOne(
+   { "name" : "Central Perk Cafe" },
+   { $set: { "violations" : 3 } }
+);`,
+      }
+]
+
+var mongoUpdateManyTemplates = [
+      {
+            caption: "updateMany",
+            snippet:
+            `updateMany({$2},{\\$set:{$3}})`,
+            comment: 'Updates multiple documents within the collection based on the filter.',
+            example:
+            `db.inventory.updateMany(
+   { violations: { $gt: 4 } },
+   { $set: { "Review" : true } }
+);`,
+      }
+]
+      
+
+
 var mongoFindAndModifyTemplates = [
       {
             caption: "findAndModify",
@@ -281,15 +311,29 @@ var mongoRemoveTemplates = [
             comment: 'Removes documents from a collection.',
             example:
             `db.products.remove({qty:{$gt: 20}})`,
-      },
-      {
-            caption: "removeOne",
-            snippet:
-            `remove({$2},{justOne: true})`,
-            comment: 'Removes documents from a collection. The "justone" option to limit the deletion to just one document',
-            example:
-            `db.products.remove({qty:{$gt: 20}},{justOne: true}})`,
       }
+]
+
+var mongoDeleteOneTemplates = [
+      {
+            caption: "deleteOne",
+            snippet:
+            `deleteOne({$2})`,
+            comment: 'Removes a single document from a collection.',
+            example:
+            `db.orders.deleteOne( { "_id" : ObjectId("563237a41a4d68582c2509da") } );`,
+      },
+]
+
+var mongoDeleteManyTemplates = [
+      {
+            caption: "deleteMany",
+            snippet:
+            `deleteMany({$2})`,
+            comment: 'Removes all documents that match the filter from a collection.',
+            example:
+            `db.orders.deleteMany( { "client" : "Crude Traders Inc." } );`,
+      },
 ]
 
 var mongoCreateIndexTemplates = [
@@ -414,21 +458,32 @@ var mongoInsertTemplates = [
             comment: 'Inserts a document or documents into a collection.',
             example:
             `db.products.insert( { item: "card", qty: 15 } )`,
-      },
+      }
+]
 
+var mongoInsertOneTemplates = [
       {
-            caption: "insertMultipleDocuments",
+            caption: "insertOne",
             snippet:
-            `insert([{$2}])`,
-            comment: 'insert Multiple Documents',
+            `insertOne({$2})`,
+            comment: 'Inserts a document into a collection.',
             example:
-            `db.products.insert(
-   [
-     { _id: 11, item: "pencil", qty: 50, type: "no.2" },
-     { item: "pen", qty: 20 },
-     { item: "eraser", qty: 25 }
-   ]
-)`,
+            `db.products.insertOne( { item: "card", qty: 15 } );`,
+      }
+]
+
+var mongoInsertManyTemplates = [
+      {
+            caption: "insertMany",
+            snippet:
+            `insertMany([{$2}])`,
+            comment: 'Inserts multiple documents into a collection.',
+            example:
+            `db.products.insertMany([
+   { item: "card", qty: 15 },
+   { item: "envelope", qty: 20 },
+   { item: "stamps" , qty: 30 }
+]);`,
       }
 ]
 
@@ -440,6 +495,19 @@ var mongoSaveTemplates = [
             comment: 'Updates an existing document or inserts a new document, depending on its document parameter.',
             example:
             `db.products.save( { item: "book", qty: 40 } )`,
+      }]
+      
+var mongoReplaceOneTemplates = [
+      {
+            caption: "replaceOne",
+            snippet:
+            `replaceOne({$2},{$3})`,
+            comment: 'Replaces a single document within the collection based on the filter.',
+            example:
+            `db.inventory.replaceOne(
+   { "name" : "Central Perk Cafe" },
+   { "name" : "Central Pork Cafe", "Borough" : "Manhattan" }
+);`,
       }]
 
 var mongoAggregateTemplates = [
@@ -710,10 +778,18 @@ let initMongoCodeTemplates = () => {
       addMongoCodeTemplates("findOne", mongoFindOneTemplates);
       addMongoCodeTemplates("findAndModify", mongoFindAndModifyTemplates);
       addMongoCodeTemplates("insert", mongoInsertTemplates);
+      addMongoCodeTemplates("insertOne", mongoInsertOneTemplates);
+      addMongoCodeTemplates("insertMany", mongoInsertManyTemplates);
       addMongoCodeTemplates("save", mongoSaveTemplates);
+      addMongoCodeTemplates("replaceOne", mongoReplaceOneTemplates);
       addMongoCodeTemplates("update", mongoUpdateTemplates);
+      addMongoCodeTemplates("updateOne", mongoUpdateOneTemplates);
+      addMongoCodeTemplates("updateMany", mongoUpdateManyTemplates);
+      
       addMongoCodeTemplates("distinct", mongoDistinctTemplates);
       addMongoCodeTemplates("remove", mongoRemoveTemplates);
+      addMongoCodeTemplates("deleteOne", mongoDeleteOneTemplates);
+      addMongoCodeTemplates("deleteMany", mongoDeleteManyTemplates);
       addMongoCodeTemplates("mapReduce", mongoMapReduceTemplates);
       addMongoCodeTemplates("createIndex", mongoCreateIndexTemplates);
       addMongoCodeTemplates("aggregate", mongoAggregateTemplates);

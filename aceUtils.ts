@@ -165,17 +165,24 @@ getShardDistribution
 getShardVersion
 group
 insert
+insertOne
+insertMany
 isCapped
 mapReduce
 reIndex
+deleteOne
+deleteMany
 remove
 renameCollection
 save
+replaceOne
 stats
 storageSize
 totalSize
 totalIndexSize
 update
+updateOne
+updateMany
 validate`
 
 //"db.db.test.test1.insert(".match(/\bdb\.(.+)\.(find|insert)\(/)
@@ -262,6 +269,7 @@ export function injectCompleterToAdjustMethodParamWidth(){
         if (completions && completions.filtered){
              completions.filtered.sort((a,b)=>compareCompletionItem(prefix,a,b));
         }
+        
         
         let rst= proto.apply(this, arguments);
         
@@ -364,7 +372,7 @@ export function compareCompletionItem(filterText, a,b){
         }
         let aWeight=metaWeight[a.meta]|| defaultWeight;
         let bWeight=metaWeight[b.meta]|| defaultWeight;
-        return (aWeight-bWeight)? 1:-1;
+        return aWeight - bWeight;
       }
       
       var compare = function(a, b) {

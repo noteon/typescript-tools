@@ -335,12 +335,21 @@ export function compareCompletionItem(filterText, a,b){
       
 
       var matchCompare = function(a, b) {
-          return matchFunc(b) - matchFunc(a);
+          let aRst=matchFunc(b);
+          let bRst=matchFunc(a);
+          let ret=aRst-bRst;
+          if (ret!==0) return ret;
+          
+          return a.caption.length-b.caption.length;
       };
       
       var scoreCompare=function(a,b){
+          //todo: 这里假定所有 score >=0, 但存在score<0的情况
           let aScore=-1000;
           let bScore=-1000;
+          if (a.score<0) a.score=0;
+          if (b.score<0) b.score=0;
+          
           if (_.isNumber(a.score)) aScore=a.score;
           if (_.isNumber(b.score)) bScore=b.score;
           

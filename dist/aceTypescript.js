@@ -630,11 +630,21 @@ function compareCompletionItem(filterText, a, b) {
         return elm.caption.indexOf(filterText) === 0 ? 1 : 0;
     };
     var matchCompare = function (a, b) {
-        return matchFunc(b) - matchFunc(a);
+        var aRst = matchFunc(b);
+        var bRst = matchFunc(a);
+        var ret = aRst - bRst;
+        if (ret !== 0)
+            return ret;
+        return a.caption.length - b.caption.length;
     };
     var scoreCompare = function (a, b) {
+        //todo: 这里假定所有 score >=0, 但存在score<0的情况
         var aScore = -1000;
         var bScore = -1000;
+        if (a.score < 0)
+            a.score = 0;
+        if (b.score < 0)
+            b.score = 0;
         if (_.isNumber(a.score))
             aScore = a.score;
         if (_.isNumber(b.score))

@@ -372,15 +372,17 @@ export function compareCompletionItem(filterText, a,b){
         }
         let aWeight=metaWeight[a.meta]|| defaultWeight;
         let bWeight=metaWeight[b.meta]|| defaultWeight;
-        return (aWeight - bWeight)>0? -1:1;
+        return (bWeight - aWeight);
       }
       
       var compare = function(a, b) {
+          let ret;
           if (a.caption === b.caption){
-              return metaCompare(a,b);
+              ret=metaCompare(a,b);
+              if (ret!==0) return ret;
           }
           
-          let  ret = matchCompare(a, b);
+          ret = matchCompare(a, b);
           
           if (ret===0)
               ret=scoreCompare(a,b)

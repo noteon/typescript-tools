@@ -662,13 +662,16 @@ function compareCompletionItem(filterText, a, b) {
         };
         var aWeight = metaWeight[a.meta] || defaultWeight;
         var bWeight = metaWeight[b.meta] || defaultWeight;
-        return (aWeight - bWeight) > 0 ? -1 : 1;
+        return (bWeight - aWeight);
     };
     var compare = function (a, b) {
+        var ret;
         if (a.caption === b.caption) {
-            return metaCompare(a, b);
+            ret = metaCompare(a, b);
+            if (ret !== 0)
+                return ret;
         }
-        var ret = matchCompare(a, b);
+        ret = matchCompare(a, b);
         if (ret === 0)
             ret = scoreCompare(a, b);
         if (ret === 0)

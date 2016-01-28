@@ -372,10 +372,14 @@ export function compareCompletionItem(filterText, a,b){
         }
         let aWeight=metaWeight[a.meta]|| defaultWeight;
         let bWeight=metaWeight[b.meta]|| defaultWeight;
-        return aWeight - bWeight;
+        return (aWeight - bWeight)>0? -1:1;
       }
       
       var compare = function(a, b) {
+          if (a.caption === b.caption){
+              return metaCompare(a,b);
+          }
+          
           let  ret = matchCompare(a, b);
           
           if (ret===0)

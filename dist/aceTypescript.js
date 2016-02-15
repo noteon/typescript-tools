@@ -990,6 +990,24 @@ var mongoFindTemplates = [
         comment: 'uses the cursor method forEach() to iterate the cursor and access the documents.',
         example: "db.bios.find().sort({name:1}).limit(5)",
     },
+    {
+        caption: "findTextSearch",
+        snippet: "find({\\$text: {\\$search:\"$2\"}})",
+        comment: ' performs a text search',
+        example: "db.movies.find( { $text : { $search : \"Big Fish\" }})",
+    },
+    {
+        caption: "findnearLegacy2d",
+        snippet: "find({ location: { \\$near: [-$2, $3], \\$maxDistance: 0.10 } })",
+        comment: 'Query on Legacy Coordinates',
+        example: "Consider a collection legacy2d that has a 2d index.\nThe following example returns documents that are at most 0.10 radians from the specified legacy coordinate pair, sorted from nearest to farthest:\n\ndb.legacy2d.find(\n   { location : { $near : [ -73.9667, 40.78 ], $maxDistance: 0.10 } }\n)",
+    },
+    {
+        caption: "findnear$geometry",
+        snippet: "find({\n    location:\n    {\n        \\$near:\n        {\n            \\$geometry: { type: \"Point\", coordinates: [-500, 100] },\n            \\$minDistance: 1000,\n            \\$maxDistance: 5000\n        }\n    }\n})",
+        comment: 'Query on GeoJSON Data',
+        example: "Consider a collection places that has a 2dsphere index.\nThe following example returns documents that are at least 1000 meters from and at most 5000 meters from the specified GeoJSON point, sorted from nearest to farthest:\n\ndb.places.find({\n    location:\n    { $near :\n        {\n          $geometry: { type: \"Point\",  coordinates: [ -73.9667, 40.78 ] },\n          $minDistance: 1000,\n          $maxDistance: 5000\n        }\n     }\n})",
+    },
 ];
 var mongoFindOneTemplates = [
     {

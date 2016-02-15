@@ -56,6 +56,58 @@ var mongoFindTemplates = [
             `db.bios.find().sort({name:1}).limit(5)`,
       },
 
+      {
+            caption: "findTextSearch",
+            snippet:
+            `find({\\$text: {\\$search:"$2"}})`,
+            comment: ' performs a text search',
+            example:
+            `db.movies.find( { $text : { $search : "Big Fish" }})`,
+      },
+      
+      {
+            caption: "findnearLegacy2d",
+            snippet:
+            `find({ location: { \\$near: [-$2, $3], \\$maxDistance: 0.10 } })`,
+            comment: 'Query on Legacy Coordinates',
+            example:
+            `Consider a collection legacy2d that has a 2d index.
+The following example returns documents that are at most 0.10 radians from the specified legacy coordinate pair, sorted from nearest to farthest:
+
+db.legacy2d.find(
+   { location : { $near : [ -73.9667, 40.78 ], $maxDistance: 0.10 } }
+)`,
+      },
+      {
+            caption: "findnear$geometry",
+            snippet:
+            `find({
+    location:
+    {
+        \\$near:
+        {
+            \\$geometry: { type: "Point", coordinates: [-500, 100] },
+            \\$minDistance: 1000,
+            \\$maxDistance: 5000
+        }
+    }
+})`,
+            comment: 'Query on GeoJSON Data',
+            example:
+            `Consider a collection places that has a 2dsphere index.
+The following example returns documents that are at least 1000 meters from and at most 5000 meters from the specified GeoJSON point, sorted from nearest to farthest:
+
+db.places.find({
+    location:
+    { $near :
+        {
+          $geometry: { type: "Point",  coordinates: [ -73.9667, 40.78 ] },
+          $minDistance: 1000,
+          $maxDistance: 5000
+        }
+     }
+})`,
+      },
 ];
 
 var mongoFindOneTemplates = [

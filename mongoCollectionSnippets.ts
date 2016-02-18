@@ -566,7 +566,7 @@ var mongoAggregateTemplates = [
       {
             caption: "aggregate",
             snippet:
-            `.aggregate(
+            `aggregate(
     [
         { \\$match: {$2} },
         //{ \\$project: { _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } } },

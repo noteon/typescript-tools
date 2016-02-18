@@ -566,15 +566,15 @@ var mongoAggregateTemplates = [
       {
             caption: "aggregate",
             snippet:
-            `aggregate(
-   [
-     { \\$match: { $2 } },
-     //{ \\$project : { _id:0, calcField:{ \\$concat: ["\\$field1","-","\\$field2" ] } }}
-     //{ \\$unwind : "\\$unwindField" }
-     //{ \\$group: { _id: { group: "\\$groupByField"}, total: { \\$sum: "\\$sumField" } } },
-     //{ \\$sort: { total: -1 } },
-     { \\$limit: 100 }
-   ]
+            `.aggregate(
+    [
+        { \\$match: {$2} },
+        //{ \\$project: { _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } } },
+        //{ \\$unwind: "$unwindField" },
+        //{ \\$group: { _id: { group: "\\$groupByField" }, total: { \\$sum: "$sumField" } } },
+        //{ \\$sort: { total: -1 } },
+        { \\$limit: 100 }
+    ]
 )`,
             comment: `Aggregation operation: Group by and Calculate a Sum.`,
             example:

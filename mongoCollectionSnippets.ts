@@ -570,8 +570,8 @@ var mongoAggregateTemplates = [
     [
         { \\$match: {$2} },
         //{ \\$project: { _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } } },
-        //{ \\$unwind: "$unwindField" },
-        //{ \\$group: { _id: { group: "\\$groupByField" }, total: { \\$sum: "$sumField" } } },
+        //{ \\$unwind: "\\$unwindField" },
+        //{ \\$group: { _id: { group: "\\$groupByField" }, total: { \\$sum: "\\$sumField" } } },
         //{ \\$sort: { total: -1 } },
         { \\$limit: 100 }
     ]

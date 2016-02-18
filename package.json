@@ -1,6 +1,6 @@
 {
   "name": "mb-ace-typescript",
-  "version": "1.1.4",
+  "version": "1.2.1",
   "description": "TypeScript and mongodb for ace",
   "main": "./dist/aceTypescript.js",
   "keywords": [

@@ -1242,7 +1242,7 @@ var mongoReplaceOneTemplates = [
 var mongoAggregateTemplates = [
     {
         caption: "aggregate",
-        snippet: "aggregate(\n   [\n     { \\$match: { $2 } },\n     { \\$group: { _id: \"\\$groupByField\", total: { \\$sum: \"$amount\" } } },\n     { \\$sort: { total: -1 } }\n   ]\n)",
+        snippet: "aggregate(\n   [\n     { \\$match: { $2 } },\n     //{ \\$project : { _id:0, calcField:{ \\$concat: [\"\\$field1\",\"-\",\"\\$field2\" ] } }}\n     //{ \\$unwind : \"\\$unwindField\" }\n     //{ \\$group: { _id: { group: \"\\$groupByField\"}, total: { \\$sum: \"\\$sumField\" } } },\n     //{ \\$sort: { total: -1 } },\n     { \\$limit: 100 }\n   ]\n)",
         comment: "Aggregation operation: Group by and Calculate a Sum.",
         example: "db.orders.aggregate([\n      { $match: { status: \"A\" } },\n      { $group: { _id: \"$cust_id\", total: { $sum: \"$amount\" } } },\n      { $sort: { total: -1 } }\n])",
     },

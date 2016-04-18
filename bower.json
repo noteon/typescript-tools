@@ -15,7 +15,8 @@
   ],
   "devDependencies": {
     "ace-builds": "~1.2.0",
-    "highlightjs": "~8.7.0"
+    "highlightjs": "~8.7.0",
+    "lodash":"~4.11.1"
   },
   "dependencies": {
     "jquery": "~2.1.4"

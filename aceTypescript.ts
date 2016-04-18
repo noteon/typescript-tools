@@ -1,7 +1,5 @@
 /// <reference path="./typings/tsd.d.ts" />
 
-_ = require("lodash");
-
 var aceUtils = require("./aceUtils");
 var ts = require("./typescriptService");
 var tsCompleters = require('./typescriptCompleters');

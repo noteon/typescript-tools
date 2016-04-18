@@ -22,7 +22,7 @@ export var fetchParamsPlaceHolderCompleter=(tsServ: ts.TypescriptService, script
 
             let currentLine = session.getLine(pos.row).trim();
 
-            session.__includeShellCmdSpaceChar=_.any(["show ","use ","help "],(it)=>{
+            session.__includeShellCmdSpaceChar=_.some(["show ","use ","help "],(it)=>{
                 return _.startsWith(currentLine,it)
             })
             

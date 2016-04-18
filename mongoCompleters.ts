@@ -2,9 +2,6 @@
 
 import aceUtils = require("./aceUtils");
 import ts = require("./typescriptService");
-_ = require("lodash");
-
-
 
 
 function nonMongoCompletePrevChar(prevChar){

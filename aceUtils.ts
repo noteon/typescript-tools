@@ -290,7 +290,7 @@ export function injectCompleterToAdjustMethodParamWidth(){
             return rst;
         } 
         
-        let maxLengthItem=_.max(completions.filtered,(it:any)=>it.caption.length);
+        let maxLengthItem=_.maxBy(completions.filtered,(it:any)=>it.caption.length);
          
         let width=calcTextWidth(maxLengthItem.caption, $('.ace_editor.ace_autocomplete .ace_line.ace_selected').css('font'));
         

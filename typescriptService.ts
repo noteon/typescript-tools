@@ -424,20 +424,21 @@ export class TypescriptService {
 
   public createDefaultFormatCodeOptions(): ts.FormatCodeOptions {
     return {
-        IndentSize: 4,
-        IndentStyle: 2,//smart
-        TabSize: 4,
-        NewLineCharacter: '\r\n',
-        ConvertTabsToSpaces: true,
-        InsertSpaceAfterCommaDelimiter: true,
-        InsertSpaceAfterSemicolonInForStatements: true,
-        InsertSpaceBeforeAndAfterBinaryOperators: true,
-        InsertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: false,
-        InsertSpaceAfterKeywordsInControlFlowStatements: true,
-        InsertSpaceAfterFunctionKeywordForAnonymousFunctions: false,
-        InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,
-        PlaceOpenBraceOnNewLineForFunctions: false,
-        PlaceOpenBraceOnNewLineForControlBlocks: false
+            IndentSize: 4,
+            TabSize: 4,
+            NewLineCharacter: ts.sys ? ts.sys.newLine : "\n",
+            ConvertTabsToSpaces: true,
+            IndentStyle: ts.IndentStyle.Smart,
+            InsertSpaceAfterCommaDelimiter: true,
+            InsertSpaceAfterSemicolonInForStatements: true,
+            InsertSpaceBeforeAndAfterBinaryOperators: true,
+            InsertSpaceAfterKeywordsInControlFlowStatements: true,
+            InsertSpaceAfterFunctionKeywordForAnonymousFunctions: false,
+            InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,
+            InsertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: false,
+            InsertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces: false,
+            PlaceOpenBraceOnNewLineForFunctions: false,
+            PlaceOpenBraceOnNewLineForControlBlocks: false,
     };
  }
 

@@ -38,7 +38,7 @@ if (commandLine.fileNames.length>0) {
 
 } else {
 
-  configFile = ts.findConfigFile(path.normalize(ts.sys.getCurrentDirectory()));
+  configFile = ts.findConfigFile(path.normalize(ts.sys.getCurrentDirectory()),ts.sys.fileExists);
 
 }
 
@@ -56,7 +56,7 @@ if (configFile) {
                 
   //change by qinghai
                 const configParseResult = ts.parseJsonConfigFileContent(configObject,
-                                 { readDirectory: ts.sys.readDirectory, fileExists: ts.sys.fileExists, readFile:ts.sys.readFile },
+                                 ts.sys,
                                  path.dirname(configFile));
                 if (configParseResult.errors.length > 0) {
                     console.error({

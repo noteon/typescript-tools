@@ -1,6 +1,6 @@
 {
   "name": "mb-ace-typescript",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "TypeScript and mongodb for ace",
   "main": "./dist/aceTypescript.js",
   "keywords": [
@@ -13,10 +13,10 @@
     "keymaster": "^1.6.2",
     "moment": "2.11.1",
     "source-map": "^0.5.3",
-    "typescript": "1.7.5"
+    "typescript": "~1.8.0"
   },
   "scripts": {
-    "start": "tsc  && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && electron ./dist/demo/main.js",
+    "start": "cp node_modules/typescript/lib/lib.d.ts ./dist/ &&  tsc  && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && electron ./dist/demo/main.js",
     "prepublish": "rm ./dist/aceTypescript.js && tsc && browserify ./bin/aceTypescript.js --bare --standalone aceTypescript -o ./dist/aceTypescript.js && rm ./bin/*.js && rm ./*.ts",
     "postpublish": "git reset --hard"
   }

@@ -101,7 +101,10 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                 if (prevChar === ".") {
                     var colNames = aceUtils.getCollectionNames(currentLine);
                     if (!_.isEmpty(colNames)){
-                        colNames.forEach(fieldsFetcher)
+                        let col=colNames.shift();
+                        colNames.forEach(fieldsFetcher);
+                        
+                        return fieldsFetcher(col);
                     }
                     else {
                         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
@@ -113,10 +116,9 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                         }
                     }
 
-                    return []
-                } else {
-                    return fieldsFetcher('');
                 }
+                
+                return fieldsFetcher('');
             }
             
             let canQuotaStr=(()=>{

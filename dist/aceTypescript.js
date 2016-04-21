@@ -1463,7 +1463,7 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 var fieldNameHasDot = fieldValue.indexOf('.') > -1;
                 var existingPartHasDot = existingPart && (existingPart.indexOf('.') > -1);
-                console.log({ fieldNameHasDot: fieldNameHasDot, existingPart: existingPart, fieldValue: fieldValue });
+                //console.log({fieldNameHasDot,existingPart,fieldValue})
                 if (existingPartHasDot && !fieldNameHasDot)
                     return undefined;
                 if (fieldNameHasDot && existingPart) {

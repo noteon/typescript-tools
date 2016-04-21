@@ -30,36 +30,35 @@
           
           return [{
                       fieldName: '_id',
-                      collection: "order",
+                      collection: "test",
                   },
                   {    
                       fieldName: 'amount',
-                      collection: "order",
+                      collection: "test",
                   },
   
                   {
-                      fieldName: 'user.fname',
-                      collection: "order",
+                      fieldName: 'user.order.quantity',
+                      collection: "test",
                   },
                   
                   {
-                      fieldName: 'user.order.title',
-                      collection: "order",
+                      fieldName: 'user.order.amount',
+                      collection: "test",
+                  },
+                  {
+                      fieldName: 'user.lname',
+                      collection: "test",
+                  },
+                  
+                  {
+                      fieldName: 'user.fname',
+                      collection: "test",
                   },
                   
                   {
                       fieldName: 'user.lname',
-                      collection: "order",
-                  },
-                  
-                  {
-                      fieldName: 'fname',
-                      collection: "user",
-                  },
-                  
-                  {
-                      fieldName: 'lname',
-                      collection: "user",
+                      collection: "test",
                   }
                   
                   ].filter(function(it){

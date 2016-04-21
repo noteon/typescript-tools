@@ -1425,9 +1425,11 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             var prevChar = currentLine[currentLine.length - 1];
             var getFields = function () {
                 if (prevChar === ".") {
-                    var colNames = aceUtils.getCollectionNames(currentLine);
-                    if (!_.isEmpty(colNames)) {
-                        colNames.forEach(fieldsFetcher);
+                    var collNames = aceUtils.getCollectionNames(currentLine);
+                    if (!_.isEmpty(collNames)) {
+                        var firstColl = collNames.shift();
+                        collNames.forEach(fieldsFetcher);
+                        return fieldsFetcher(firstColl);
                     }
                     else {
                         var posChar = tsServ.fileCache.lineColToPosition(scriptFileName, pos.row + 1, pos.column + 1);
@@ -1437,11 +1439,11 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                             return fieldsFetcher('');
                         }
                     }
-                    return [];
                 }
                 else {
                     return fieldsFetcher('');
                 }
+                return [];
             };
             var canQuotaStr = (function () {
                 var prePrefixChar = currentLine[currentLine.length - 1 - (prefix || "").length];
@@ -1459,6 +1461,7 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     return matches[matches.length - 1];
                 }
             })();
+            console.log("getFields", getFields());
             var fields = getFields().map(function (it) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 var fieldNameHasDot = fieldValue.indexOf('.') > -1;

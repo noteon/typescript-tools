@@ -140,6 +140,8 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                    return matches[matches.length-1]
                }
            })();
+           
+//           console.log("getFields",getFields());
                 
             let fields = getFields().map((it) => {
                 let fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;

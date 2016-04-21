@@ -140,11 +140,16 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                 
             let fields = getFields().map((it) => {
                 let fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
-                let hasDot=fieldValue.indexOf('.')>-1;
+                let fieldNameHasDot=fieldValue.indexOf('.')>-1;
+                let existingPartHasDot=existingPart && (existingPart.indexOf('.')>-1);
                 
-                if (hasDot && existingPart){
+                //console.log({fieldNameHasDot,existingPart,fieldValue})
+                
+                if (existingPartHasDot && !fieldNameHasDot) return undefined;
+                
+                if (fieldNameHasDot && existingPart){
                     fieldValue=(()=>{
-                        if  (!_.startsWith(fieldValue,existingPart)) return fieldValue;
+                        if  (!_.startsWith(fieldValue,existingPart)) return "";
                         
                         let lastDotPos=existingPart.lastIndexOf('.');
                         if (lastDotPos===-1) return fieldValue;
@@ -153,15 +158,17 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
                     })(); 
                 }
                 
+                if (fieldValue==="") return undefined;
+                
                 return {
                     caption: fieldValue,
-                    value: (hasDot&&canQuotaStr)?`"${fieldValue}"`:fieldValue,
+                    value: (fieldNameHasDot&&canQuotaStr)?`"${fieldValue}"`:fieldValue,
                     meta: it.collection,
                     score: it["score"]||1,
                 }
             });
             
-            callback(null, fields);
+            callback(null, _.compact(fields));
         }
     }
 

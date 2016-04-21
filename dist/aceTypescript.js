@@ -1461,25 +1461,31 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
             })();
             var fields = getFields().map(function (it) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
-                var hasDot = fieldValue.indexOf('.') > -1;
-                if (hasDot && existingPart) {
+                var fieldNameHasDot = fieldValue.indexOf('.') > -1;
+                var existingPartHasDot = existingPart && (existingPart.indexOf('.') > -1);
+                console.log({ fieldNameHasDot: fieldNameHasDot, existingPart: existingPart, fieldValue: fieldValue });
+                if (existingPartHasDot && !fieldNameHasDot)
+                    return undefined;
+                if (fieldNameHasDot && existingPart) {
                     fieldValue = (function () {
                         if (!_.startsWith(fieldValue, existingPart))
-                            return fieldValue;
+                            return "";
                         var lastDotPos = existingPart.lastIndexOf('.');
                         if (lastDotPos === -1)
                             return fieldValue;
                         return fieldValue.slice(lastDotPos + 1);
                     })();
                 }
+                if (fieldValue === "")
+                    return undefined;
                 return {
                     caption: fieldValue,
-                    value: (hasDot && canQuotaStr) ? "\"" + fieldValue + "\"" : fieldValue,
+                    value: (fieldNameHasDot && canQuotaStr) ? "\"" + fieldValue + "\"" : fieldValue,
                     meta: it.collection,
                     score: it["score"] || 1,
                 };
             });
-            callback(null, fields);
+            callback(null, _.compact(fields));
         }
     };
     return fieldsCompleter;

@@ -369,7 +369,7 @@ function setupAceEditor(params) {
     }
     params.tsFilePath = switchFoward(params.tsFilePath);
     params.tsTypings = params.tsTypings.map(function (it) {
-        if (_.isString)
+        if (_.isString(it))
             return switchFoward(it);
         it["path"] = switchFoward(it["path"]);
         return it;
@@ -1461,7 +1461,7 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
                     return matches[matches.length - 1];
                 }
             })();
-            console.log("getFields", getFields());
+            //           console.log("getFields",getFields());
             var fields = getFields().map(function (it) {
                 var fieldValue = prefix[0] === "$" ? "$" + it.fieldName : it.fieldName;
                 var fieldNameHasDot = fieldValue.indexOf('.') > -1;
@@ -2688,33 +2688,28 @@ var TypescriptService = (function () {
     TypescriptService.prototype.setup = function (files, options) {
         var _this = this;
         this.fileCache = new FileCache();
-        this.rootFiles = files.map(function (file) { return resolvePath(file.name); });
+        this.rootFiles = files.map(function (it) {
+            if (it.content)
+                return it;
+            var fullPath = resolvePath(it.name);
+            return {
+                name: fullPath,
+                content: ts.sys.readFile(fullPath, 'utf8')
+            };
+        });
         this.compilerOptions = options;
         this.compilerHost = ts.createCompilerHost(options);
         //TODO: diagnostics
         // prime fileCache with root files and defaultLib
         var seenNoDefaultLib = options.noLib;
-        files.forEach(function (file) {
-            var fullFileName = resolvePath(file.name);
-            if (!file.content) {
-                var source = _this.compilerHost.getSourceFile(fullFileName, options.target);
-                if (source) {
-                    seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
-                    _this.fileCache.addFile(fullFileName, source.text);
-                }
-                else {
-                    throw ("tss cannot find file: " + file);
-                }
-            }
-            else {
-                //seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
-                _this.fileCache.addFile(fullFileName, file.content);
-            }
+        this.rootFiles.forEach(function (file) {
+            _this.fileCache.addFile(file.name, file.content);
         });
         if (!seenNoDefaultLib) {
             var defaultLibFileName = this.compilerHost.getDefaultLibFileName(options);
             var source = this.compilerHost.getSourceFile(defaultLibFileName, options.target);
-            this.fileCache.addFile(defaultLibFileName, source.text);
+            if (source && source.text)
+                this.fileCache.addFile(defaultLibFileName, source.text);
         }
         // Get a language service
         // internally builds programs from root files,
@@ -2810,7 +2805,7 @@ var TypescriptService = (function () {
             if (ref) {
                 start = _this.fileCache.positionToLineCol(ref.fileName, ref.textSpan.start);
                 end = _this.fileCache.positionToLineCol(ref.fileName, ts.textSpanEnd(ref.textSpan));
-                fileName = resolvePath(ref.fileName);
+                fileName = ref.fileName;
                 lineText = _this.fileCache.getLineText(fileName, start.line);
             }
             return {
@@ -2917,7 +2912,7 @@ var TypescriptService = (function () {
             .concat(this.getErrors())
             .map(function (d) {
             if (d.file) {
-                var file = resolvePath(d.file.fileName);
+                var file = d.file.fileName;
                 var lc = _this.fileCache.positionToLineCol(file, d.start);
                 var len = _this.fileCache.getScriptInfo(file).content.length;
                 var end = Math.min(len, d.start + d.length);
@@ -2947,9 +2942,7 @@ var TypescriptService = (function () {
         return this.lsHost.getScriptFileNames(); // TODO: files are pre-resolved
     };
     TypescriptService.prototype.reload = function () {
-        // TODO: keep updated (in-memory-only) files?
-        var files = this.rootFiles.map(function (it) { return { name: it }; });
-        return this.setup(files, this.compilerOptions);
+        return this.setup(this.rootFiles, this.compilerOptions);
     };
     TypescriptService.prototype.transpile = function (fileName) {
         var tsRst = this.ls.getEmitOutput(fileName);

@@ -360,7 +360,7 @@ export function setupAceEditor(params: AceTsSetupParams): AceAjax.Editor {
     
     params.tsFilePath=switchFoward(params.tsFilePath);
     params.tsTypings=params.tsTypings.map((it)=>{
-        if (_.isString) return switchFoward(it);
+        if (_.isString(it)) return switchFoward(it);
         
         it["path"]=switchFoward(it["path"]);
         return it;

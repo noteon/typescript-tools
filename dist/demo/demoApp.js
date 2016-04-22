@@ -14,7 +14,14 @@
     window["editor"]=aceTs.setupAceEditor({
         tsFilePath:tsFilePath,
         //tsFileInitContent:fs.readFileSync(tsFilePath), 
-        tsTypings:[path.resolve(__dirname,"lodash.d.ts"),path.resolve(__dirname,"mongo-shell.d.ts")],
+        tsTypings:[
+            path.resolve(__dirname,"lodash.d.ts"),
+            path.resolve(__dirname,"mongo-shell.d.ts")].map((it)=>{
+                return {
+                    path:it,
+                    content:fs.readFileSync(it,"utf8")
+                }
+            }),
         editorTheme:"monokai",
         editorElem:'ts-editor',
         dbFieldsFetcher: function (collectionName){

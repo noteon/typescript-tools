@@ -52,7 +52,7 @@ export class TypescriptService {
   public compilerHost: ts.CompilerHost;
   public lsHost : ts.LanguageServiceHost;
   public ls : ts.LanguageService;
-  public rootFiles : string[];
+  public rootFiles;
   public lastError;
 
   constructor (public prettyJSON: boolean = false) { } // NOTE: call setup
@@ -90,7 +90,15 @@ export class TypescriptService {
   public setup(files:{name:string, content?:string}[],options) {
     this.fileCache = new FileCache();
     
-    this.rootFiles = files.map(file=>resolvePath(file.name));
+    this.rootFiles = files.map((it)=>{
+      if (it.content) return it;
+      
+      let fullPath=resolvePath(it.name);
+      return {
+        name: fullPath,
+        content: ts.sys.readFile(fullPath,'utf8')
+      }
+    });
 
     this.compilerOptions = options;
     this.compilerHost    = ts.createCompilerHost(options);
@@ -100,27 +108,16 @@ export class TypescriptService {
     // prime fileCache with root files and defaultLib
     var seenNoDefaultLib = options.noLib;
     
-    files.forEach(file=>{
-      var fullFileName=resolvePath(file.name);
-      if (!file.content){
-        var source = this.compilerHost.getSourceFile(fullFileName,options.target);
-        
-        if (source) {
-          seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
-          this.fileCache.addFile(fullFileName,source.text);
-        } else {
-          throw ("tss cannot find file: "+file);
-       }        
-      }else{
-        //seenNoDefaultLib = seenNoDefaultLib || source.hasNoDefaultLib;
-        this.fileCache.addFile(fullFileName,file.content);
-      }
+    this.rootFiles.forEach(file=>{
+        this.fileCache.addFile(file.name,file.content);
     });
+    
     
     if (!seenNoDefaultLib) {
       var defaultLibFileName = this.compilerHost.getDefaultLibFileName(options);
       var source = this.compilerHost.getSourceFile(defaultLibFileName,options.target);
-      this.fileCache.addFile(defaultLibFileName,source.text);
+      if (source && source.text)
+        this.fileCache.addFile(defaultLibFileName,source.text);
     }
 
     // Get a language service
@@ -246,7 +243,7 @@ export class TypescriptService {
             if (ref) {
               start    = this.fileCache.positionToLineCol(ref.fileName,ref.textSpan.start);
               end      = this.fileCache.positionToLineCol(ref.fileName,ts.textSpanEnd(ref.textSpan));
-              fileName = resolvePath(ref.fileName);
+              fileName = ref.fileName;
               lineText = this.fileCache.getLineText(fileName,start.line);
             }
             return {
@@ -373,7 +370,7 @@ export class TypescriptService {
       .map(d => {
         if (d.file) {
 
-          var file = resolvePath(d.file.fileName);
+          var file = d.file.fileName;
           var lc = this.fileCache.positionToLineCol(file, d.start);
           var len = this.fileCache.getScriptInfo(file).content.length;
           var end = Math.min(len, d.start + d.length);
@@ -409,11 +406,7 @@ export class TypescriptService {
   }
   
   public reload(){
-    // TODO: keep updated (in-memory-only) files?
-      var files=this.rootFiles.map((it)=>{return {name:it}});
-    
-    
-      return this.setup(files,this.compilerOptions);
+      return this.setup(this.rootFiles,this.compilerOptions);
   }
   
   public transpile(fileName){

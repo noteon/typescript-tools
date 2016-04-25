@@ -130,7 +130,7 @@ export var getTypeScriptAutoCompleters = (params:{tsServ: ts.TypescriptService, 
            
             let userSnippets=_.isFunction(params.userSnippets)? (<any>params.userSnippets)():params.userSnippets;
            
-            let entries=_.union(params.userSnippets,completionEntries)
+            let entries=_.union(userSnippets,completionEntries)
             callback(null, entries)
         },
 

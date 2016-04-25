@@ -2548,6 +2548,7 @@ exports.getTypeScriptAutoCompleters = function (params) {
             }
             //console.log(session.__firstCompletionEntry);
             // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
+            var userSnippets = _.isFunction(params.userSnippets) ? params.userSnippets() : params.userSnippets;
             var entries = _.union(params.userSnippets, completionEntries);
             callback(null, entries);
         },

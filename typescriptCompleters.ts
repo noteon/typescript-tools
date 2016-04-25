@@ -35,7 +35,7 @@ export var fetchParamsPlaceHolderCompleter=(tsServ: ts.TypescriptService, script
     return placeHolderAutoCompleter;
 }
 
-export var getTypeScriptAutoCompleters = (params:{tsServ: ts.TypescriptService, scriptFileName: string, methodHelpUrlGetter?:(methodDotName:string)=>string, userSnippets?:IAutoCompleteItem[]}) => {
+export var getTypeScriptAutoCompleters = (params:{tsServ: ts.TypescriptService, scriptFileName: string, methodHelpUrlGetter?:(methodDotName:string)=>string, userSnippets?:IAutoCompleteItem[]|Function}) => {
     var tsServ=params.tsServ;
     var scriptFileName=params.scriptFileName;
     var methodHelpUrlGetter=params.methodHelpUrlGetter;
@@ -127,6 +127,9 @@ export var getTypeScriptAutoCompleters = (params:{tsServ: ts.TypescriptService, 
             
            //console.log(session.__firstCompletionEntry);
            // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
+           
+            let userSnippets=_.isFunction(params.userSnippets)? (<any>params.userSnippets)():params.userSnippets;
+           
             let entries=_.union(params.userSnippets,completionEntries)
             callback(null, entries)
         },

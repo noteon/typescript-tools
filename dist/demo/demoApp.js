@@ -24,7 +24,7 @@
             }),
         editorTheme:"monokai",
         editorElem:'ts-editor',
-        userSnippets:require("./userSnippets"),
+        userSnippets:()=>require("./userSnippets"),//array|function  or ()=>require("./userSnippets")
         
         
         dbFieldsFetcher: function (collectionName){

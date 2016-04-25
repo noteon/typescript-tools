@@ -26,7 +26,7 @@ interface AceTsSetupParams {
     dbFieldsFetcher?: (collectionName?: string) => { fieldName: string; collection: string }[];
     helpUrlFetcher?: (methodDotName: string) => string;//methodDotName like: "mongo.ICollection.find"
     handleF1MethodHelp?:(docUrl:string,methodDotName?:string)=>string;//
-    userSnippets?:IAutoCompleteItem[]
+    userSnippets?:IAutoCompleteItem[]|Function;
 }
 
 function bindTypescriptExtension(editor: AceAjax.Editor, params:AceTsSetupParams) {

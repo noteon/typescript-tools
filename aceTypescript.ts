@@ -25,10 +25,11 @@ interface AceTsSetupParams {
     editorElem: string|HTMLElement, editorTheme?: string;
     dbFieldsFetcher?: (collectionName?: string) => { fieldName: string; collection: string }[];
     helpUrlFetcher?: (methodDotName: string) => string;//methodDotName like: "mongo.ICollection.find"
-    handleF1MethodHelp?:(docUrl:string,methodDotName:string)=>string;//
+    handleF1MethodHelp?:(docUrl:string,methodDotName?:string)=>string;//
+    userSnippets?:IAutoCompleteItem[]
 }
 
-function bindTypescriptExtension(editor: AceAjax.Editor, params) {
+function bindTypescriptExtension(editor: AceAjax.Editor, params:AceTsSetupParams) {
     var tsServ = new ts.TypescriptService();
     var fileName = params.tsFilePath;
     //console.log(__dirname+"/lodash.d.ts");
@@ -184,7 +185,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params) {
         tsCompleters.fetchParamsPlaceHolderCompleter(tsServ,fileName),
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),//getShellCmdCompleter置顶，它增加了session.__includeShellCmdSpaceChar
         
-        tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),//注，Completer的顺序很重要，getTypeScriptAutoCompleters必须置顶，
+        tsCompleters.getTypeScriptAutoCompleters({tsServ, scriptFileName:fileName, methodHelpUrlGetter:params.helpUrlFetcher, userSnippets:params.userSnippets}),//注，Completer的顺序很重要，getTypeScriptAutoCompleters必须置顶，
         //TypescriptAuto会缓存语言服务的一些值
                                                                                           
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),

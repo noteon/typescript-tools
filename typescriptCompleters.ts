@@ -35,10 +35,14 @@ export var fetchParamsPlaceHolderCompleter=(tsServ: ts.TypescriptService, script
     return placeHolderAutoCompleter;
 }
 
-export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFileName: string, methodHelpUrlGetter?:(methodDotName:string)=>string) => {
+export var getTypeScriptAutoCompleters = (params:{tsServ: ts.TypescriptService, scriptFileName: string, methodHelpUrlGetter?:(methodDotName:string)=>string, userSnippets?:IAutoCompleteItem[]}) => {
+    var tsServ=params.tsServ;
+    var scriptFileName=params.scriptFileName;
+    var methodHelpUrlGetter=params.methodHelpUrlGetter;
     
-    var getCompletionEntries=(posChar, prefix)=>{
+    var getCompletionEntries=(posChar)=>{
             let completionsInfo = tsServ.getCompletionsInfoByPos(true, scriptFileName, posChar);
+            
             if (!completionsInfo) {
                 return [];
             }
@@ -62,9 +66,7 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
             });
             
             return completions;
-        
-    }
-    
+    } 
     // uses http://rhymebrain.com/api.html
     var typescriptAutoCompleter = {
         
@@ -86,7 +88,7 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
              if (!prefix && ["{","["].indexOf(session.__prevChar)>-1)
                 return callback(null, []);
 
-            let completionEntries=getCompletionEntries(curPos,prefix);
+            let completionEntries=getCompletionEntries(curPos);
            
                 
             if (!prefix){
@@ -123,11 +125,10 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
                     session.__collectionNames=cols;
             }            
             
-            //console.log(session.__firstCompletionEntry);
-            
+           //console.log(session.__firstCompletionEntry);
            // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
-            
-            callback(null, completionEntries)
+            let entries=_.union(params.userSnippets,completionEntries)
+            callback(null, entries)
         },
 
         getDocTooltip: function(item) {
@@ -158,8 +159,7 @@ export var getTypeScriptAutoCompleters = (tsServ: ts.TypescriptService, scriptFi
                     item.docHTML = aceUtils.highlightTypeCommentAndHelp(detailInfo.type, detailInfo.docComment, helpUrl);
                 }
                 else item.docHTML = '';
-            }
-
+            } //user snippets may include item.docHTML
         }
     }
 

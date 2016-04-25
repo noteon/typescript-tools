@@ -24,6 +24,9 @@
             }),
         editorTheme:"monokai",
         editorElem:'ts-editor',
+        userSnippets:require("./userSnippets"),
+        
+        
         dbFieldsFetcher: function (collectionName){
           // if (collectionName && !appendedMethod){
           //    appendedMethod=true;

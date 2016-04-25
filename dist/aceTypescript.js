@@ -241,7 +241,7 @@ function bindTypescriptExtension(editor, params) {
     langTools.setCompleters([
         tsCompleters.fetchParamsPlaceHolderCompleter(tsServ, fileName),
         mongoCompleters.getShellCmdCompleter(tsServ, fileName),
-        tsCompleters.getTypeScriptAutoCompleters(tsServ, fileName, params.helpUrlFetcher),
+        tsCompleters.getTypeScriptAutoCompleters({ tsServ: tsServ, scriptFileName: fileName, methodHelpUrlGetter: params.helpUrlFetcher, userSnippets: params.userSnippets }),
         //TypescriptAuto会缓存语言服务的一些值
         tsCompleters.getTypescriptParameterCompleter(tsServ, fileName),
         mongoCompleters.getFieldCompleter(tsServ, fileName, params.dbFieldsFetcher),
@@ -2476,8 +2476,11 @@ exports.fetchParamsPlaceHolderCompleter = function (tsServ, scriptFileName) {
     };
     return placeHolderAutoCompleter;
 };
-exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHelpUrlGetter) {
-    var getCompletionEntries = function (posChar, prefix) {
+exports.getTypeScriptAutoCompleters = function (params) {
+    var tsServ = params.tsServ;
+    var scriptFileName = params.scriptFileName;
+    var methodHelpUrlGetter = params.methodHelpUrlGetter;
+    var getCompletionEntries = function (posChar) {
         var completionsInfo = tsServ.getCompletionsInfoByPos(true, scriptFileName, posChar);
         if (!completionsInfo) {
             return [];
@@ -2513,7 +2516,7 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
                 session.__firstCompletionEntry = undefined;
             if (!prefix && ["{", "["].indexOf(session.__prevChar) > -1)
                 return callback(null, []);
-            var completionEntries = getCompletionEntries(curPos, prefix);
+            var completionEntries = getCompletionEntries(curPos);
             if (!prefix) {
                 session.__firstCompletionEntry = completionEntries[0] && tsServ.getCompletionEntryDetailsInfo(scriptFileName, curPos, completionEntries[0].caption);
             }
@@ -2545,7 +2548,8 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
             }
             //console.log(session.__firstCompletionEntry);
             // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
-            callback(null, completionEntries);
+            var entries = _.union(params.userSnippets, completionEntries);
+            callback(null, entries);
         },
         getDocTooltip: function (item) {
             if (item.isAutoComplete) {
@@ -2572,7 +2576,7 @@ exports.getTypeScriptAutoCompleters = function (tsServ, scriptFileName, methodHe
                 }
                 else
                     item.docHTML = '';
-            }
+            } //user snippets may include item.docHTML
         }
     };
     return typescriptAutoCompleter;

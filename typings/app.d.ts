@@ -12,3 +12,10 @@ declare module AceAjax {
     __collectionNames:string[];
   } 
 }
+
+interface IAutoCompleteItem{
+  caption:string, //name
+  docHTML?:string, //comment
+  snippet:string, //body
+  meta?:string  //category , default is snippet
+}

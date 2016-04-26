@@ -2546,9 +2546,14 @@ exports.getTypeScriptAutoCompleters = function (params) {
                 if (!_.isEmpty(cols_1))
                     session.__collectionNames = cols_1;
             }
-            //console.log(session.__firstCompletionEntry);
-            // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
-            var userSnippets = _.isFunction(params.userSnippets) ? params.userSnippets() : params.userSnippets;
+            var userSnippets = (function () {
+                if (!params.userSnippets)
+                    return;
+                var lineBefore = aceUtils.getLineTextBeforePos(editor.session, pos);
+                if (!/^[A-Za-z0-9_-]+$/.test(lineBefore))
+                    return;
+                return _.isFunction(params.userSnippets) ? params.userSnippets() : params.userSnippets;
+            })();
             var entries = _.union(userSnippets, completionEntries);
             callback(null, entries);
         },

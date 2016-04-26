@@ -128,8 +128,9 @@ export var getTypeScriptAutoCompleters = (params:{tsServ: ts.TypescriptService, 
             
             let userSnippets=(()=>{
                 if (!params.userSnippets) return;
+                let lineBefore=aceUtils.getLineTextBeforePos(editor.session, pos);
                 
-                if (!/^[A-Za-z0-9_-]+$/.test(prefix)) return;
+                if (!/^[A-Za-z0-9_-]+$/.test(lineBefore)) return;
                 
                 return _.isFunction(params.userSnippets)? (params.userSnippets as Function)():params.userSnippets;
             })()

@@ -125,10 +125,14 @@ export var getTypeScriptAutoCompleters = (params:{tsServ: ts.TypescriptService, 
                     session.__collectionNames=cols;
             }            
             
-           //console.log(session.__firstCompletionEntry);
-           // console.log("prefix",prefix,completionEntries[0], session.__firstCompletionEntry);
-           
-            let userSnippets=_.isFunction(params.userSnippets)? (<any>params.userSnippets)():params.userSnippets;
+            
+            let userSnippets=(()=>{
+                if (!params.userSnippets) return;
+                
+                if (!/^[A-Za-z0-9_-]+$/.test(prefix)) return;
+                
+                return _.isFunction(params.userSnippets)? (params.userSnippets as Function)():params.userSnippets;
+            })()
            
             let entries=_.union(userSnippets,completionEntries)
             callback(null, entries)

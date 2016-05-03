@@ -116,7 +116,7 @@ var dateRangeSnippets = [
 ];
 
 dateRangeSnippets = dateRangeSnippets.map((it: any) => {
-      it.meta = "code template";
+      it.meta = "snippet";
 
       return it;
 });

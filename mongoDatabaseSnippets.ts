@@ -156,7 +156,7 @@ let databaseTemplates=[];
 
 let addMongoCodeTemplates=(mongoMethod,templates:any[])=>{
     let theTmpls=templates.map((it)=>{
-          it.meta="code template"
+          it.meta="snippet"
           it.isMongoTemplateCommand=true;
           it.methodDotName="db."+mongoMethod;  //for help url
           

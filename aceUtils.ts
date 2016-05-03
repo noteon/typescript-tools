@@ -377,7 +377,7 @@ export function compareCompletionItem(filterText, a,b){
       var metaCompare=function(a,b){
         const defaultWeight=0;
         let metaWeight={
-          "code template":1,
+          "snippet":1,
         }
         let aWeight=metaWeight[a.meta]|| defaultWeight;
         let bWeight=metaWeight[b.meta]|| defaultWeight;

@@ -566,23 +566,19 @@ var mongoAggregateTemplates = [
       {
             caption: "aggregate",
             snippet:
-            `aggregate(
-    [
-        { \\$match: {$2} },
-        //{ \\$project: { _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } } },
-        //{ \\$unwind: "\\$unwindField" },
-        //{ \\$group: { _id: { group: "\\$groupByField" }, total: { \\$sum: "\\$sumField" } } },
-        //{ \\$sort: { total: -1 } },
-        { \\$limit: 100 }
-    ]
-)`,
-            comment: `Aggregation operation: Group by and Calculate a Sum.`,
+            `aggregate()
+             .match({$2})
+            //.project({ _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } })
+            //.unwind()
+            //.group()
+            //.sort()
+            //.limit(100)`,
+            comment: `Aggregation operation`,
             example:
-            `db.orders.aggregate([
-      { $match: { status: "A" } },
-      { $group: { _id: "$cust_id", total: { $sum: "$amount" } } },
-      { $sort: { total: -1 } }
-])`,
+            `db.orders.aggregate()
+                      .match({ status: "A" })
+                      .group({ _id: "$cust_id", total: { $sum: "$amount" } })
+                      .sort({total:-1})`,
       },
       {
             caption: "aggregatePreformACount",
@@ -801,7 +797,7 @@ let mongoCodeTemplates = [];
 
 let addMongoCodeTemplates = (mongoMethod, templates: any[]) => {
       let theTmpls = templates.map((it) => {
-            it.meta = "code template"
+            it.meta = "snippet"
             it.isMongoTemplateCommand = true;
             it.methodDotName = "mongo.ICollection." + mongoMethod;  //for help url
             

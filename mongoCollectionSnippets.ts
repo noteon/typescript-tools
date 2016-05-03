@@ -566,8 +566,7 @@ var mongoAggregateTemplates = [
       {
             caption: "aggregate",
             snippet:
-            `aggregate()
-      .match({$2})
+            `aggregate({$2}) //matches documents
       //.project({ _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } })
       //.unwind()
       //.group()
@@ -575,8 +574,7 @@ var mongoAggregateTemplates = [
       //.limit(100)`,
             comment: `Aggregation operation`,
             example:
-            `db.orders.aggregate()
-                      .match({ status: "A" })
+            `db.orders.aggregate({status:"A"})
                       .group({ _id: "$cust_id", total: { $sum: "$amount" } })
                       .sort({total:-1})`,
       },

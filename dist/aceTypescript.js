@@ -669,7 +669,7 @@ function compareCompletionItem(filterText, a, b) {
     var metaCompare = function (a, b) {
         var defaultWeight = 0;
         var metaWeight = {
-            "code template": 1,
+            "snippet": 1,
         };
         var aWeight = metaWeight[a.meta] || defaultWeight;
         var bWeight = metaWeight[b.meta] || defaultWeight;
@@ -948,7 +948,7 @@ var mongoUpdateTemplates = [
 var bulkFindOpTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
-        it.meta = "code template";
+        it.meta = "snippet";
         it.isMongoTemplateCommand = true;
         it.methodDotName = "db." + mongoMethod; //for help url
         return it;
@@ -1247,7 +1247,7 @@ var mongoReplaceOneTemplates = [
 var mongoAggregateTemplates = [
     {
         caption: "aggregate",
-        snippet: ".aggregate()\n              .match({$2})\n            //.project({ _id: 0, calcField: { \\$concat: [\"\\$field1\", \"-\", \"\\$field2\"] } })\n            //.unwind()\n            //.group()\n            //.sort()\n            //.limit(100)",
+        snippet: "aggregate()\n      .match({$2})\n      //.project({ _id: 0, calcField: { \\$concat: [\"\\$field1\", \"-\", \"\\$field2\"] } })\n      //.unwind()\n      //.group()\n      //.sort()\n      //.limit(100)",
         comment: "Aggregation operation",
         example: "db.orders.aggregate()\n                      .match({ status: \"A\" })\n                      .group({ _id: \"$cust_id\", total: { $sum: \"$amount\" } })\n                      .sort({total:-1})",
     },
@@ -1311,7 +1311,7 @@ var mongoStatsTemplates = [
 var mongoCodeTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
-        it.meta = "code template";
+        it.meta = "snippet";
         it.isMongoTemplateCommand = true;
         it.methodDotName = "mongo.ICollection." + mongoMethod; //for help url
         return it;
@@ -1685,7 +1685,7 @@ var mongoSortTemplates = [
 var cursorTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
-        it.meta = "code template";
+        it.meta = "snippet";
         it.isMongoTemplateCommand = true;
         it.methodDotName = "cursor." + mongoMethod; //for help url
         return it;
@@ -1757,7 +1757,7 @@ var mongoCurrentOpTemplates = [
 var databaseTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
-        it.meta = "code template";
+        it.meta = "snippet";
         it.isMongoTemplateCommand = true;
         it.methodDotName = "db." + mongoMethod; //for help url
         return it;
@@ -1829,7 +1829,7 @@ var dateRangeSnippets = [
     }
 ];
 dateRangeSnippets = dateRangeSnippets.map(function (it) {
-    it.meta = "code template";
+    it.meta = "snippet";
     return it;
 });
 module.exports = dateRangeSnippets;
@@ -2245,7 +2245,7 @@ var mongoInitializeTemplates = [
 var replTemplates = [];
 var addMongoCodeTemplates = function (mongoMethod, templates) {
     var theTmpls = templates.map(function (it) {
-        it.meta = "code template";
+        it.meta = "snippet";
         it.isMongoTemplateCommand = true;
         it.methodDotName = "rs." + mongoMethod; //for help url
         return it;

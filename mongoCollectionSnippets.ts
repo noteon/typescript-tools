@@ -567,12 +567,12 @@ var mongoAggregateTemplates = [
             caption: "aggregate",
             snippet:
             `aggregate()
-             .match({$2})
-            //.project({ _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } })
-            //.unwind()
-            //.group()
-            //.sort()
-            //.limit(100)`,
+      .match({$2})
+      //.project({ _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } })
+      //.unwind()
+      //.group()
+      //.sort()
+      //.limit(100)`,
             comment: `Aggregation operation`,
             example:
             `db.orders.aggregate()

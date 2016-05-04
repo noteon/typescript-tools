@@ -57,7 +57,7 @@ export var getTypeScriptAutoCompleters = (params:{tsServ: ts.TypescriptService, 
                     
                 return {
                     caption: it.name,
-                    snippet: it.name+(isMethodOrFunction(it.kind)?"($2)":""),
+                    snippet: _.replace(it.name,'$','\\$')+(isMethodOrFunction(it.kind)?"($2)":""),
                     meta: it.kind,
                     pos: posChar,
                     srcProps: it,

@@ -613,8 +613,380 @@ declare module mongo {
 		**/
 		count(): number;
 	}
+    interface IQueryOperator{
+		/**
+		* Specifies an $all query condition
+		* e.g. 
+		*   query.where('permission').all(['read', 'write'])
+		**/
+		all(val: any[]): ICursor;
 
-	interface ICursor {
+
+		/**
+		* Specifies arguments for an $and condition
+		* e.g. 
+		*   query.and([{ color: 'green' }, { status: 'ok' }])
+		**/
+		and(array: Object[]): ICursor;
+
+		/**
+		* Specifies a $box condition
+		* e.g. 
+		*   var lowerLeft = [40.73083, -73.99756]
+		*   var upperRight= [40.741404,  -73.988135]
+        *   query.where('location').within().box(lowerLeft,upperRight)
+		**/
+		box(val: Object): ICursor;
+		box(a: number[], b: number[]): ICursor;
+
+		/**
+		* Specifies a $center or $centerSphere condition.
+        * e.g.
+        *  var area = { center: [50, 50], radius: 10, unique: true }
+        *  query.where('loc').within().circle(area)
+        *  query.circle('loc', area);
+        *  // for spherical calculations
+        *  var area = {center: [50, 50], radius: 10, unique: true,spherical:true}
+        *  query.where('loc').within().circle(area)
+        *  query.circle('loc', area);
+        **/
+		circle(area: Object): ICursor;
+		circle(path: string, area: Object): ICursor;
+
+		/**
+		* Specifies an $elemMatch condition
+        * e.g.
+        *  query.where('comment').elemMatch({author:'autobot',votes:{$gte:5}})
+		*
+        *  query.elemMatch('comment', function (elem) {
+        *     elem.where('author').equals('autobot');
+        *     elem.where('votes').gte(5);
+        *  })
+		**/
+		elemMatch(criteria: Object): ICursor;
+		elemMatch(criteria: (elem: ICursor) => void): ICursor;
+		elemMatch(path: string, criteria: Object): ICursor;
+		elemMatch(path: string, criteria: (elem: ICursor) => void): ICursor;
+
+	    /**
+    	 * Specifies the complementary comparison value for paths specified with `where()`
+		 * e.g.
+		 *     query..where('age').equals(49);
+		 *
+		 *     // is the same as
+		 *
+		 *     query..where('age', 49);
+		 *
+		 */
+		 equals(val: Object): ICursor;
+
+		/**
+		 * Specifies the complementary comparison value for paths specified with `where()`
+		 * This is alias of `equals`
+		 * e.g.
+		 *     query..where('age').eq(49);
+		 *
+		 *     // is the same as
+		 *
+		 *     query..where('age').equals(49);
+		 *
+		 *     // is the same as
+		 *
+		 *     query..where('age', 49);
+		 *
+		 * @param {Object} val
+		 */
+		eq(val: Object): ICursor;
+
+		/**
+		 * Specifies an `$exists` condition
+		 * e.g.
+		 *     // { name: { $exists: true }}
+		 *     query.where('name').exists()
+		 *     query.where('name').exists(true)
+		 *     query.find().exists('name')
+		 *
+		 *     // { name: { $exists: false }}
+		 *     query.where('name').exists(false);
+		 *     query.find().exists('name', false);
+		 *
+		 * @param {String} [path]
+		 * @param {Number} val
+		 */
+    	exists(val?: boolean): ICursor;
+        exists(path: string, val?: boolean): ICursor;
+
+		/**
+		 * Specifies a `$geometry` condition
+		 * e.g.
+		 *     var polyA = [[[ 10, 20 ], [ 10, 40 ], [ 30, 40 ], [ 30, 20 ]]]
+		 *     query.where('loc').within().geometry({ type: 'Polygon', coordinates: polyA })
+		 *
+		 *     // or
+		 *     var polyB = [[ 0, 0 ], [ 1, 1 ]]
+		 *     query.where('loc').within().geometry({ type: 'LineString', coordinates: polyB })
+		 *
+		 *     // or
+		 *     var polyC = [ 0, 0 ]
+		 *     query.where('loc').within().geometry({ type: 'Point', coordinates: polyC })
+		 *
+		 *     // or
+		 *     query.where('loc').intersects().geometry({ type: 'Point', coordinates: polyC })
+		 *
+		 * ####NOTE:
+		 *
+		 * `geometry()` **must** come after either `intersects()` or `within()`.
+		 *
+		 * The `object` argument must contain `type` and `coordinates` properties.
+		 * - type {String}
+		 * - coordinates {Array}
+		 *
+		 * The most recent path passed to `where()` is used.
+		 *
+		 * @param {Object} object Must contain a `type` property which is a String and a `coordinates` property which is an Array. See the examples.
+		 */
+		geometry(object: Object): ICursor;
+
+		/**
+		 * Specifies a $gt query condition.
+		 *
+		 * When called with one argument, the most recent path passed to `where()` is used.
+		 * e.g.
+		 *     query.where('clicks').gt(999)
+		 *
+		 */
+		gt(val: any): ICursor;
+		gt(path: string, val: any): ICursor;
+
+		/**
+		 * Specifies a $gte query condition.
+		 *
+		 * When called with one argument, the most recent path passed to `where()` is used.
+		 * e.g.
+		 *  query.where('clicks').gte(1000)
+		 */
+		gte(val: any): ICursor;
+		gte(path: string, val: any): ICursor;
+
+		/**
+		* Specifies an $in query condition.
+        *
+        * e.g. query.where('author_id').in([3, 48901, 761])
+        */
+		in(val: any[]): ICursor;
+		in(path: string, val: any[]): ICursor;
+
+		/**
+		 * Declares an intersects query for `geometry()`.
+		 * e.g.
+		 *     query.where('path').intersects().geometry({
+		 *         type: 'LineString'
+		 *       , coordinates: [[180.0, 11.0], [180, 9.0]]
+		 *     })
+		 *
+		 *     query.where('path').intersects({
+		 *         type: 'LineString'
+		 *       , coordinates: [[180.0, 11.0], [180, 9.0]]
+		 *     })
+		 */
+		intersects(arg?: Object): ICursor;
+
+
+		/**
+		* Specifies a $lt query condition.
+		*
+		* e.g. query.where('clicks').lt(50)
+		*/
+		lt(val: any): ICursor;
+
+		/**
+		* Specifies a $lt query condition.
+		*
+		* e.g. query.lt("clicks",50)
+		*/
+		lt(path: string, val: any): ICursor;
+
+       	/**
+		* Specifies a $lte query condition.
+		*
+		* e.g. query.where('clicks').lte(50)
+		*/
+		lte(val: any): ICursor;
+
+       	/**
+		* Specifies a $lte query condition.
+		* e.g. query.lte("clicks",50)
+		*/
+		lte(path: string, val: any): ICursor;
+
+        /**
+		* Specifies a $maxDistance query condition.
+		* e.g.
+		*  query.where('location').near({ center: [139, 74.3] }).maxDistance(5)
+		*/
+		maxDistance(val: number): ICursor;
+		maxDistance(path: string, val: number): ICursor;
+		
+		
+        /**
+		* Specifies a $mod condition
+		*
+		* e.g. query.where('count').mod(2, 0)
+		*/
+		mod(val: number[]): ICursor;
+		mod(path: string, val: number[]): ICursor;
+		
+        /**
+		* Specifies a $ne query condition.
+		*
+		* e.g. query.where('status').ne('ok')
+		*/
+		ne(val: any): ICursor;
+		ne(path: string, val: any): ICursor;
+        
+		
+        /**
+		* Specifies arguments for a $near or $nearSphere condition.
+        * These operators return documents sorted by distance.
+		* e.g.
+		* query.where('loc').near({ center: [10, 10] });
+        * query.where('loc').near({ center: [10, 10], maxDistance: 5 });
+        * query.near('loc', { center: [10, 10], maxDistance: 5 });
+        *  // GeoJSON
+        * query.where('loc').near({ center: { type: 'Point', coordinates: [10, 10] }});
+        * query.where('loc').near({ center: { type: 'Point', coordinates: [10, 10] }, maxDistance: 5, spherical: true });
+        * query.where('loc').near().geometry({ type: 'Point', coordinates: [10, 10] });
+        * // For a $nearSphere condition, pass the `spherical` option.
+        * query.near({ center: [10, 10], maxDistance: 5, spherical: true }); 
+		*/
+		near(val: Object): ICursor;
+		near(path: string, val: Object): ICursor;
+
+        /**
+		* Specifies an $nin query condition.
+		*
+		* e.g. query.where('author_id').nin([3, 48901, 761])
+		*/
+		nin(val: any[]): ICursor;
+		nin(path: string, val: any[]): ICursor;
+
+        /**
+		* Specifies arguments for an $nor condition.
+		*
+		* e.g. query.nor([{ color: 'green' }, { status: 'ok' }])
+		*/
+		nor(array: Object[]): ICursor;
+        
+		
+        /**
+		* Specifies arguments for an $or condition.
+		*
+		* e.g. query.or([{ color: 'red' }, { status: 'emergency' }])
+		*/
+		or(array: Object[]): ICursor;
+
+        /**
+		* Specifies a $polygon condition
+		* e.g.
+		*  query.where('loc').within().polygon([10,20], [13, 25], [7,15])
+		*  query.polygon('loc', [10,20], [13, 25], [7,15])
+		*/
+		polygon(...coordinatePairs: number[][]): ICursor;
+		polygon(path: string, ...coordinatePairs: number[][]): ICursor;
+
+
+        /**
+		* Specifies a $regex query condition.
+		* e.g. 
+		*    query.where('name').regex(/^sixstepsrecords/)
+		*/
+		regex(val: RegExp): ICursor;
+		regex(path: string, val: RegExp): ICursor;
+
+
+        /**
+		* Specifies a $size query condition.
+		*
+		* e.g. 
+		*    query.where('someArray').size(6)
+		*/
+		$size(val: number): ICursor;
+		$size(path: string, val: number): ICursor;
+
+        /**
+		* Specifies a $slice projection for a path
+		* e.g. 
+		*    query.where('comments').slice(5)
+		*    query.where('comments').slice(-5)
+		*    query.where('comments').slice([-10, 5])
+		*/        
+		slice(val: number): ICursor;
+		slice(val: number[]): ICursor;
+		slice(path: string, val: number): ICursor;
+		slice(path: string, val: number[]): ICursor;
+
+        /**
+		* Specifies a path for use with chaining
+		* e.g. 
+		*    // instead of writing:
+        *    query.find({age: {$gte: 21, $lte: 65}});
+		*    // // we can instead write:
+        *    query.where('age').gte(21).lte(65);
+		*
+		*    // passing query conditions is permitted too
+		*    query.find().where({ name: 'vonderful' })
+        *
+		*    // chaining
+		*    query
+		*     .where('age').gte(21).lte(65)
+		*     .where({ 'name': /^vonderful/i })
+		*     .where('friends').slice(10)
+		*/        
+		where(path?: string, val?: any): ICursor;
+		where(path?: Object, val?: any): ICursor;
+		
+		
+        /**
+		* Sets a $geoWithin or $within argument for geo-spatial queries.
+		* e.g. 
+        *    query.within().box()
+		*    query.within().circle()
+        *    query.within().geometry()
+		*
+		*    query.where('loc').within({ center: [50,50], radius: 10, unique: true, spherical: true });
+		*    query.where('loc').within({ box: [[40.73, -73.9], [40.7, -73.988]] });
+        *    query.where('loc').within({ polygon: [[],[],[],[]] });
+		*    
+		*    query.where('loc').within([], [], []) // polygon
+		*    query.where('loc').within([], []) // box
+		*    query.where('loc').within({ type: 'LineString', coordinates: [...] }); // geometry
+		*/ 		
+		within(val?: Object): ICursor;
+		within(coordinate: number[], ...coordinatePairs: number[][]): ICursor;
+
+        /**
+		* Specifies a $where condition.
+		* Use $where when you need to select documents using a JavaScript expression.
+		* e.g. 
+		*    query.$where('this.comments.length > 10 || this.name.length > 5')
+		*    query.$where(function () {
+		*     return this.comments.length > 10 || this.name.length > 5;
+		*    })
+		*
+		*  Only use $where when you have a condition that cannot be met using other MongoDB operators like $lt. Be sure to read about all of its caveats before using.
+		*/   
+		$where(argument: string): ICursor;
+		$where(argument: Function): ICursor;		
+	}
+    interface IQueryBuilder extends IQueryOperator{
+		/**
+		* Get QueryBuilder Result.
+		* e.g.   qb.where('type').eq('movie').build() => {'type':'movie'} 
+		**/
+		build():Object;
+	}
+
+	interface ICursor extends IQueryOperator {
 		/**
 		* Adds OP_QUERY wire protocol flags, such as the tailable flag, to change the behavior of queries.
 		* @param flag OP_QUERY wire protocol flag. For the mongo shell, you can use the cursor flags listed below
@@ -735,13 +1107,15 @@ declare module mongo {
 		 */
 		showRecordId(): ICursor;
 		/**
-		* A count of the number of documents that match the db.collection.find() query after applying any cursor.skip() and cursor.limit() methods.
-		**/
-		size(): number;
-		/**
 		* Call the cursor.skip() method on a cursor to control where MongoDB begins returning results. 
 		**/
 		skip(skip: number): ICursor;
+		
+				/**
+		* A count of the number of documents that match the db.collection.find() query after applying any cursor.skip() and cursor.limit() methods.
+		**/
+		size(): number;
+		
 		/**
 		* Append the snapshot() method to a cursor to toggle the “snapshot” mode. This ensures that the query will not return a document multiple times, even if intervening write operations result in a move of the document due to the growth in document size.
 		* You must apply snapshot() to the cursor before retrieving any documents from the database.
@@ -765,380 +1139,15 @@ declare module mongo {
 		**/
 		help(): void;
 
-
-		/**
-		* Specifies an $all query condition
-		* e.g. 
-		*   db.collection.where('permission').all(['read', 'write'])
-		**/
-		all(val: any[]): ICursor;
-
-
-		/**
-		* Specifies arguments for an $and condition
-		* e.g. 
-		*   db.collection.and([{ color: 'green' }, { status: 'ok' }])
-		**/
-		and(array: Object[]): ICursor;
-
-		/**
-		* Specifies a $box condition
-		* e.g. 
-		*   var lowerLeft = [40.73083, -73.99756]
-		*   var upperRight= [40.741404,  -73.988135]
-        *   db.collection.where('location').within().box(lowerLeft,upperRight)
-		**/
-		box(val: Object): ICursor;
-		box(a: number[], b: number[]): ICursor;
-
-		/**
-		* Specifies a $center or $centerSphere condition.
-        * e.g.
-        *  var area = { center: [50, 50], radius: 10, unique: true }
-        *  query.where('loc').within().circle(area)
-        *  query.circle('loc', area);
-        *  // for spherical calculations
-        *  var area = {center: [50, 50], radius: 10, unique: true,spherical:true}
-        *  query.where('loc').within().circle(area)
-        *  query.circle('loc', area);
-        **/
-		circle(area: Object): ICursor;
-		circle(path: string, area: Object): ICursor;
-
-		/**
-		* Specifies an $elemMatch condition
-        * e.g.
-        *  query.where('comment').elemMatch({author:'autobot',votes:{$gte:5}})
-		*
-        *  query.elemMatch('comment', function (elem) {
-        *     elem.where('author').equals('autobot');
-        *     elem.where('votes').gte(5);
-        *  })
-		**/
-		elemMatch(criteria: Object): ICursor;
-		elemMatch(criteria: (elem: ICursor) => void): ICursor;
-		elemMatch(path: string, criteria: Object): ICursor;
-		elemMatch(path: string, criteria: (elem: ICursor) => void): ICursor;
-
-	    /**
-    	 * Specifies the complementary comparison value for paths specified with `where()`
-		 * e.g.
-		 *     db.user.where('age').equals(49);
-		 *
-		 *     // is the same as
-		 *
-		 *     db.user.where('age', 49);
-		 *
-		 */
-		 equals(val: Object): ICursor;
-
-		/**
-		 * Specifies the complementary comparison value for paths specified with `where()`
-		 * This is alias of `equals`
-		 * e.g.
-		 *     db.user.where('age').eq(49);
-		 *
-		 *     // is the same as
-		 *
-		 *     db.user.where('age').equals(49);
-		 *
-		 *     // is the same as
-		 *
-		 *     db.user.where('age', 49);
-		 *
-		 * @param {Object} val
-		 */
-		eq(val: Object): ICursor;
-
-		/**
-		 * Specifies an `$exists` condition
-		 * e.g.
-		 *     // { name: { $exists: true }}
-		 *     query.where('name').exists()
-		 *     query.where('name').exists(true)
-		 *     query.find().exists('name')
-		 *
-		 *     // { name: { $exists: false }}
-		 *     query.where('name').exists(false);
-		 *     query.find().exists('name', false);
-		 *
-		 * @param {String} [path]
-		 * @param {Number} val
-		 */
-    	exists(val?: boolean): ICursor;
-        exists(path: string, val?: boolean): ICursor;
-
-		/**
-		 * Specifies a `$geometry` condition
-		 * e.g.
-		 *     var polyA = [[[ 10, 20 ], [ 10, 40 ], [ 30, 40 ], [ 30, 20 ]]]
-		 *     query.where('loc').within().geometry({ type: 'Polygon', coordinates: polyA })
-		 *
-		 *     // or
-		 *     var polyB = [[ 0, 0 ], [ 1, 1 ]]
-		 *     query.where('loc').within().geometry({ type: 'LineString', coordinates: polyB })
-		 *
-		 *     // or
-		 *     var polyC = [ 0, 0 ]
-		 *     query.where('loc').within().geometry({ type: 'Point', coordinates: polyC })
-		 *
-		 *     // or
-		 *     query.where('loc').intersects().geometry({ type: 'Point', coordinates: polyC })
-		 *
-		 * ####NOTE:
-		 *
-		 * `geometry()` **must** come after either `intersects()` or `within()`.
-		 *
-		 * The `object` argument must contain `type` and `coordinates` properties.
-		 * - type {String}
-		 * - coordinates {Array}
-		 *
-		 * The most recent path passed to `where()` is used.
-		 *
-		 * @param {Object} object Must contain a `type` property which is a String and a `coordinates` property which is an Array. See the examples.
-		 */
-		geometry(object: Object): ICursor;
-
-		/**
-		 * Specifies a $gt query condition.
-		 *
-		 * When called with one argument, the most recent path passed to `where()` is used.
-		 * e.g.
-		 *     query.where('clicks').gt(999)
-		 *
-		 */
-		gt(val: any): ICursor;
-		gt(path: string, val: any): ICursor;
-
-		/**
-		 * Specifies a $gte query condition.
-		 *
-		 * When called with one argument, the most recent path passed to `where()` is used.
-		 * e.g.
-		 *  query.where('clicks').gte(1000)
-		 */
-		gte(val: any): ICursor;
-		gte(path: string, val: any): ICursor;
-
-		/**
-		* Specifies an $in query condition.
-        *
-        * e.g. db.collection.where('author_id').in([3, 48901, 761])
-        */
-		in(val: any[]): ICursor;
-		in(path: string, val: any[]): ICursor;
-
-		/**
-		 * Declares an intersects query for `geometry()`.
-		 * e.g.
-		 *     query.where('path').intersects().geometry({
-		 *         type: 'LineString'
-		 *       , coordinates: [[180.0, 11.0], [180, 9.0]]
-		 *     })
-		 *
-		 *     query.where('path').intersects({
-		 *         type: 'LineString'
-		 *       , coordinates: [[180.0, 11.0], [180, 9.0]]
-		 *     })
-		 */
-		intersects(arg?: Object): ICursor;
-
-
-		/**
-		* Specifies a $lt query condition.
-		*
-		* e.g. db.collection.where('clicks').lt(50)
-		*/
-		lt(val: any): ICursor;
-
-		/**
-		* Specifies a $lt query condition.
-		*
-		* e.g. db.collection.lt("clicks",50)
-		*/
-		lt(path: string, val: any): ICursor;
-
-       	/**
-		* Specifies a $lte query condition.
-		*
-		* e.g. db.collection.where('clicks').lte(50)
-		*/
-		lte(val: any): ICursor;
-
-       	/**
-		* Specifies a $lte query condition.
-		* e.g. db.collection.lte("clicks",50)
-		*/
-		lte(path: string, val: any): ICursor;
-
-        /**
-		* Specifies a $maxDistance query condition.
-		* e.g.
-		*  db.collection.where('location').near({ center: [139, 74.3] }).maxDistance(5)
-		*/
-		maxDistance(val: number): ICursor;
-		maxDistance(path: string, val: number): ICursor;
-		
-		
-        /**
-		* Specifies a $mod condition
-		*
-		* e.g. db.collection.where('count').mod(2, 0)
-		*/
-		mod(val: number[]): ICursor;
-		mod(path: string, val: number[]): ICursor;
-		
-        /**
-		* Specifies a $ne query condition.
-		*
-		* e.g. db.collection.where('status').ne('ok')
-		*/
-		ne(val: any): ICursor;
-		ne(path: string, val: any): ICursor;
-        
-		
-        /**
-		* Specifies arguments for a $near or $nearSphere condition.
-        * These operators return documents sorted by distance.
-		* e.g.
-		* query.where('loc').near({ center: [10, 10] });
-        * query.where('loc').near({ center: [10, 10], maxDistance: 5 });
-        * query.near('loc', { center: [10, 10], maxDistance: 5 });
-        *  // GeoJSON
-        * query.where('loc').near({ center: { type: 'Point', coordinates: [10, 10] }});
-        * query.where('loc').near({ center: { type: 'Point', coordinates: [10, 10] }, maxDistance: 5, spherical: true });
-        * query.where('loc').near().geometry({ type: 'Point', coordinates: [10, 10] });
-        * // For a $nearSphere condition, pass the `spherical` option.
-        * query.near({ center: [10, 10], maxDistance: 5, spherical: true }); 
-		*/
-		near(val: Object): ICursor;
-		near(path: string, val: Object): ICursor;
-
-        /**
-		* Specifies an $nin query condition.
-		*
-		* e.g. db.collection.where('author_id').nin([3, 48901, 761])
-		*/
-		nin(val: any[]): ICursor;
-		nin(path: string, val: any[]): ICursor;
-
-        /**
-		* Specifies arguments for an $nor condition.
-		*
-		* e.g. db.collection.nor([{ color: 'green' }, { status: 'ok' }])
-		*/
-		nor(array: Object[]): ICursor;
-        
-		
-        /**
-		* Specifies arguments for an $or condition.
-		*
-		* e.g. db.collection.or([{ color: 'red' }, { status: 'emergency' }])
-		*/
-		or(array: Object[]): ICursor;
-
-        /**
-		* Specifies a $polygon condition
-		* e.g.
-		*  db.collection.where('loc').within().polygon([10,20], [13, 25], [7,15])
-		*  db.collection.polygon('loc', [10,20], [13, 25], [7,15])
-		*/
-		polygon(...coordinatePairs: number[][]): ICursor;
-		polygon(path: string, ...coordinatePairs: number[][]): ICursor;
-
-
-        /**
-		* Specifies a $regex query condition.
-		* e.g. 
-		*    db.collection.where('name').regex(/^sixstepsrecords/)
-		*/
-		regex(val: RegExp): ICursor;
-		regex(path: string, val: RegExp): ICursor;
-
         /**
 		* Specifies which document fields to include or exclude
 		* e.g. 
 		*   // 1 means include, 0 means exclude
-        *   db.collection.select({ name: 1, address: 1, _id: 0 })
+        *   query.select({ name: 1, address: 1, _id: 0 })
         *   // or prefixing a path with - will flag that path as excluded.
-		*   db.collection.select('name address -_id')
+		*   query.select('name address -_id')
 		*/
 		select(arg: string|Object): ICursor;
-
-  		
-        /**
-		* Specifies a $size query condition.
-		*
-		* e.g. 
-		*    db.collection.where('someArray').size(6)
-		*/
-		size(val: number): ICursor;
-		size(path: string, val: number): ICursor;
-
-        /**
-		* Specifies a $slice projection for a path
-		* e.g. 
-		*    db.collection.where('comments').slice(5)
-		*    db.collection.where('comments').slice(-5)
-		*    db.collection.where('comments').slice([-10, 5])
-		*/        
-		slice(val: number): ICursor;
-		slice(val: number[]): ICursor;
-		slice(path: string, val: number): ICursor;
-		slice(path: string, val: number[]): ICursor;
-
-        /**
-		* Specifies a path for use with chaining
-		* e.g. 
-		*    // instead of writing:
-        *    db.collection.find({age: {$gte: 21, $lte: 65}});
-		*    // // we can instead write:
-        *    db.collection.where('age').gte(21).lte(65);
-		*
-		*    // passing query conditions is permitted too
-		*    db.collection.find().where({ name: 'vonderful' })
-        *
-		*    // chaining
-		*    db.collection
-		*     .where('age').gte(21).lte(65)
-		*     .where({ 'name': /^vonderful/i })
-		*     .where('friends').slice(10)
-		*/        
-		where(path?: string, val?: any): ICursor;
-		where(path?: Object, val?: any): ICursor;
-		
-		
-        /**
-		* Sets a $geoWithin or $within argument for geo-spatial queries.
-		* e.g. 
-        *    db.collection.within().box()
-		*    db.collection.within().circle()
-        *    db.collection.within().geometry()
-		*
-		*    db.collection.where('loc').within({ center: [50,50], radius: 10, unique: true, spherical: true });
-		*    db.collection.where('loc').within({ box: [[40.73, -73.9], [40.7, -73.988]] });
-        *    db.collection.where('loc').within({ polygon: [[],[],[],[]] });
-		*    
-		*    db.collection.where('loc').within([], [], []) // polygon
-		*    db.collection.where('loc').within([], []) // box
-		*    db.collection.where('loc').within({ type: 'LineString', coordinates: [...] }); // geometry
-		*/ 		
-		within(val?: Object): ICursor;
-		within(coordinate: number[], ...coordinatePairs: number[][]): ICursor;
-
-        /**
-		* Specifies a $where condition.
-		* Use $where when you need to select documents using a JavaScript expression.
-		* e.g. 
-		*    query.$where('this.comments.length > 10 || this.name.length > 5')
-		*    query.$where(function () {
-		*     return this.comments.length > 10 || this.name.length > 5;
-		*    })
-		*
-		*  Only use $where when you have a condition that cannot be met using other MongoDB operators like $lt. Be sure to read about all of its caveats before using.
-		*/   
-		$where(argument: string): ICursor;
-		$where(argument: Function): ICursor;
 	}
 
 	interface IDatabase {
@@ -2575,3 +2584,5 @@ declare var DBQuery: {
 declare var db: mongo.IDatabase;
 declare var rs: mongo.IReplication;
 declare var sh: mongo.ISharding;
+declare var qb: mongo.IQueryBuilder;
+declare var queryBuilder: mongo.IQueryBuilder;

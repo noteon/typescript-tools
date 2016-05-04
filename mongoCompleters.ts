@@ -183,7 +183,7 @@ export var getFieldCompleter = (tsServ: ts.TypescriptService, scriptFileName: st
 
 export var operatorsCompleter = {
     getCompletions: function(editor: AceAjax.Editor, session: AceAjax.IEditSession, pos: { row: number, column: number }, prefix, callback) {
-        if (prefix[0] === '$') {//load mongo completeors
+        if ((session.__prevChar!==".") && (prefix[0] === '$')) {//load mongo completeors
             let mongoOperators = require('./mongoOperators');
 
             mongoOperators.map((it) => {

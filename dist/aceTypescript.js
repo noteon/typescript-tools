@@ -1495,7 +1495,7 @@ exports.getFieldCompleter = function (tsServ, scriptFileName, fieldsFetcher) {
 };
 exports.operatorsCompleter = {
     getCompletions: function (editor, session, pos, prefix, callback) {
-        if (prefix[0] === '$') {
+        if ((session.__prevChar !== ".") && (prefix[0] === '$')) {
             var mongoOperators = require('./mongoOperators');
             mongoOperators.map(function (it) {
                 it.isMongoOperator = true;
@@ -2493,7 +2493,7 @@ exports.getTypeScriptAutoCompleters = function (params) {
             //console.log("completionsInfo",it); 
             return {
                 caption: it.name,
-                snippet: it.name + (isMethodOrFunction(it.kind) ? "($2)" : ""),
+                snippet: _.replace(it.name, '$', '\\$') + (isMethodOrFunction(it.kind) ? "($2)" : ""),
                 meta: it.kind,
                 pos: posChar,
                 srcProps: it,

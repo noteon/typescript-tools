@@ -567,10 +567,10 @@ var mongoAggregateTemplates = [
             caption: "aggregate",
             snippet:
             `aggregate({$2}) //matches documents
-      //.project({ _id: 0, calcField: { \\$concat: ["\\$field1", "-", "\\$field2"] } })
+      //.project('name age _id')
       //.unwind()
       //.group()
-      //.sort()
+      //.sort('-age name')
       //.limit(100)`,
             comment: `Aggregation operation`,
             example:

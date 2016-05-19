@@ -1247,7 +1247,7 @@ var mongoReplaceOneTemplates = [
 var mongoAggregateTemplates = [
     {
         caption: "aggregate",
-        snippet: "aggregate({$2}) //matches documents\n      //.project({ _id: 0, calcField: { \\$concat: [\"\\$field1\", \"-\", \"\\$field2\"] } })\n      //.unwind()\n      //.group()\n      //.sort()\n      //.limit(100)",
+        snippet: "aggregate({$2}) //matches documents\n      //.project('name age _id')\n      //.unwind()\n      //.group()\n      //.sort('-age name')\n      //.limit(100)",
         comment: "Aggregation operation",
         example: "db.orders.aggregate({status:\"A\"})\n                      .group({ _id: \"$cust_id\", total: { $sum: \"$amount\" } })\n                      .sort({total:-1})",
     },

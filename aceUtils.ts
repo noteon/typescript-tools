@@ -139,7 +139,7 @@ export var highlightTypeCommentAndHelp = (type, docComment, docUrl?: string) => 
   if (!docUrl)
     return highlightTypeAndComment({ type: type, docComment: docComment }, true)
   else
-    return highlightTypeAndComment({ type: type, docComment: docComment }, false) + `<p><a href='#' onmousedown="require('shell').openExternal('${docUrl}')">view online help</a></p>`;
+    return highlightTypeAndComment({ type: type, docComment: docComment }, false) + `<p><a href='${docUrl}' class='js-external-link')">view online help</a></p>`;
 }
 
 export var highlightTypeCommentAndTip = (type, docComment, tipHtml: string) => {

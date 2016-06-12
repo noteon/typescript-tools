@@ -131,7 +131,6 @@ function bindTypescriptExtension(editor, params) {
     var fileName = params.tsFilePath;
     //console.log(__dirname+"/lodash.d.ts");
     var tsAndTypingFiles = [];
-    tsAndTypingFiles.push({ name: "globalVars.ts", content: "import shell=require(\"shelljs);" });
     tsAndTypingFiles.push({ name: fileName, content: params.tsFileInitContent || "//////" });
     params.tsTypings && params.tsTypings.forEach(function (it) {
         if (it.path)

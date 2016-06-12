@@ -36,6 +36,7 @@ function bindTypescriptExtension(editor: AceAjax.Editor, params:AceTsSetupParams
     
     var tsAndTypingFiles = [];
     tsAndTypingFiles.push({ name: fileName, content: params.tsFileInitContent || "//////" });
+    
 
     params.tsTypings && params.tsTypings.forEach((it: any) => {
         if (it.path)

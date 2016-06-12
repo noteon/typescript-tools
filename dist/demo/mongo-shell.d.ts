@@ -671,11 +671,11 @@ declare module mongo {
 	    /**
     	 * Specifies the complementary comparison value for paths specified with `where()`
 		 * e.g.
-		 *     query..where('age').equals(49);
+		 *     query.where('age').equals(49);
 		 *
 		 *     // is the same as
 		 *
-		 *     query..where('age', 49);
+		 *     query.where('age', 49);
 		 *
 		 */
 		 equals(val: Object): ICursor;
@@ -684,15 +684,15 @@ declare module mongo {
 		 * Specifies the complementary comparison value for paths specified with `where()`
 		 * This is alias of `equals`
 		 * e.g.
-		 *     query..where('age').eq(49);
+		 *     query.where('age').eq(49);
 		 *
 		 *     // is the same as
 		 *
-		 *     query..where('age').equals(49);
+		 *     query.where('age').equals(49);
 		 *
 		 *     // is the same as
 		 *
-		 *     query..where('age', 49);
+		 *     query.where('age', 49);
 		 *
 		 * @param {Object} val
 		 */

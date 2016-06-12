@@ -16,6 +16,7 @@
         //tsFileInitContent:fs.readFileSync(tsFilePath), 
         tsTypings:[
             path.resolve(__dirname,"lodash.d.ts"),
+            path.resolve(__dirname,"shelljs.d.ts"),
             path.resolve(__dirname,"mongo-shell.d.ts")].map((it)=>{
                 return {
                     path:it,
